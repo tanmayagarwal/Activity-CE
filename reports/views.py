@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 from django.views.generic import TemplateView, View
 from workflow.models import ProjectAgreement, ProjectComplete, Program
 from indicators.models import CollectedData, Indicator
@@ -14,6 +16,7 @@ from workflow.export import ProjectAgreementResource
 from workflow.export import ProgramResource
 from indicators.export import CollectedDataResource
 from indicators.export import IndicatorResource
+import six
 
 
 def make_filter(my_request):
@@ -25,7 +28,7 @@ def make_filter(my_request):
     query_attrs['project'] = {}
     query_attrs['indicator'] = {}
     query_attrs['collecteddata'] = {}
-    for param, val in my_request.iteritems():
+    for param, val in six.iteritems(my_request):
         if param == 'program':
             query_attrs['program']['id__in'] = val.split(',')
             query_attrs['project']['program__id__in'] = val.split(',')
@@ -136,7 +139,7 @@ class ProjectReportData(View, AjaxableResponseMixin):
         project_filter = filter['project']
         indicator_filter = filter['indicator']
 
-        print project_filter
+        print(project_filter)
 
         project = ProjectAgreement.objects.all().filter(**project_filter).values('program__name','project_name','activity_code','project_type__name','sector__sector','total_estimated_budget','approval')
         approval_count = ProjectAgreement.objects.all().filter(**project_filter).filter(program__funding_status="Funded", approval='awaiting approval').count()
@@ -186,8 +189,8 @@ class IndicatorReportData(View, AjaxableResponseMixin):
 
         indicator_serialized = json.dumps(list(indicator))
 
-        print indicator_filter
-        print indicator.query
+        print(indicator_filter)
+        print(indicator.query)
 
         final_dict = {
             'criteria': indicator_filter, 'indicator': indicator_serialized,
@@ -219,8 +222,8 @@ class CollectedDataReportData(View, AjaxableResponseMixin):
 
         collecteddata_serialized = json.dumps(list(collecteddata))
 
-        print collecteddata_filter
-        print collecteddata.query
+        print(collecteddata_filter)
+        print(collecteddata.query)
 
         final_dict = {
             'criteria': collecteddata_filter, 'collecteddata': collecteddata_serialized,
@@ -242,5 +245,5 @@ def filter_json(request, service, **kwargs):
     """
     final_dict = {
     'criteria': kwargs}
-    print final_dict
+    print(final_dict)
     JsonResponse(final_dict, safe=False)

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from import_export import resources
 from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 from import_export import fields

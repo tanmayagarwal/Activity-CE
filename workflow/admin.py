@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from .models import *
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget

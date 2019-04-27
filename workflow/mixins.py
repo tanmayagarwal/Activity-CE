@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.http import JsonResponse

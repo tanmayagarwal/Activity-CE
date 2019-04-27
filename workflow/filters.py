@@ -1,5 +1,6 @@
+from __future__ import absolute_import
 import django_filters
-from models import ProjectAgreement
+from .models import ProjectAgreement
 
 class ProjectAgreementFilter(django_filters.FilterSet):
 

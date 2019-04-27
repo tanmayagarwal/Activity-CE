@@ -1,5 +1,6 @@
+from __future__ import absolute_import
 import django_tables2 as tables
-from models import Indicator, CollectedData
+from .models import Indicator, CollectedData
 from django_tables2.utils import A
 
 TEMPLATE = '''

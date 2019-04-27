@@ -1,8 +1,10 @@
+from __future__ import absolute_import
+from __future__ import print_function
 from django.db import connection
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
-from urlparse import urlparse
+from six.moves.urllib.parse import urlparse
 import re
 from .models import Indicator, PeriodicTarget, DisaggregationLabel, DisaggregationValue, CollectedData, IndicatorType, Level, ExternalServiceRecord, ExternalService, TolaTable
 from workflow.models import Program, SiteProfile, Country, Sector, TolaSites, TolaUser, FormGuidance
@@ -10,7 +12,7 @@ from django.shortcuts import render_to_response
 from django.contrib import messages
 from django.core.serializers.json import DjangoJSONEncoder
 from tola.util import getCountry, get_table
-from tables import IndicatorDataTable
+from .tables import IndicatorDataTable
 from django_tables2 import RequestConfig
 from workflow.forms import FilterForm
 from .forms import IndicatorForm, CollectedDataForm
@@ -32,7 +34,7 @@ from workflow.mixins import AjaxableResponseMixin
 import json
 
 import requests
-from export import IndicatorResource, CollectedDataResource
+from .export import IndicatorResource, CollectedDataResource
 # from reportlab.pdfgen import canvas
 from weasyprint import HTML, CSS
 from django.template.loader import get_template
@@ -41,6 +43,9 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta #('%Y-%m-%d') %b %d, %Y
 from feed.serializers import FlatJsonSerializer
 import dateutil.parser
+import six
+from six.moves import range
+from six.moves import zip
 
 
 def generate_periodic_target_single(tf, start_date, nthTargetPeriod, target_frequency_custom=''):
@@ -439,7 +444,7 @@ class IndicatorUpdate(UpdateView):
 
     def form_invalid(self, form):
         messages.error(self.request, 'Invalid Form', fail_silently=False)
-        print(".............................%s............................" % form.errors )
+        print((".............................%s............................" % form.errors ))
         return self.render_to_response(self.get_context_data(form=form))
 
 
@@ -669,14 +674,14 @@ class CollectedDataCreate(CreateView):
         for label in disaggregation_labels:
             if process_disaggregation == True:
                 break
-            for k, v in self.request.POST.iteritems():
+            for k, v in six.iteritems(self.request.POST):
                 if k == str(label.id) and len(v) > 0:
                     process_disaggregation = True
                     break
 
         if process_disaggregation == True:
             for label in disaggregation_labels:
-                for k, v in self.request.POST.iteritems():
+                for k, v in six.iteritems(self.request.POST):
                     if k == str(label.id):
                         save = new.disaggregation_value.create(disaggregation_label=label, value=v)
                         new.disaggregation_value.add(save.id)
@@ -786,7 +791,7 @@ class CollectedDataUpdate(UpdateView):
 
         # Insert or update disagg values
         for label in getDisaggregationLabel:
-            for key, value in self.request.POST.iteritems():
+            for key, value in six.iteritems(self.request.POST):
                 if key == str(label.id):
                     value_to_insert = value
                     save = getCollectedData.disaggregation_value.create(disaggregation_label=label, value=value_to_insert)
@@ -827,7 +832,7 @@ def getTableCount(url,table_id):
         headers = {'content-type': 'application/json', 'Authorization': 'Token ' + token.tola_tables_token }
     else:
         headers = {'content-type': 'application/json'}
-        print "Token Not Found"
+        print("Token Not Found")
 
     response = requests.get(url,headers=headers, verify=True)
     data = json.loads(response.content)
@@ -937,7 +942,7 @@ def collected_data_json(AjaxableResponseMixin, indicator, program):
         for data in collecteddata:
             if data.tola_table:
                 data.tola_table.detail_url = const_table_det_url(str(data.tola_table.url))
-    except Exception, e:
+    except Exception as e:
         pass
 
     collected_sum = CollectedData.objects\
@@ -1316,7 +1321,7 @@ def dictfetchall(cursor):
     "Return all rows from a cursor as a dict"
     columns = [col[0] for col in cursor.description]
     return [
-        dict(zip(columns, row))
+        dict(list(zip(columns, row)))
         for row in cursor.fetchall()
     ]
 

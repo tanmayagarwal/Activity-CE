@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from .serializers import *
 
 from workflow.models import Program, Sector, ProjectType, Office, SiteProfile, Country, ProjectComplete, \

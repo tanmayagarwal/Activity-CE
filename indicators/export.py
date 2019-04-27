@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from import_export import resources
 from .models import Indicator, CollectedData, Country, Program, Sector, DisaggregationValue, ReportingFrequency
 from workflow.models import ProjectAgreement, ProjectComplete, TolaUser

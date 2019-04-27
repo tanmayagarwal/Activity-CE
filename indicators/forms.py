@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from django.core.urlresolvers import reverse_lazy
 from indicators.models import Indicator, PeriodicTarget, CollectedData, Objective, StrategicObjective, TolaTable, DisaggregationType
 from workflow.models import Program, SiteProfile, Documentation, ProjectComplete, TolaUser

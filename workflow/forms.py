@@ -1,10 +1,11 @@
+from __future__ import absolute_import
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import *
 from crispy_forms.bootstrap import *
 from crispy_forms.layout import Layout, Submit, Reset, Field
 from django.forms import HiddenInput
 from functools import partial
-from widgets import GoogleMapsWidget
+from .widgets import GoogleMapsWidget
 from django import forms
 from .models import ProjectAgreement, ProjectComplete, Program, SiteProfile, Documentation, Benchmarks, Monitor, Budget, Capacity, Evaluate, Office, Checklist, ChecklistItem, Province, Stakeholder, TolaUser, Contact, Sector
 from indicators.models import CollectedData, Indicator, PeriodicTarget

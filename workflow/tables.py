@@ -1,5 +1,6 @@
+from __future__ import absolute_import
 import django_tables2 as tables
-from models import ProjectAgreement
+from .models import ProjectAgreement
 
 TEMPLATE = '''
 <div class="btn-group btn-group-xs">

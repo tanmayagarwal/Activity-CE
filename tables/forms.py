@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from indicators.models import Indicator, CollectedData
 from workflow.models import ProjectAgreement
 from crispy_forms.helper import FormHelper

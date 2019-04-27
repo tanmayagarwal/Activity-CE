@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import operator
 import unicodedata
 
@@ -23,8 +24,8 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db.models import Count
 from django.db.models import Q
-from tables import ProjectAgreementTable
-from filters import ProjectAgreementFilter
+from .tables import ProjectAgreementTable
+from .filters import ProjectAgreementFilter
 import json
 import requests
 import logging
@@ -35,14 +36,15 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.generic.detail import View
 
 from django.contrib.sites.shortcuts import get_current_site
+from functools import reduce
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 from django.utils.decorators import method_decorator
 from tola.util import getCountry, emailGroup, group_excluded, group_required
-from mixins import AjaxableResponseMixin
-from export import ProjectAgreementResource, StakeholderResource, SiteProfileResource
+from .mixins import AjaxableResponseMixin
+from .export import ProjectAgreementResource, StakeholderResource, SiteProfileResource
 
 APPROVALS = (
     ('in_progress',('in progress')),
@@ -1081,7 +1083,7 @@ class SiteProfileList(ListView):
     template_name = 'workflow/site_profile_list.html'
 
     def dispatch(self, request, *args, **kwargs):
-        if request.GET.has_key('report'):
+        if 'report' in request.GET:
             template_name = 'workflow/site_profile_report.html'
         else:
             template_name = 'workflow/site_profile_list.html'
@@ -1517,7 +1519,7 @@ class ContactList(ListView):
         try:
             getStakeholder = Stakeholder.objects.get(id=stakeholder_id)
 
-        except Exception, e:
+        except Exception as e:
             pass
 
         if int(self.kwargs['pk']) == 0:

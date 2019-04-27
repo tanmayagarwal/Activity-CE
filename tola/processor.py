@@ -1,7 +1,8 @@
 #add global variable for report server or not to all templates so we can hide elements that aren't wanted on the report server
-from settings.local import REPORT_SERVER
-from settings.local import OFFLINE_MODE
-from settings.local import NON_LDAP
+from __future__ import absolute_import
+from .settings.local import REPORT_SERVER
+from .settings.local import OFFLINE_MODE
+from .settings.local import NON_LDAP
 from django.conf import settings
 
 def report_server_check(request):

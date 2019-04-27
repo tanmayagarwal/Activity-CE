@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from tola import views
 from tola.views import *
 from feed.views import *

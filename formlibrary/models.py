@@ -1,8 +1,10 @@
 from __future__ import unicode_literals
+from __future__ import absolute_import
 from django.db import models
 from django.contrib import admin
 from datetime import datetime
 from workflow.models import Program, SiteProfile, ProjectAgreement, Office, Province
+import six
 
 try:
     from django.utils import timezone
@@ -49,7 +51,7 @@ class TrainingAttendance(models.Model):
 
     # displayed in admin templates
     def __unicode__(self):
-        return unicode(self.training_name)
+        return six.text_type(self.training_name)
 
 
 class TrainingAttendanceAdmin(admin.ModelAdmin):
@@ -105,7 +107,7 @@ class Distribution(models.Model):
 
     # displayed in admin templates
     def __unicode__(self):
-        return unicode(self.distribution_name)
+        return six.text_type(self.distribution_name)
 
 
 class DistributionAdmin(admin.ModelAdmin):
@@ -139,7 +141,7 @@ class Beneficiary(models.Model):
 
     # displayed in admin templates
     def __unicode__(self):
-        return unicode(self.beneficiary_name)
+        return six.text_type(self.beneficiary_name)
 
 
 class BeneficiaryAdmin(admin.ModelAdmin):

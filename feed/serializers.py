@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework import serializers

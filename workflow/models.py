@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from __future__ import absolute_import
 from django.db import models
 from django.contrib import admin
 from django.contrib.auth.models import User
@@ -14,6 +15,7 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from simple_history.models import HistoricalRecords
 from django.contrib.sessions.models import Session
+import six
 try:
     from django.utils import timezone
 except ImportError:
@@ -225,7 +227,7 @@ class FormGuidance(models.Model):
         super(FormGuidance, self).save()
 
     def __unicode__(self):
-        return unicode(self.form)
+        return six.text_type(self.form)
 
 
 class FormGuidanceAdmin(admin.ModelAdmin):
@@ -516,7 +518,7 @@ class Office(models.Model):
 
     # displayed in admin templates
     def __unicode__(self):
-        new_name = unicode(self.name) + unicode(" - ") + unicode(self.code)
+        new_name = six.text_type(self.name) + six.text_type(" - ") + six.text_type(self.code)
         return new_name
 
 
@@ -841,7 +843,7 @@ class Stakeholder(models.Model):
 
     # displayed in admin templates
     def __unicode__(self):
-        return unicode(self.name)
+        return six.text_type(self.name)
 
 
 class StakeholderAdmin(admin.ModelAdmin):
@@ -1025,7 +1027,7 @@ class ProjectAgreement(models.Model):
 
     # displayed in admin templates
     def __unicode__(self):
-        new_name = unicode(self.office) + unicode(" - ") + unicode(self.project_name)
+        new_name = six.text_type(self.office) + six.text_type(" - ") + six.text_type(self.project_name)
         return new_name
 
 # Project Tracking, admin is handled in the admin.py
@@ -1135,7 +1137,7 @@ class ProjectComplete(models.Model):
 
     # displayed in admin templates
     def __unicode__(self):
-        new_name = unicode(self.office) + unicode(" - ") + unicode(self.project_name)
+        new_name = six.text_type(self.office) + six.text_type(" - ") + six.text_type(self.project_name)
         return new_name
 
     @property
@@ -1303,7 +1305,7 @@ class Checklist(models.Model):
 
     # displayed in admin templates
     def __unicode__(self):
-        return unicode(self.agreement)
+        return six.text_type(self.agreement)
 
 
 class ChecklistAdmin(admin.ModelAdmin):
@@ -1333,7 +1335,7 @@ class ChecklistItem(models.Model):
 
     # displayed in admin templates
     def __unicode__(self):
-        return unicode(self.item)
+        return six.text_type(self.item)
 
 
 class ChecklistItemAdmin(admin.ModelAdmin):
@@ -1343,7 +1345,7 @@ class ChecklistItemAdmin(admin.ModelAdmin):
 
 #Logged users
 from django.contrib.auth.signals import user_logged_in, user_logged_out
-from urllib2 import urlopen
+from six.moves.urllib.request import urlopen
 import json
 
 
@@ -1375,7 +1377,7 @@ class LoggedUser(models.Model):
                 if data.get('google-oauth2_state'):
                     LoggedUser(username=user.username, country=country, email=user.email).save()
 
-        except Exception, e:
+        except Exception as e:
             pass
 
 
@@ -1402,6 +1404,6 @@ def get_user_country(request):
         response = json.loads(response)
         return response['country'].lower()
 
-    except Exception, e:
+    except Exception as e:
         response = "undefined"
         return response

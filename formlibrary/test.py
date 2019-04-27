@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from django.test import TestCase
 from workflow.models import Program, Country, Province,ProjectAgreement, Sector, ProjectType, SiteProfile, Office
 from formlibrary.models import TrainingAttendance, Distribution, Beneficiary

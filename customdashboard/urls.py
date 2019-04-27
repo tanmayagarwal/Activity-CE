@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from .views import ProgramList, PublicDashboard, SurveyPublicDashboard, \
     SurveyTalkPublicDashboard, RRIMAPublicDashboard, Notebook, DefaultCustomDashboard, \
     DefaultCustomDashboard, DefaultCustomDashboard

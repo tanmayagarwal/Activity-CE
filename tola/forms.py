@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import *
 from crispy_forms.bootstrap import *
@@ -17,7 +19,7 @@ class RegistrationForm(UserChangeForm):
         user = kwargs.pop('initial')
         super(RegistrationForm, self).__init__(*args, **kwargs)
         del self.fields['password']
-        print user['username'].is_superuser
+        print(user['username'].is_superuser)
         # if they aren't a super user or User Admin don't let them change countries form field
         if 'User Admin' not in user['username'].groups.values_list('name', flat=True) and not user['username'].is_superuser:
             self.fields['countries'].widget.attrs['disabled'] = "disabled"
