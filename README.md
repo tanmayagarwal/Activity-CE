@@ -1,9 +1,9 @@
 Activity-CE [![Build Status](https://travis-ci.org/toladata/TolaActivity.svg?branch=master)]
 ====
-Activity-CE is the community edition of TolaActivity; the ultimate tool for humanitarians to manage project activities for their programs, including project approval workflows and reporting. 
+Activity-CE is the community edition of TolaActivity; the ultimate tool for humanitarians to manage project activities and indicator results for their programs, including project approval workflows and reporting. 
 
 
-The community edition is for and by humanitarians; it shall always be free.
+The community edition is for and built by humanitarians; it shall always be free.
 
 ## To deploy locally via virtualenv
 (Install virtualenv)
@@ -47,7 +47,7 @@ $ python manage.py migrate
 * If you get access denied, it means you need to modify the config file and write your Mysql username and password in the file
 
 # Run Activity-CE
-If your using more then one settings file change manage.py to point to local or dev file first
+If you're using more then one settings file change manage.py to point to local or dev file first
 ```bash
 $ python manage.py runserver
 ```
