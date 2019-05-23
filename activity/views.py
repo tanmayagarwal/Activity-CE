@@ -33,13 +33,17 @@ def index(request, selected_countries=None, id=0, sector=0):
     Home page
     get count of agreements approved and total for dashboard
     """
+    # set organization variable for wfl level update
+    organization = get_object_or_404(ActivityUser, 
+                                     user=request.user).organization
 
     # add program
     if request.method == 'POST' and request.is_ajax:
         data = request.POST
 
         program = Program.objects.create(name=data.get(
-            'program_name'), start_date=data.get('start_date'), end_date=data.get('end_date'))
+            'program_name'), start_date=data.get('start_date'), 
+                             end_date=data.get('end_date'))
 
         sectors = Sector.objects.filter(id__in=data.getlist('sectors[]'))
         program.sector.set(sectors)
@@ -359,6 +363,7 @@ def index(request, selected_countries=None, id=0, sector=0):
         'count_indicator_data': total_indicator_data_count,
         'selected_countries_label_list': selected_countries_label_list,
         'user_pending_approvals': user_pending_approvals,
+        'organization': organization,
     })
 
 
@@ -429,11 +434,26 @@ def admin_dashboard(request):
 
 
 def admin_default_settings(request):
+    user = get_object_or_404(ActivityUser, user=request.user)
+    organization = user.organization
+
+    if request.method == "POST":
+        for wfl, level in zip(['wfl1', 'wfl2', 'wfl3', 'wfl4'], 
+                              ['level_1_label', 'level_2_label', 
+                               'level_3_label', 'level_4_label']):
+            if request.POST.get(wfl):
+                setattr(organization, level, request.POST.get(wfl))
+
+            organization.save()
+            user.organization = organization
+            user.save()
+
     nav_links = get_nav_links('Default Settings')
     return render(
         request,
         'admin/default_settings.html',
-        {'nav_links': nav_links}
+        {'nav_links': nav_links,
+         'organization': organization}
     )
 
 

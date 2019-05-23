@@ -12,7 +12,7 @@
     $(document).ready(function () {
         $("#countries").select2({ placeholder: "Country", allowClear: true });
         $("#id_sector").select2({ placeholder: "Sector", allowClear: true, });
-        $("#id_program").select2({ placeholder: "Program", allowClear: true, });
+        $("#id_program").select2({ placeholder: "{{ user.activity_user.organization.level_1_label }}", allowClear: true, });
         $('.dateinput').datepicker({ dateFormat: 'yyyy-mm-dd', });
 
         //Show the program table
@@ -36,7 +36,7 @@
             });
 
             // provide export url and filters for program
-            $('#export').click(function () { do_export(filters, "program"); });
+            $('#export').click(function () { do_export(filters, "{{ user.activity_user.organization.level_1_label }}"); });
 
         }
 
@@ -59,7 +59,7 @@
                 data: indicator_records,
                 columns: [
                     {
-                        title: "Program", data: "program__name",
+                        title: "{{ user.activity_user.organization.level_1_label }}", data: "program__name",
                         "mRender": function (data, type, row) {
                             return '<a id="program_report" name=' + row.program__id + '>' + data + '</a>';
                         }
@@ -131,9 +131,9 @@
                 retrieve: true,
                 data: project_records,
                 columns: [
-                    { title: "Program", data: "program__name" },
-                    { title: "Project", data: "project_name" },
-                    { title: "Activity Code", data: "activity_code" },
+                    { title: "{{ user.activity_user.organization.level_1_label }}", data: "program__name" },
+                    { title: "{{ user.activity_user.organization.level_2_label }}", data: "project_name" },
+                    { title: "{{ user.activity_user.organization.level_4_label }} Code", data: "activity_code" },
                     { title: "Type", data: "project_type__name" },
                     { title: "Sector", data: "sector__sector" },
                     { title: "Budget", data: "total_estimated_budget" },
@@ -142,16 +142,16 @@
             });
 
             // provide export button url for project
-            $('#export').click(function () { do_export(filters, "project"); });
+            $('#export').click(function () { do_export(filters, "{{ user.activity_user.organization.level_2_label }}"); });
 
         }
 
         function show_program_charts(project_count, approval_count, approved_count, inprogress_count, rejected_count, nostatus_count, filters) {
-            document.getElementById('doughnut1-header').innerHTML = "Project Status";
+            document.getElementById('doughnut1-header').innerHTML = "{{ user.activity_user.organization.level_2_label }} Status";
             //render project_status in a doughnut chart
             var status_options = {
                 // single tooltip
-                tooltipTemplate: "<%=label + ' Projects' %>",
+                tooltipTemplate: "<%=label + ' {{ user.activity_user.organization.level_2_label }}s' %>",
                 percentageInnerCutout: 60,
                 tooltipFontSize: 10,
             };
@@ -387,7 +387,7 @@
             });
 
 
-            if (document.getElementById('report_type').innerHTML.valueOf == "Program Report") {
+            if (document.getElementById('report_type').innerHTML.valueOf == "{{ user.activity_user.organization.level_1_label }} Report") {
                 // first time do the program report
                 program_report(filters);
             } else if (document.getElementById('report_type').innerHTML.valueOf == "Indicator Report") {
@@ -421,7 +421,7 @@
     </div>
     <div class="col-sm-9">
         <div id='welcome-panel' class="panel panel-success">
-            <div class="panel-heading"> Program Filter Reports</div>
+            <div class="panel-heading"> {{ user.activity_user.organization.level_1_label }} Filter Reports</div>
             <div class="panel-body" id="welcome" style="padding:5px;"> Filter your search in the panel on the left to
                 see results.</div>
         </div>

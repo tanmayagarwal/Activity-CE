@@ -34,7 +34,7 @@
 			data-toggle="dropdown"
 			aria-expanded="true"
 		>
-			Programs
+			{{ user.activity_user.organization.level_1_label }}s
 			<span class="caret"></span>
 		</button>
 		<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
@@ -67,7 +67,7 @@
 	<table class="table">
 		<tr>
 			<th>Document Name</th>
-			<th>Program</th>
+			<th>{{ user.activity_user.organization.level_1_label }}</th>
 			<th>&nbsp;</th>
 		</tr>
 		{% for item in getDocumentation %}
@@ -81,7 +81,7 @@
 					data-target="#myModal"
 					href="/workflow/documentation_update_project/{{ item.id }}/{{ project }}/"
 					class="btn btn-xs btn-info"
-					>Add to Project</a
+					>Add to {{ user.activity_user.organization.level_2_label }}</a
 				>
 			</td>
 		</tr>

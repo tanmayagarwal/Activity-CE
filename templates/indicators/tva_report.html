@@ -110,7 +110,7 @@
             if (programId != undefined && programId > 0) {
                 window.location.href = "/indicators/tvaprint/" + programId + "/";
             } else {
-                alert("Select a program before exporting it to PDF");
+                alert("Select a {{ user.activity_user.organization.level_1_label }} before exporting it to PDF");
             }
         }
 

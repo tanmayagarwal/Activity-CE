@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block bread_crumb %}
 <ol class="breadcrumb">
-  <li><a href="/workflow/dashboard/0/">Program Dashboards</a></li>
+  <li><a href="/workflow/dashboard/0/">{{ user.activity_user.organization.level_1_label }} Dashboards</a></li>
   <li class="active">Reports</li>
 </ol>
 
 {% endblock bread_crumb %}
 
-{% block page_title %}Project Report{% endblock %}
+{% block page_title %}{{ user.activity_user.organization.level_2_label }} Report{% endblock %}
 
 {% block content %}
 

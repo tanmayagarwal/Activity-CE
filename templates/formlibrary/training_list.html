@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block bread_crumb %}
 <ol class="breadcrumb">
-  <li><a href="/workflow/dashboard/0/">Program Index</a></li>
+  <li><a href="/workflow/dashboard/0/">{{ user.activity_user.organization.level_1_label }} Index</a></li>
   {%  if project_agreement_id != '0'%}
-    <li><a href="/workflow/dashboard/project/{{ project_agreement_id }}/">Project Dashboards</a></li>
+    <li><a href="/workflow/dashboard/project/{{ project_agreement_id }}/">{{ user.activity_user.organization.level_2_label }} Dashboards</a></li>
   {% endif %}
   <li class="active">Trainings</li>
 </ol>
@@ -27,7 +27,7 @@
         $("select#program").change(function() {
 
             if ($(this).val() == 'all') {
-                    $("select#project").html("<option>project(s)</option>");
+                    $("select#project").html("<option>{{ user.activity_user.organization.level_2_label }}(s)</option>");
                     $("select#project").attr('disabled', true);
 
                 }
@@ -36,10 +36,10 @@
                     var url = "/formlibrary/getagreements/" + $(this).val() + "/0/";
                     program_id = $(this).val();
                     $.getJSON(url, function(models) {
-                        var options = '<option value="all">Project</option>';
+                        var options = '<option value="all">{{ user.activity_user.organization.level_2_label }}</option>';
 
                         if(!$.trim(models['getAgreements'])){
-                            $("select#project").html("<option>project(s)</option>");
+                            $("select#project").html("<option>{{ user.activity_user.organization.level_2_label }}(s)</option>");
                             $("select#project").attr('disabled', true);
                             program_filter(program_id, 0);                            
                         }else{

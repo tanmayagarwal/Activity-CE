@@ -96,7 +96,7 @@
         </div>
         <div class="col-md-6">
             <div class="panel panel-default">
-                <div class="panel-heading"><b>Project(s) Status</b> {% if getFilteredName %} for <a href="/workflow/dashboard/{{ getFilteredName.id }}">{{ getFilteredName }} </a>{% endif %}
+                <div class="panel-heading"><b>{{ user.activity_user.organization.level_2_label }}(s) Status</b> {% if getFilteredName %} for <a href="/workflow/dashboard/{{ getFilteredName.id }}">{{ getFilteredName }} </a>{% endif %}
                     </div>
                 <div class="panel-body">
                     <div class="col-md-offset-2 col-md-10">
