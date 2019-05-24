@@ -355,7 +355,7 @@ The trend of employment in surveyed areas was such that the majority (70%) of bu
 
     <div class="col-md-12">
         <div class="row tools">
-            <h3>Project Status and Key Performance Indicators</h3>
+            <h3>{{ user.activity_user.organization.level_2_label }} Status and Key Performance Indicators</h3>
 
             <div class="list-group col-md-6">
 
@@ -398,7 +398,7 @@ The trend of employment in surveyed areas was such that the majority (70%) of bu
                           <div id="collapse2" class="panel-collapse collapse">
                               <table class="table table-striped">
                                   <tr>
-                                      <td colspan="5"><b>Summary of project initiations for - {% if getProgram %}{{ getProgram.name }}{% endif %}</b></td>
+                                      <td colspan="5"><b>Summary of {{ user.activity_user.organization.level_2_label }} initiations for - {% if getProgram %}{{ getProgram.name }}{% endif %}</b></td>
                                   </tr>
                                   <tr>
                                       <th>Initiation#</th>

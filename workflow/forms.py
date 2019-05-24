@@ -1766,7 +1766,7 @@ class SiteProfileForm(forms.ModelForm):
                   <div class='panel panel-default'>
 
                   <!-- Default panel contents -->
-                  <div class='panel-heading'>Projects in this Site</div>
+                  <div class='panel-heading'>{{ user.activity_user.organization.level_2_label }}s in this Site</div>
                     {% if getProjects %}
                       <!-- Table -->
                       <table class="table">
