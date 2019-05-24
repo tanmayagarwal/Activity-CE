@@ -17,7 +17,7 @@ from indicators.models import CollectedData, Indicator
 from workflow.models import (
     ProjectAgreement, ProjectComplete, Program,
     SiteProfile, Sector, Country, ActivityUser,
-    ActivitySites, ActivityBookmarks, FormGuidance
+    ActivitySites, ActivityBookmarks, FormGuidance, Organization
 )
 from activity.tables import IndicatorDataTable
 from activity.util import get_country, get_nav_links
@@ -25,6 +25,8 @@ from activity.forms import (
     RegistrationForm, NewUserRegistrationForm,
     NewActivityUserRegistrationForm, BookmarkForm
 )
+
+from django.core import serializers
 
 
 @login_required(login_url='/accounts/login/')
@@ -433,20 +435,21 @@ def admin_dashboard(request):
     )
 
 
-def admin_default_settings(request):
+def admin_configurations(request):
     user = get_object_or_404(ActivityUser, user=request.user)
     organization = user.organization
 
     if request.method == "POST":
-        for wfl, level in zip(['wfl1', 'wfl2', 'wfl3', 'wfl4'], 
-                              ['level_1_label', 'level_2_label', 
-                               'level_3_label', 'level_4_label']):
+        for wfl, level in zip(['wfl' + str(i+1) for i in range(4)], 
+                              ['level_' + str(i+1) + '_label' for i in range(4)]):
             if request.POST.get(wfl):
                 setattr(organization, level, request.POST.get(wfl))
-
-            organization.save()
-            user.organization = organization
-            user.save()
+        setattr(organization, 'stakeholder_label', request.POST.get('stakeholder_label'))
+        setattr(organization, 'date_format', request.POST.get('date_format'))
+        
+        organization.save()
+        user.organization = organization
+        user.save()
 
     nav_links = get_nav_links('Default Settings')
     return render(
@@ -454,8 +457,39 @@ def admin_default_settings(request):
         'admin/default_settings.html',
         {'nav_links': nav_links,
          'organization': organization}
-    )
+         )
+"""
+def admin_configurations(request):
+    logged_activity_user = ActivityUser.objects.get(user=request.user)
 
+    if request.method == 'POST' and request.is_ajax:
+        data = request.POST
+
+        model_updates = {
+            'level_1_label': data.get('level_1_label'),
+            'level_2_label': data.get('level_2_label'),
+            'level_3_label': data.get('level_3_label'),
+            'level_4_label': data.get('level_4_label'),
+            'stakeholder_label': data.get('stakeholder_label'),
+            'date_format': data.get('date_format'),
+            # 'default_currency': data.get('default_currency')
+        }
+        organization = Organization.objects.filter(id=logged_activity_user.organization.id)
+        updates = organization.update(**model_updates)
+        if updates:
+            organization_changes = Organization.objects.filter(
+                id=logged_activity_user.organization.id)
+            data = serializers.serialize('json', organization_changes)
+            return HttpResponse(data, content_type="application/json")
+
+    nav_links = get_nav_links('Configurations')
+    return render(
+        request,
+        'admin/default_settings.html',
+        {'nav_links': nav_links, 'organization': logged_activity_user.organization}
+
+    )
+"""
 
 def admin_profile_settings(request):
     nav_links = get_nav_links('Profile Settings')
