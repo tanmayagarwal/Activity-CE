@@ -108,3 +108,31 @@ admin.site.register(ExternalServiceRecord, ExternalServiceRecordAdmin)
 admin.site.register(ActivityTable, ActivityTableAdmin)
 admin.site.register(DataCollectionFrequency)
 admin.site.register(PeriodicTarget, PeriodicTargetAdmin)
+
+
+# New Models
+@admin.register(IndicatorLevel)
+class IndicatorLevelAdmin(admin.ModelAdmin):
+    list_display = ('level', 'created_by', 'create_date')
+    list_filter = ('type', 'created_by')
+    display = 'Indicator Types'
+
+
+@admin.register(IndicatorType)
+class IndicatorTypeAdmin(admin.ModelAdmin):
+    list_display = ('type', 'created_by', 'create_date')
+    list_filter = ('type', 'created_by')
+
+
+@admin.register(IndicatorTag)
+class IndicatorTagAdmin(admin.ModelAdmin):
+    list_display = ('tag', 'created_by', 'create_date')
+    list_filter = ('created_by',)
+    display = 'Indicator Tags'
+
+
+@admin.register(Indicator1)
+class Indicator1Admin(admin.ModelAdmin):
+    list_display = ('name', 'parent_location', 'type', 'key_performance_indicator')
+    list_filter = ('name', 'level', 'workflow_level1')
+    display = 'Indicators'

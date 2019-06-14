@@ -3,6 +3,7 @@
 
 from django.db import models
 from django.contrib import admin
+from django.contrib.postgres.fields import JSONField
 from django.utils import timezone
 
 import uuid
@@ -12,7 +13,7 @@ from datetime import datetime, timedelta
 
 from workflow.models import (
     Program, Sector, SiteProfile, ProjectAgreement, ProjectComplete,
-    Country, Documentation, ActivityUser, Organization)
+    Country, Documentation, ActivityUser, Organization, Sector1, WorkflowLevel1, Approval)
 
 
 class ActivityTable(models.Model):
@@ -607,3 +608,231 @@ class CollectedDataAdmin(admin.ModelAdmin):
     list_display = ('indicator', 'date_collected', 'create_date', 'edit_date')
     list_filter = ['indicator__program__country__country']
     display = 'Indicator Output/Outcome Collected Data'
+
+
+# NEW MODELS
+class IndicatorLevel(models.Model):
+    """
+    Indicator Level Model
+    """
+    indicator_level_uuid = models.UUIDField('Indicator Level UUID', editable=False, default=uuid.uuid4, unique=True)
+    level = models.CharField('Indicator Level', max_length=100, unique=True)
+    create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
+    modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
+    created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
+                                   related_name='org_sub_created_by', on_delete=models.SET_NULL)
+    modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
+                                    related_name='org_sub_modified_by', on_delete=models.SET_NULL)
+
+    class Meta:
+        ordering = ('create_date',)
+        verbose_name_plural = 'Indicator Levels'
+
+    # displayed in admin templates
+    def __str__(self):
+        return self.level or ''
+
+    def save(self, request, *args, **kwargs):
+        # get logged user
+        logged_user = ActivityUser.objects.get(user=request.user)
+        if not self.id:
+            self.create_date = timezone.now()
+            self.created_by = logged_user
+        self.modified_date = timezone.now()
+        self.modified_by = logged_user
+        return super(IndicatorLevel, self).save(*args, **kwargs)
+
+
+class IndicatorTag(models.Model):
+    """
+    Indicator Tag Model
+    """
+    indicator_tag_uuid = models.UUIDField('Indicator Tag UUID', editable=False, default=uuid.uuid4, unique=True)
+    tag = models.CharField('Indicator Tag', max_length=100, unique=True)
+    create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
+    modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
+    created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
+                                   related_name='tag_created_by', on_delete=models.SET_NULL)
+    modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
+                                    related_name='tag_modified_by', on_delete=models.SET_NULL)
+
+    class Meta:
+        ordering = ('tag',)
+        verbose_name_plural = 'Indicator Tags'
+
+    # displayed in admin templates
+    def __str__(self):
+        return self.level or ''
+
+    def save(self, request, *args, **kwargs):
+        # get logged user
+        logged_user = ActivityUser.objects.get(user=request.user)
+        if not self.id:
+            self.create_date = timezone.now()
+            self.created_by = logged_user
+        self.modified_date = timezone.now()
+        self.modified_by = logged_user
+        return super(IndicatorTag, self).save(*args, **kwargs)
+
+
+class IndicatorType(models.Model):
+    """
+    Indicator Type Model
+    """
+    indicator_type_uuid = models.UUIDField('Indicator Type UUID', editable=False, default=uuid.uuid4, unique=True)
+    type = models.CharField('Indicator Type', max_length=100, unique=True)
+    create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
+    modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
+    created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
+                                   related_name='org_sub_created_by', on_delete=models.SET_NULL)
+    modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
+                                    related_name='org_sub_modified_by', on_delete=models.SET_NULL)
+
+    class Meta:
+        ordering = ('create_date',)
+        verbose_name_plural = 'Indicator Types'
+
+    # displayed in admin templates
+    def __str__(self):
+        return self.type or ''
+
+    def save(self, request, *args, **kwargs):
+        # get logged user
+        logged_user = ActivityUser.objects.get(user=request.user)
+        if not self.id:
+            self.create_date = timezone.now()
+            self.created_by = logged_user
+        self.modified_date = timezone.now()
+        self.modified_by = logged_user
+        return super(IndicatorType, self).save(*args, **kwargs)
+
+
+class AdditionalField(models.Model):
+    """
+    Additional Fields Model
+    """
+    additional_field_uuid = models.UUIDField('Additional Field UUID', editable=False, default=uuid.uuid4, unique=True)
+    field = models.CharField('Field', max_length=255, unique=True)
+    create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
+    modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
+    created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
+                                   related_name='org_sub_created_by', on_delete=models.SET_NULL)
+    modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
+                                    related_name='org_sub_modified_by', on_delete=models.SET_NULL)
+
+    class Meta:
+        ordering = ('create_date',)
+        verbose_name_plural = 'Additional Fields'
+
+    # displayed in admin templates
+    def __str__(self):
+        return self.filed or ''
+
+    def save(self, request, *args, **kwargs):
+        # get logged user
+        logged_user = ActivityUser.objects.get(user=request.user)
+        if not self.id:
+            self.create_date = timezone.now()
+            self.created_by = logged_user
+        self.modified_date = timezone.now()
+        self.modified_by = logged_user
+        return super(AdditionalField, self).save(*args, **kwargs)
+
+
+class Indicator1(models.Model):
+    """
+    Indicator Model
+    """
+    DIRECTION_CHOICES = (
+        ('increasing', 'Increasing'),
+        ('decreasing', 'Decreasing')
+    )
+
+    LOP = 1
+    MID_END = 2
+    ANNUAL = 3
+    SEMI_ANNUAL = 4
+    TRI_ANNUAL = 5
+    QUARTERLY = 6
+    MONTHLY = 7
+    EVENT = 8
+    BASE_END = 9
+    BASE_MID_END = 10
+
+    TARGET_FREQUENCIES = (
+        (LOP, 'Life of Workflow Level (LoP) only'),
+        (MID_END, 'Midline and endline'),
+        (BASE_END, 'Baseline and endlin'),
+        (BASE_MID_END, 'Baseline, midline and endline')
+        (ANNUAL, 'Annual'),
+        (SEMI_ANNUAL, 'Semiannual'),
+        (TRI_ANNUAL, 'Tri-annual'),
+        (QUARTERLY, 'Quarterly'),
+        (MONTHLY, 'Monthly'),
+        (EVENT, 'Event')
+    )
+
+    indicator_uuid = models.UUIDField('Indicator UUID', editable=False, default=uuid.uuid4, unique=True)
+    name = models.TextField('Indicator Name', max_length=255)
+    type = models.ForeignKey(IndicatorType, verbose_name='Indicator Type', null=True, on_delete=models.SET_NULL)
+    objective = models.ForeignKey(Objective, verbose_name='Program Objective', null=True, on_delete=models.SET_NULL)
+    level = models.ForeignKey(IndicatorLevel, verbose_name='Indicator Level', null=True, on_delete=models.SET_NULL)
+    sector = models.ForeignKey(Sector1, verbose_name='Indicator Sector', null=True, on_delete=models.SET_NULL)
+    definition = models.TextField('Indicator Definition', blank=True)
+    key_performance_indicator = models.BooleanField('Key Performance Indicator?', default=0)
+    justification = models.TextField(max_length=500, null=True, blank=True,
+                                     verbose_name='Rationale or Justification for Indicator')
+    unit_of_measure = models.TextField('Unit of Measure', max_length=500, blank=True,)
+    disaggregation = models.ManyToManyField(DisaggregationValue)
+    direction_of_change = models.CharField('Direction of Change', blank=True, choices=DIRECTION_CHOICES,
+                                           default='increasing')
+    baseline = models.DecimalField('Baseline', null=True, decimal_places=4, default=Decimal('0.0000'), max_digits=25)
+    life_of_wfl1_target = models.DecimalField('Life of Workflow Level1 Target', null=True,
+                                              default=Decimal('0.0000'), decimal_places=4, max_digits=25)
+    rationale_for_target = models.TextField('Rationale for Target', max_length=500, blank=True)
+    first_event_name = models.CharField('First Event Name', blank=True, max_length=255)
+    number_of_target_periods = models.IntegerField('Number of Periodic Target', default=0)
+    periodic_targets = models.ManyToManyField(PeriodicTarget, verbose_name='Periodic Target')
+    target_frequency = models.CharField('Target Frequencies', max_length=100, choices=TARGET_FREQUENCIES)
+    source = models.CharField('Source', max_length=255, blank=True)
+    means_of_verification = models.TextField('Means of Verification / Data Source', blank=True)
+    method_of_data_collection = models.TextField('Method of Data Collection', max_length=765, blank=True)
+    data_points = models.TextField('Data Points', max_length=765, blank=True)
+    responsible_person = models.ForeignKey(ActivityUser, verbose_name='Responsible Person(s) and Team', null=False)
+    method_of_analysis = models.CharField('Method of Analysis', max_length=255, blank=True)
+    information_use = models.TextField('Information Use', blank=True, max_length=765)
+    quality_assurance = models.TextField('Quality Assurance Measures', blank=True, max_length=765)
+    data_issues = models.TextField('Data Issues', blank=True, max_length=765)
+    changes_to_indicator = models.TextField('Changes to Indicator', blank=True)
+    notes = models.TextField('Changes to Indicator', max_length=765, blank=True)
+    comments = models.TextField('Comments', max_length=765, blank=True)
+    workflow_level1 = models.ForeignKey(WorkflowLevel1, null=True, verbose_name='Workflow Level1')
+    approved_by = models.ForeignKey(Approval, null=True, verbose_name='Approved By')
+    tags = models.ManyToManyField(IndicatorTag, verbose_name='Indicator Tags', related_name='tags')
+    additional_fields = models.ManyToManyField(AdditionalField, verbose_name='Additional Fields',
+                                               related_name='additional_fields')
+    additional_field_values = JSONField(null=True, verbose_name='Additional Values Object')
+    create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
+    modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
+    created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
+                                   related_name='indicator_created_by', on_delete=models.SET_NULL)
+    modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
+                                    related_name='indicator_modified_by', on_delete=models.SET_NULL)
+
+    class Meta:
+        ordering = ('name', 'level', 'create_date',)
+
+    def __str__(self):
+        return self.name or ''
+
+    def save(self, request, *args, **kwargs):
+        # get logged user
+        logged_user = ActivityUser.objects.get(user=request.user)
+        if not self.id:
+            self.create_date = timezone.now()
+            self.created_by = logged_user
+        self.modified_date = timezone.now()
+        self.modified_by = logged_user
+        return super(AdditionalField, self).save(*args, **kwargs)
+
+

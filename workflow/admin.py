@@ -246,3 +246,106 @@ admin.site.register(ActivitySites, ActivitySitesAdmin)
 admin.site.register(FormGuidance, FormGuidanceAdmin)
 admin.site.register(ActivityUserProxy, ReportActivityUserProxyAdmin)
 admin.site.register(ActivityBookmarks, ActivityBookmarksAdmin)
+
+
+# New Admin Model Registrations
+@admin.register(Workspace)
+class WorkspaceAdmin(admin.ModelAdmin):
+    list_display = ('name', 'created_by', 'create_date', 'updated_by',)
+    list_filter = ('created_by',)
+    display = 'Workspaces'
+
+
+@admin.register(OrganizationType)
+class OrganizationTypeAdmin(admin.ModelAdmin):
+    list_display = ('type', 'created_by', 'create_date',)
+    list_filter = ('created_by',)
+    display = 'Organization Types'
+
+
+@admin.register(OrganizationSubType)
+class OrganizationSubTypeAdmin(admin.ModelAdmin):
+    list_display = ('sub_type', 'created_by', 'create_date',)
+    list_filter = ('created_by',)
+    display = 'Organization Sub-Types'
+
+
+@admin.register(Organization1)
+class Organization1Admin(admin.ModelAdmin):
+    list_display = ('full_name', 'short_name', 'parent_organization', 'create_date',)
+    list_filter = ('created_by',)
+    display = 'Organizations'
+
+
+@admin.register(Sector1)
+class Sector1Admin(admin.ModelAdmin):
+    list_display = ('sector', 'created_by', 'create_date')
+    list_filter = ('parent_sector', 'created_by')
+    display = 'Sectors'
+
+
+@admin.register(Contact1)
+class Contact1Admin(admin.ModelAdmin):
+    list_display = ('first_name', 'last_name', 'created_by', 'create_date')
+    list_filter = ('organization__name', 'created_by__name')
+    display = 'Contacts'
+
+
+@admin.register(LocationType)
+class LocationTypeAdmin(admin.ModelAdmin):
+    list_display = ('type', 'created_by', 'create_date')
+    list_filter = ('type',)
+    display = ' Location Types'
+
+
+@admin.register(Location)
+class LocationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'parent_location', 'contact', 'created_by', 'create_date')
+    list_filter = ('parent_location__name', 'contact__first_name')
+    display = 'Locations'
+
+
+@admin.register(Portfolio)
+class PortfolioAdmin(admin.ModelAdmin):
+    list_display = ('name', 'workspace', 'created_by', 'create_date')
+    list_filter = ('workspace__name',)
+    display = 'Portfolio'
+
+
+@admin.register(WorkflowLevel1Type)
+class WorkflowLevel1TypeAdmin(admin.ModelAdmin):
+    list_display = ('type', 'created_by', 'create_date')
+    display = 'Workflow Level1 Types'
+
+
+@admin.register(FundingStatus)
+class FundingStatusAdmin(admin.ModelAdmin):
+    list_display = ('status', 'created_by', 'create_date')
+    display = 'Funding Statuses'
+
+
+@admin.register(Approval)
+class ApprovalAdmin(admin.ModelAdmin):
+    list_display = ('name', 'created_by', 'create_date')
+    display = 'Approvals'
+
+
+@admin.register(WorkflowLevel1)
+class WorkflowLevel1Admin(admin.ModelAdmin):
+    list_display = ('name', 'workspace', 'organization', 'portfolio', 'created_by')
+    list_filter = ('workspace__name', 'organization__name', 'portfolio__name')
+    display = 'Workflow Level1s'
+
+
+@admin.register(WorkflowLevel2)
+class WorkflowLevel2Admin(admin.ModelAdmin):
+    list_display = ('name', 'parent', 'workflow_level1', 'created_by')
+    list_filter = ('workflow_level1__name',)
+    display = 'Workflow Level2s'
+
+
+@admin.register(WorkflowLevel2Plan)
+class WorkflowLevel2PlanAdmin(admin.ModelAdmin):
+    list_display = ('name', 'workflow_level1', 'workflow_level2', 'created_by')
+    list_filter = ('workflow_level1__name', 'workflow_level2__name')
+    display = 'Workflow Level2 Plans'
