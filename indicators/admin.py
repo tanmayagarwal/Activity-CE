@@ -136,3 +136,18 @@ class Indicator1Admin(admin.ModelAdmin):
     list_display = ('name', 'parent_location', 'type', 'key_performance_indicator')
     list_filter = ('name', 'level', 'workflow_level1')
     display = 'Indicators'
+
+
+@admin.register(IndicatorLibrary)
+class IndicatorLibraryAdmin(admin.ModelAdmin):
+    list_display = ()
+    list_filter = ('name',)
+    display = 'Indicator Library'
+
+
+@admin.register(IndicatorResult)
+class IndicatorResultsAdmin(admin.ModelAdmin):
+    list_display = ()
+    list_filter = ('indicator',)
+    display = 'Indicator Library'
+

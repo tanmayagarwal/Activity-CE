@@ -2199,6 +2199,37 @@ class LocationType(models.Model):
         return super(LocationType, self).save(*args, **kwargs)
 
 
+class AdministrativeLevel(models.Model):
+    """
+    Administrative Level Model
+    """
+    level_1 = models.CharField('Administrative Level 1', max_length=100, blank=True)
+    level_2 = models.CharField('Administrative Level 2', max_length=100, blank=True)
+    level_3 = models.CharField('Administrative Level 3', max_length=100, blank=True)
+    level_4 = models.CharField('Administrative Level 4', max_length=100, blank=True)
+    create_date = models.DateTimeField('Create Date', null=True, blank=True)
+    modified_date = models.DateTimeField('Modified Date', null=True, blank=True)
+    created_by = models.ForeignKey(ActivityUser, verbose_name='Created by', editable=False, null=True,
+                                   related_name='admin_level_created_by', on_delete=models.SET_NULL)
+    modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
+                                    related_name='admin_level_modified_by', on_delete=models.SET_NULL)
+
+    class Meta:
+        ordering = ('name',)
+        verbose_name_plural = 'Sites'
+        app_label = 'site'
+
+    # displayed in admin templates
+    def __str__(self):
+        return self.level_1 or ''
+
+    # on save add create date or update edit date
+    def save(self, request, *args, **kwargs):
+        if not self.id:
+            self.create_date = timezone.now()
+        self.modified_date = timezone.now()
+
+
 class Location(models.Model):
     """
     Location (Site) Model
@@ -2212,11 +2243,18 @@ class Location(models.Model):
     parent_location = models.ForeignKey('self', null=True, related_name='sub_locations', on_delete=models.SET_NULL)
     contact = models.ForeignKey(Contact1, null=True, verbose_name='Location Contact', on_delete=models.SET_NULL)
     status = models.CharField('Location Status', blank=True, max_length=100, choices=STATUS_CHOICES, default='active')
+    country = models.ForeignKey(Country, verbose_name='Country of Location', on_delete=models.CASCADE)
     office = models.ForeignKey(Office, null=True, verbose_name='Location Office', on_delete=models.SET_NULL)
     type = models.ForeignKey(LocationType, null=True, verbose_name='Location Type', on_delete=models.SET_NULL)
+    admin_levels = models.ForeignKey(AdministrativeLevel, verbose_name='Administrative Levels', null=True,
+                                     on_delete=models.SET_NULL)
     latitude = models.DecimalField('Latitude Coordinates', decimal_places=16, max_digits=25, default=Decimal('0.00'))
     longitude = models.DecimalField('Longitude Coordinates', decimal_places=16, max_digits=25, default=Decimal('0.00'))
     number_of_members = models.IntegerField('Number of Members', max_length=10, null=True)
+    filled_by = models.ForeignKey(ActivityUser, related_name='filled_by_user', verbose_name='Location Filled By',
+                                  null=True, on_delete=models.SET_NULL)
+    verified_by = models.ForeignKey(ActivityUser, related_name='verified_by_user', verbose_name='Location Verified By',
+                                    null=True, on_delete=models.SET_NULL)
     create_date = models.DateTimeField('Create Date', null=True, blank=True)
     modified_date = models.DateTimeField('Modified Date', null=True, blank=True)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created by', editable=False, null=True,
@@ -2227,7 +2265,6 @@ class Location(models.Model):
     class Meta:
         ordering = ('name',)
         verbose_name_plural = 'Sites'
-        app_label = 'site'
 
     # displayed in admin templates
     def __str__(self):

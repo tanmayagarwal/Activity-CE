@@ -298,6 +298,12 @@ class LocationTypeAdmin(admin.ModelAdmin):
     display = ' Location Types'
 
 
+@admin.register(AdministrativeLevel)
+class AdministrativeLevelAdmin(admin.ModelAdmin):
+    list_display = ('level_1', 'level_2', 'level_3', 'level_4')
+    display = 'Administrative Levels'
+
+
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
     list_display = ('name', 'parent_location', 'contact', 'created_by', 'create_date')
