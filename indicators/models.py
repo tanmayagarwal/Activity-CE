@@ -903,6 +903,9 @@ class IndicatorResult(models.Model):
     Indicator Library Model
     """
     indicator = models.ForeignKey(Indicator, verbose_name='Indicator', on_delete=models.CASCADE)
+    disaggregation_label = models.ForeignKey(DisaggregationLabel, verbose_name='Disaggregation Label',
+                                             null=True, on_delete=models.SET_NULL)
+    disaggregation_value = models.CharField(max_length=765, blank=True, null=True)
     description = models.TextField('Indicator Results Description', max_length=765, blank=True)
     create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
     modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
