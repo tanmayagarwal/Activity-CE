@@ -120,4 +120,4 @@ class LocationAdmin(admin.ModelAdmin):
 class PortfolioAdmin(admin.ModelAdmin):
     list_display = ('name', 'workspace', 'created_by', 'create_date')
     list_filter = ('workspace__name',)
-    display = 'Portfolio'
+    display = 'Portfolios'
