@@ -286,3 +286,11 @@ class WorkflowLevel2PlanAdmin(admin.ModelAdmin):
     list_display = ('name', 'workflow_level1', 'workflow_level2', 'created_by')
     list_filter = ('workflow_level1__name', 'workflow_level2__name')
     display = 'Workflow Level2 Plans'
+
+
+@admin.register(Budget1)
+class BudgetAdmin(admin.ModelAdmin):
+    list_display = ('contributor', 'workflow_level2', 'actual_budget_donor_currency', 'create_date')
+    list_filter = ('workflow_level2',)
+    display = 'Budgets'
+

@@ -7,6 +7,8 @@ from django.utils import timezone
 from decimal import Decimal
 from workflow.models import (Documentation, ActivityUser)
 
+from activity.middlewares.get_current_user import get_request
+
 
 class Workspace(models.Model):
     """
@@ -41,8 +43,8 @@ class Workspace(models.Model):
         return self.name or ''
 
     # on save add create date or update edit date
-    def save(self, request, *args, **kwargs):
-        logged_user = ActivityUser.objects.get(user=request.user)
+    def save(self, *args, **kwargs):
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -73,9 +75,9 @@ class OrganizationType(models.Model):
     def __str__(self):
         return self.type or ''
 
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
         # get logged user
-        logged_user = ActivityUser.objects.get(user=request.user)
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -107,9 +109,9 @@ class OrganizationSubType(models.Model):
     def __str__(self):
         return self.type or ''
 
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
         # get logged user
-        logged_user = ActivityUser.objects.get(user=request.user)
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -160,8 +162,8 @@ class Organization(models.Model):
         return self.name or ''
 
     # on save add create date or update edit date
-    def save(self, request, *args, **kwargs):
-        logged_user = ActivityUser.objects.get(user=request.user)
+    def save(self, *args, **kwargs):
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -176,18 +178,25 @@ class Office(models.Model):
     """
     name = models.CharField('Office Name', max_length=255, blank=True)
     code = models.CharField('Office Code', max_length=255, blank=True)
-    create_date = models.DateTimeField(null=True, blank=True)
-    edit_date = models.DateTimeField(null=True, blank=True)
+    create_date = models.DateTimeField('Create Date', null=True, blank=True)
+    modified_date = models.DateTimeField('Modified Date', null=True, blank=True)
+    created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', related_name='office_created_by',
+                                   editable=False, null=True, on_delete=models.SET_NULL)
+    modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', related_name='office_modified_by',
+                                    editable=False, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ('name',)
 
     # on save add create date or update edit date
     def save(self, *args, **kwargs):
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if self.create_date is None:
             self.create_date = datetime.now()
+            self.created_by = logged_user
         self.edit_date = datetime.now()
-        super(Office, self).save()
+        self.modified_by = logged_user
+        super(Office, self).save(*args, **kwargs)
 
     # displayed in admin templates
     def __str__(self):
@@ -219,8 +228,8 @@ class Sector(models.Model):
         return self.sector or ''
 
     # on save add create date or update edit date
-    def save(self, request, *args, **kwargs):
-        logged_user = ActivityUser.objects.get(user=request.user)
+    def save(self, *args, **kwargs):
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -267,8 +276,8 @@ class Contact(models.Model):
             format(self.street, self.city, self.zip_code, self.state, self.country)
 
     # on save add create date or update edit date
-    def save(self, request, *args, **kwargs):
-        logged_user = ActivityUser.objects.get(user=request.user)
+    def save(self, *args, **kwargs):
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -298,9 +307,9 @@ class LocationType(models.Model):
     def __str__(self):
         return self.type or ''
 
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
         # get logged user
-        logged_user = ActivityUser.objects.get(user=request.user)
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -334,10 +343,14 @@ class AdministrativeLevel(models.Model):
         return self.level_1 or ''
 
     # on save add create date or update edit date
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
+            self.created_by = logged_user
         self.modified_date = timezone.now()
+        self.modified_by = logged_user
+        return super(AdministrativeLevel, self).save(*args, **kwargs)
 
 
 class Country(models.Model):
@@ -360,10 +373,13 @@ class Country(models.Model):
 
     # on save add create date or update edit date
     def save(self, *args, **kwargs):
-        if self.create_date is None:
-            self.create_date = datetime.now()
-        self.edit_date = datetime.now()
-        super(Country, self).save()
+        logged_user = ActivityUser.objects.get(user=get_request().user)
+        if not self.id:
+            self.create_date = timezone.now()
+            self.created_by = logged_user
+        self.modified_date = timezone.now()
+        self.modified_by = logged_user
+        return super(Country, self).save(*args, **kwargs)
 
     # displayed in admin templates
     def __str__(self):
@@ -411,8 +427,8 @@ class Location(models.Model):
         return self.name or ''
 
     # on save add create date or update edit date
-    def save(self, request, *args, **kwargs):
-        logged_user = ActivityUser.objects.get(user=request.user)
+    def save(self, *args, **kwargs):
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -442,9 +458,9 @@ class Portfolio(models.Model):
     def __str__(self):
         return self.name or ''
 
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
         # get logged user
-        logged_user = ActivityUser.objects.get(user=request.user)
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user

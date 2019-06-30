@@ -27,6 +27,8 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.core.files.images import get_image_dimensions
 
+from activity.middlewares.get_current_user import get_request
+
 
 # New user created generate a token
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -1944,9 +1946,9 @@ class WorkflowLevel1Type(models.Model):
     def __str__(self):
         return self.type or ''
 
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
         # get logged user
-        logged_user = ActivityUser.objects.get(user=request.user)
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -1976,9 +1978,9 @@ class FundingStatus(models.Model):
     def __str__(self):
         return self.status or ''
 
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
         # get logged user
-        logged_user = ActivityUser.objects.get(user=request.user)
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -2008,9 +2010,9 @@ class Approval(models.Model):
     def __str__(self):
         return self.name or ''
 
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
         # get logged user
-        logged_user = ActivityUser.objects.get(user=request.user)
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -2037,6 +2039,7 @@ class WorkflowLevel1(models.Model):
     Portfolio = models.ForeignKey('activity.Portfolio', on_delete=models.CASCADE)
     funding_status = models.ForeignKey(FundingStatus, verbose_name='Funding Status', null=True,
                                        on_delete=models.SET_NULL)
+    history = HistoricalRecords()
     edit_date = models.DateTimeField('Edit Date', null=True, blank=True)
     start_date = models.DateTimeField('Start Date', null=True, blank=True)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
@@ -2051,9 +2054,9 @@ class WorkflowLevel1(models.Model):
     def __str__(self):
         return self.name or ''
 
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
         # get logged user
-        logged_user = ActivityUser.objects.get(user=request.user)
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -2062,20 +2065,97 @@ class WorkflowLevel1(models.Model):
         return super(WorkflowLevel1, self).save(*args, **kwargs)
 
 
+class WorkflowStatus(models.Model):
+    """
+    Workflow Status Model
+    TODO - create migrations to add the default values
+    (Open, Awaiting approval, Tracking, Closed, Rejected)
+    """
+    status_uuid = models.UUIDField('Workflow Status UUID', editable=False, default=uuid.uuid4, unique=True)
+    status = models.CharField('Workflow Status', max_length=100)
+    create_date = models.DateTimeField('Create Date', null=True, blank=True, editable=False)
+    modified_date = models.DateTimeField('Modified Date', null=True, blank=True)
+    created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
+                                   related_name='wfl2_created_by', on_delete=models.SET_NULL)
+    modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
+                                    related_name='wfl2_modified_by', on_delete=models.SET_NULL)
+
+    class Meta:
+        ordering = ('create_data',)
+        verbose_name_plural = 'Workflow Statuses'
+
+    def __str__(self):
+        return self.status or ''
+
+    def save(self, *args, **kwargs):
+        # get logged user
+        logged_user = ActivityUser.objects.get(user=get_request().user)
+        if not self.id:
+            self.create_date = timezone.now()
+            self.created_by = logged_user
+        self.modified_date = timezone.now()
+        self.modified_by = logged_user
+        return super(WorkflowStatus, self).save(*args, **kwargs)
+
+
+class WorkflowLevel2Type(models.Model):
+    """
+    Workflow Level 2 Type Model
+    These are Workflow Level 2 categories
+    """
+    type_uuid = models.UUIDField('Workflow Level 2 Type UUID', editable=False, default=uuid.uuid4, unique=True)
+    type = models.CharField('Workflow Level 2 Type', max_length=100, unique=True)
+    create_date = models.DateTimeField('Create Date', blank=True, null=True)
+    modified_date = models.DateTimeField('Modified Date', blank=True, null=True)
+    created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
+                                   related_name='level2_type_created_by', on_delete=models.SET_NULL)
+    modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
+                                    related_name='level2_type_modified_by', on_delete=models.SET_NULL)
+
+    class Meta:
+        ordering = ('create_date',)
+        verbose_name_plural = 'Workflow Level2 Types'
+
+    def __str__(self):
+        return self.type or ''
+
+    def save(self, *args, **kwargs):
+        # get logged user
+        logged_user = ActivityUser.objects.get(user=get_request().user)
+        if not self.id:
+            self.create_date = timezone.now()
+            self.created_by = logged_user
+        self.modified_date = timezone.now()
+        self.modified_by = logged_user
+        return super(WorkflowLevel2Type, self).save(*args, **kwargs)
+
+
 class WorkflowLevel2(models.Model):
     """
     workflow Level2 or 3 or 4 model
     Workflow Level3s have self relationship with WFL2s
     """
     workflow_level2_uuid = models.UUIDField('Workflow Level 2/3 UUID', editable=False, default=uuid.uuid4, unique=True)
-    name = models.CharField('Workflow Level 2/3 Name', max_length=255, blank=False)
+    name = models.CharField('Workflow Level 2/3 Name', max_length=255)
     description = models.TextField('Workflow Level 2/3 Description', max_length=765, blank=True)
-    create_date = models.DateTimeField('Create Date', null=True, blank=True, editable=False)
-    edit_date = models.DateTimeField('Edit Date', null=True, blank=True)
+    workflow_level2_code = models.CharField('Workflow Level2 Code', blank=True, max_length=100)
     start_date = models.DateTimeField('Start Date', null=True, blank=True)
     end_date = models.DateTimeField('End Date', null=True, blank=True)
+    workflow_status = models.ForeignKey(WorkflowStatus, max_length=100, verbose_name='Workflow Status', null=True,
+                                        on_delete=models.SET_NULL)
     workflow_level1 = models.ForeignKey(WorkflowLevel1, null=False, on_delete=models.CASCADE)
+    workflow_level2_type = models.ForeignKey(WorkflowLevel2Type, verbose_name='Workflow Level 2 Type', null=True,
+                                             on_delete=models.SET_NULL)
     parent = models.ForeignKey('self', null=True, related_name='workflow_level3s', on_delete=models.SET_NULL)
+    office_location = models.ForeignKey(Office, null=True, verbose_name='Office Location Tag',
+                                        on_delete=models.SET_NULL)
+    implementation_location = models.ForeignKey('activity.Location', verbose_name='Implementation Location Tag',
+                                                null=True, on_delete=models.SET_NULL)
+    staff_responsible = models.ForeignKey('activity.Contact', verbose_name='Staff Responsible', null=True,
+                                          on_delete=models.SET_NULL)
+    workflow_sector = models.ManyToManyField('activity.Sector', verbose_name='Workflow Sector Tag',
+                                             related_name='workflow_sectors')
+    history = HistoricalRecords()
     create_date = models.DateTimeField('Create Date', null=True, blank=True, editable=False)
     modified_date = models.DateTimeField('Modified Date', null=True, blank=True)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
@@ -2090,9 +2170,9 @@ class WorkflowLevel2(models.Model):
     def __str__(self):
         return self.name or ''
 
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
         # get logged user
-        logged_user = ActivityUser.objects.get(user=request.user)
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -2114,6 +2194,7 @@ class WorkflowLevel2Plan(models.Model):
                                         on_delete=models.CASCADE)
     workflow_level2 = models.ForeignKey(WorkflowLevel2, verbose_name='Workflow Level 2', null=True,
                                         on_delete=models.SET_NULL)
+    history = HistoricalRecords()
     create_date = models.DateTimeField('Create Date', null=True, blank=True, editable=False)
     modified_date = models.DateTimeField('Modified Date', null=True, blank=True)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
@@ -2128,13 +2209,61 @@ class WorkflowLevel2Plan(models.Model):
     def __str__(self):
         return self.name or ''
 
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
         # get logged user
-        logged_user = ActivityUser.objects.get(user=request.user)
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
         self.modified_date = timezone.now()
         self.modified_by = logged_user
         return super(WorkflowLevel2Plan, self).save(*args, **kwargs)
+
+
+class Budget1(models.Nodel):
+    """
+    Budget Model
+    """
+    contributor = models.CharField(max_length=135, blank=True)
+    description_of_contribution = models.TextField(max_length=765, blank=True)
+    workflow_level2 = models.ForeignKey(WorkflowLevel2, null=True, verbose_name="Workflow Level 2",
+                                        on_delete=models.SET_NULL)
+    estimated_budget = models.DecimalField('Estimated Budget', decimal_places=4, max_digits=16,
+                                           default=Decimal('0.0000'))
+    actual_budget_donor_currency = models.DecimalField('Actual Budget Donor Currency', decimal_places=4, max_digits=16,
+                                                       default=Decimal('0.0000'))
+    actual_expenditure_donor_currency = models.DecimalField('Actual Expenditure Donor Currency', decimal_places=4,
+                                                            max_digits=16, default=Decimal('0.0000'))
+    actual_budget_usd = models.DecimalField('Actual Budget USD', decimal_places=4, max_digits=16,
+                                            default=Decimal('0.0000'))
+    actual_expenditure_usd = models.DecimalField('Actual Expenditure USD', decimal_places=4, max_digits=16,
+                                                 default=Decimal('0.0000'))
+    actual_budget_local = models.DecimalField('Actual Budget Local', decimal_places=4, max_digits=16,
+                                              default=Decimal('0.0000'))
+    actual_expenditure_local = models.DecimalField('Actual Expenditure Local', decimal_places=4, max_digits=16,
+                                                   default=Decimal('0.0000'))
+    history = HistoricalRecords()
+    create_date = models.DateTimeField('Create Date', null=True, blank=True, editable=False)
+    modified_date = models.DateTimeField('Modified Date', null=True, blank=True)
+    created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
+                                   related_name='budget_created_by', on_delete=models.SET_NULL)
+    modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
+                                    related_name='budget_modified_by', on_delete=models.SET_NULL)
+
+    class Meta:
+        ordering = ('create_date',)
+        verbose_name_plural = 'Budgets'
+
+    def __str__(self):
+        return self.contributor or ''
+
+    def save(self, *args, **kwargs):
+        logged_user = ActivityUser.objects.get(user=get_request().user)
+        if not self.id:
+            self.create_date = timezone.now()
+            self.created_by = logged_user
+        self.modified_date = timezone.now()
+        self.modified_by = logged_user
+        return super(Budget1, self).save(*args, **kwargs)
+
 

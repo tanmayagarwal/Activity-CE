@@ -13,7 +13,9 @@ from datetime import datetime, timedelta
 
 from workflow.models import (
     Program, Sector, SiteProfile, ProjectAgreement, ProjectComplete,
-    Country, Documentation, ActivityUser, Organization, Sector1, WorkflowLevel1, Approval)
+    Country, Documentation, ActivityUser, Organization, Sector, WorkflowLevel1, Approval)
+
+from activity.middlewares.get_current_user import get_request
 
 
 class ActivityTable(models.Model):
@@ -663,9 +665,9 @@ class IndicatorLevel(models.Model):
     def __str__(self):
         return self.level or ''
 
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
         # get logged user
-        logged_user = ActivityUser.objects.get(user=request.user)
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -695,9 +697,9 @@ class IndicatorTag(models.Model):
     def __str__(self):
         return self.level or ''
 
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
         # get logged user
-        logged_user = ActivityUser.objects.get(user=request.user)
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -727,9 +729,9 @@ class IndicatorType(models.Model):
     def __str__(self):
         return self.type or ''
 
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
         # get logged user
-        logged_user = ActivityUser.objects.get(user=request.user)
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -759,9 +761,9 @@ class AdditionalField(models.Model):
     def __str__(self):
         return self.filed or ''
 
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
         # get logged user
-        logged_user = ActivityUser.objects.get(user=request.user)
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -780,7 +782,7 @@ class Indicator1(models.Model):
     type = models.ForeignKey(IndicatorType, verbose_name='Indicator Type', null=True, on_delete=models.SET_NULL)
     objective = models.ForeignKey(Objective, verbose_name='Program Objective', null=True, on_delete=models.SET_NULL)
     level = models.ForeignKey(IndicatorLevel, verbose_name='Indicator Level', null=True, on_delete=models.SET_NULL)
-    sector = models.ForeignKey(Sector1, verbose_name='Indicator Sector', null=True, on_delete=models.SET_NULL)
+    sector = models.ForeignKey(Sector, verbose_name='Indicator Sector', null=True, on_delete=models.SET_NULL)
     definition = models.TextField('Indicator Definition', blank=True)
     key_performance_indicator = models.BooleanField('Key Performance Indicator?', default=0)
     justification = models.TextField(max_length=500, null=True, blank=True,
@@ -828,9 +830,9 @@ class Indicator1(models.Model):
     def __str__(self):
         return self.name or ''
 
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
         # get logged user
-        logged_user = ActivityUser.objects.get(user=request.user)
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
             self.created_by = logged_user
@@ -847,7 +849,7 @@ class IndicatorLibrary(models.Model):
     type = models.ForeignKey(IndicatorType, verbose_name='Indicator Type', null=True, on_delete=models.SET_NULL)
     objective = models.ForeignKey(Objective, verbose_name='Program Objective', null=True, on_delete=models.SET_NULL)
     level = models.ForeignKey(IndicatorLevel, verbose_name='Indicator Level', null=True, on_delete=models.SET_NULL)
-    sector = models.ForeignKey(Sector1, verbose_name='Indicator Sector', null=True, on_delete=models.SET_NULL)
+    sector = models.ForeignKey(Sector, verbose_name='Indicator Sector', null=True, on_delete=models.SET_NULL)
     definition = models.TextField('Indicator Definition', blank=True)
     key_performance_indicator = models.BooleanField('Key Performance Indicator?', default=0)
     justification = models.TextField(max_length=500, null=True, blank=True,
@@ -893,9 +895,14 @@ class IndicatorLibrary(models.Model):
         ordering = ('name',)
 
     def save(self, *args, **kwargs):
+        # get logged user
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
+            self.created_by = logged_user
         self.modified_date = timezone.now()
+        self.modified_by = logged_user
+        return super(IndicatorLibrary, self).save(*args, **kwargs)
 
 
 class IndicatorResult(models.Model):
@@ -918,6 +925,11 @@ class IndicatorResult(models.Model):
         ordering = ('name',)
 
     def save(self, *args, **kwargs):
+        # get logged user
+        logged_user = ActivityUser.objects.get(user=get_request().user)
         if not self.id:
             self.create_date = timezone.now()
+            self.created_by = logged_user
         self.modified_date = timezone.now()
+        self.modified_by = logged_user
+        return super(IndicatorResult, self).save(*args, **kwargs)

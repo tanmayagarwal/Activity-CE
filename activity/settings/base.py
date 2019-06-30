@@ -188,7 +188,8 @@ MIDDLEWARE = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
-    'activity.middleware.TimingMiddleware'
+    'activity.middleware.TimingMiddleware',
+    'activity.middlewares.get_current_user.RequestMiddleware',
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 # END MIDDLEWARE CONFIGURATION
