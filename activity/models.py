@@ -468,3 +468,35 @@ class Portfolio(models.Model):
         self.modified_by = logged_user
         return super(Portfolio, self).save(*args, **kwargs)
 
+
+class Currency(models.Model):
+    """
+    Currency Model
+    """
+    name = models.CharField('Currency Name', max_length=255)
+    symbol = models.CharField('Currency Symbol', max_length=10, blank=True)
+    code = models.CharField('Currency Code', max_length=20, blank=True)
+    create_date = models.DateTimeField('Create Date', null=True, editable=False)
+    modified_date = models.DateTimeField('Modified Date', null=True, editable=False)
+    created_by = models.ForeignKey(ActivityUser, verbose_name='Created Vy', editable=False, null=True,
+                                   related_name='currency_created_by', on_delete=models.SET_NULL)
+    modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
+                                    related_name='currency_modified_by', on_delete=models.SET_NULL)
+
+    class Meta:
+        ordering = ('name',)
+        verbose_name_plural = 'Currencies'
+
+    def save(self, *args, **kwargs):
+        # get logged user
+        logged_user = ActivityUser.objects.get(user=get_request().user)
+        if not self.id:
+            self.create_date = timezone.now()
+            self.created_by = logged_user
+        self.modified_date = timezone.now()
+        self.modified_by = logged_user
+        return super(Currency, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+

@@ -2224,7 +2224,9 @@ class Budget1(models.Nodel):
     """
     Budget Model
     """
-    contributor = models.CharField(max_length=135, blank=True)
+    name = models.CharField(max_length=135, blank=True)
+    contributor = models.ForeignKey('activity.Organization', verbose_name='Contributing Organization', null=True,
+                                    on_delete=models.SET_NULL())
     description_of_contribution = models.TextField(max_length=765, blank=True)
     workflow_level2 = models.ForeignKey(WorkflowLevel2, null=True, verbose_name="Workflow Level 2",
                                         on_delete=models.SET_NULL)
@@ -2242,6 +2244,8 @@ class Budget1(models.Nodel):
                                               default=Decimal('0.0000'))
     actual_expenditure_local = models.DecimalField('Actual Expenditure Local', decimal_places=4, max_digits=16,
                                                    default=Decimal('0.0000'))
+    donor_currency = models.ForeignKey('activity.Currency', verbose_name='Donor Currency', null=True,
+                                       on_delete=models.SET_NULL)
     history = HistoricalRecords()
     create_date = models.DateTimeField('Create Date', null=True, blank=True, editable=False)
     modified_date = models.DateTimeField('Modified Date', null=True, blank=True)
@@ -2266,4 +2270,11 @@ class Budget1(models.Nodel):
         self.modified_by = logged_user
         return super(Budget1, self).save(*args, **kwargs)
 
+    @property
+    def percent_of_budget_spent(self):
+        return Decimal(self.actual_expenditure_donor_currency) / Decimal(self.actual_budget_donor_currency)
+
+    @property
+    def remaining_expenditure(self):
+        return Decimal(self.actual_budget_donor_currency) - Decimal(self.actual_expenditure_donor_currency)
 
