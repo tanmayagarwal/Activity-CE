@@ -2062,7 +2062,7 @@ class WorkflowLevel1(models.Model):
     name = models.CharField('Workflow Level 1 Name', max_length=255, blank=False)
     workflow_level1_code = models.CharField('Workflow Level 1 Code', max_length=100, blank=True)
     description = models.TextField('Workflow Level 1 Description', max_length=765, blank=True)
-    create_date = models.DateTimeField('Create Date', null=True, blank=True, editable=False)
+    start_date = models.DateTimeField('Start Date', null=True, blank=True)
     end_date = models.DateTimeField('End Date', null=True, blank=True)
     workflow_level1_type = models.ForeignKey(WorkflowLevel1Type, verbose_name='Workflow Level 1 Type', null=True,
                                              on_delete=models.SET_NULL)
@@ -2075,8 +2075,8 @@ class WorkflowLevel1(models.Model):
     funding_status = models.ForeignKey(FundingStatus, verbose_name='Funding Status', null=True,
                                        on_delete=models.SET_NULL)
     history = HistoricalRecords()
+    create_date = models.DateTimeField('Create Date', null=True, blank=True, editable=False)
     edit_date = models.DateTimeField('Edit Date', null=True, blank=True)
-    start_date = models.DateTimeField('Start Date', null=True, blank=True)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
                                    related_name='wfl1_created_by', on_delete=models.SET_NULL)
     modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
