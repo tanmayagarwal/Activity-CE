@@ -746,6 +746,7 @@ class AdditionalField(models.Model):
     """
     additional_field_uuid = models.UUIDField('Additional Field UUID', editable=False, default=uuid.uuid4, unique=True)
     field = models.CharField('Field', max_length=255, unique=True)
+    field_type = models.CharField('Additional Field Type', max_length=100, default='text')
     create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
     modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
@@ -788,27 +789,24 @@ class Indicator1(models.Model):
     justification = models.TextField(max_length=500, null=True, blank=True,
                                      verbose_name='Rationale or Justification for Indicator')
     unit_of_measure = models.TextField('Unit of Measure', max_length=500, blank=True,)
-    disaggregation = models.ManyToManyField(DisaggregationValue)
+    disaggregation = models.ManyToManyField(DisaggregationType)
     direction_of_change = models.CharField('Direction of Change', blank=True, choices=DIRECTION_CHOICES,
                                            default='increasing')
     baseline = models.DecimalField('Baseline', null=True, decimal_places=4, default=Decimal('0.0000'), max_digits=25)
-    life_of_wfl1_target = models.DecimalField('Life of Workflow Level1 Target', null=True,
-                                              default=Decimal('0.0000'), decimal_places=4, max_digits=25)
+    overall_target = models.DecimalField('Overall Target', null=True, default=Decimal('0.0000'), decimal_places=4,
+                                         max_digits=25)
     rationale_for_target = models.TextField('Rationale for Target', max_length=500, blank=True)
-    first_event_name = models.CharField('First Event Name', blank=True, max_length=255)
     number_of_target_periods = models.IntegerField('Number of Periodic Target', default=0)
     periodic_targets = models.ManyToManyField(PeriodicTarget, verbose_name='Periodic Target')
     target_frequency = models.CharField('Target Frequencies', max_length=100, choices=TARGET_FREQUENCIES)
     source = models.CharField('Source', max_length=255, blank=True)
-    means_of_verification = models.TextField('Means of Verification / Data Source', blank=True)
+    means_of_verification = models.TextField('Means of Verification', blank=True)
     method_of_data_collection = models.TextField('Method of Data Collection', max_length=765, blank=True)
-    data_points = models.TextField('Data Points', max_length=765, blank=True)
-    responsible_person = models.ForeignKey(ActivityUser, verbose_name='Responsible Person(s) and Team', null=False)
+    responsible_person = models.ForeignKey('activity.Contact', verbose_name='Responsible Person(s) and Team', null=False)
     method_of_analysis = models.CharField('Method of Analysis', max_length=255, blank=True)
     information_use = models.TextField('Information Use', blank=True, max_length=765)
     quality_assurance = models.TextField('Quality Assurance Measures', blank=True, max_length=765)
     data_issues = models.TextField('Data Issues', blank=True, max_length=765)
-    changes_to_indicator = models.TextField('Changes to Indicator', blank=True)
     notes = models.TextField('Changes to Indicator', max_length=765, blank=True)
     comments = models.TextField('Comments', max_length=765, blank=True)
     workflow_level1 = models.ForeignKey(WorkflowLevel1, null=True, verbose_name='Workflow Level1')
@@ -817,6 +815,7 @@ class Indicator1(models.Model):
     additional_fields = models.ManyToManyField(AdditionalField, verbose_name='Additional Fields',
                                                related_name='additional_fields')
     additional_field_values = JSONField(null=True, verbose_name='Additional Values Object')
+    add_to_library = models.BooleanField('Add Indicator to Library?', default=0)
     create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
     modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
@@ -859,23 +858,20 @@ class IndicatorLibrary(models.Model):
     direction_of_change = models.CharField('Direction of Change', blank=True, choices=DIRECTION_CHOICES,
                                            default='increasing')
     baseline = models.DecimalField('Baseline', null=True, decimal_places=4, default=Decimal('0.0000'), max_digits=25)
-    life_of_wfl1_target = models.DecimalField('Life of Workflow Level1 Target', null=True, default=Decimal('0.0000'),
-                                              decimal_places=4, max_digits=25)
+    overall_target = models.DecimalField('Overall Target', null=True, default=Decimal('0.0000'), decimal_places=4,
+                                         max_digits=25)
     rationale_for_target = models.TextField('Rationale for Target', max_length=500, blank=True)
-    first_event_name = models.CharField('First Event Name', blank=True, max_length=255)
     number_of_target_periods = models.IntegerField('Number of Periodic Target', default=0)
     periodic_targets = models.ManyToManyField(PeriodicTarget, verbose_name='Periodic Target')
     target_frequency = models.CharField('Target Frequencies', max_length=100, choices=TARGET_FREQUENCIES)
     source = models.CharField('Source', max_length=255, blank=True)
-    means_of_verification = models.TextField('Means of Verification / Data Source', blank=True)
+    means_of_verification = models.TextField('Means of Verification', blank=True)
     method_of_data_collection = models.TextField('Method of Data Collection', max_length=765, blank=True)
-    data_points = models.TextField('Data Points', max_length=765, blank=True)
-    responsible_person = models.ForeignKey(ActivityUser, verbose_name='Responsible Person(s) and Team', null=False)
+    responsible_person = models.ForeignKey('activity.Contact', verbose_name='Responsible Person(s) and Team', null=False)
     method_of_analysis = models.CharField('Method of Analysis', max_length=255, blank=True)
     information_use = models.TextField('Information Use', blank=True, max_length=765)
     quality_assurance = models.TextField('Quality Assurance Measures', blank=True, max_length=765)
     data_issues = models.TextField('Data Issues', blank=True, max_length=765)
-    changes_to_indicator = models.TextField('Changes to Indicator', blank=True)
     notes = models.TextField('Changes to Indicator', max_length=765, blank=True)
     comments = models.TextField('Comments', max_length=765, blank=True)
     workflow_level1 = models.ForeignKey(WorkflowLevel1, null=True, verbose_name='Workflow Level1')
