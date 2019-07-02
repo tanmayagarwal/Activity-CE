@@ -619,29 +619,34 @@ DIRECTION_CHOICES = (
         ('decreasing', 'Decreasing')
     )
 
-LOP = 1
-MID_END = 2
-ANNUAL = 3
-SEMI_ANNUAL = 4
-TRI_ANNUAL = 5
-QUARTERLY = 6
-MONTHLY = 7
-EVENT = 8
-BASE_END = 9
-BASE_MID_END = 10
 
-TARGET_FREQUENCIES = (
-    (LOP, 'Life of Workflow Level (LoP) only'),
-    (MID_END, 'Midline and endline'),
-    (BASE_END, 'Baseline and endlin'),
-    (BASE_MID_END, 'Baseline, midline and endline')
-    (ANNUAL, 'Annual'),
-    (SEMI_ANNUAL, 'Semiannual'),
-    (TRI_ANNUAL, 'Tri-annual'),
-    (QUARTERLY, 'Quarterly'),
-    (MONTHLY, 'Monthly'),
-    (EVENT, 'Event')
-)
+class ReportingPeriod(models.Model):
+    period_uuid = models.UUIDField('Periodic Target UUID', editable=False, default=uuid.uuid4, unique=True)
+    period = models.CharField('Reporting Period', max_length=65)
+    create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
+    modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
+    created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
+                                   related_name='org_sub_created_by', on_delete=models.SET_NULL)
+    modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
+                                    related_name='org_sub_modified_by', on_delete=models.SET_NULL)
+
+    class Meta:
+        ordering = ('create_date',)
+        verbose_name_plural = 'Reporting Periods'
+
+    # displayed in admin templates
+    def __str__(self):
+        return self.period or ''
+
+    def save(self, *args, **kwargs):
+        # get logged user
+        logged_user = ActivityUser.objects.get(user=get_request().user)
+        if not self.id:
+            self.create_date = timezone.now()
+            self.created_by = logged_user
+        self.modified_date = timezone.now()
+        self.modified_by = logged_user
+        return super(ReportingPeriod, self).save(*args, **kwargs)
 
 
 class IndicatorLevel(models.Model):
@@ -798,7 +803,8 @@ class Indicator1(models.Model):
     rationale_for_target = models.TextField('Rationale for Target', max_length=500, blank=True)
     number_of_target_periods = models.IntegerField('Number of Periodic Target', default=0)
     periodic_targets = models.ManyToManyField(PeriodicTarget, verbose_name='Periodic Target')
-    target_frequency = models.CharField('Target Frequencies', max_length=100, choices=TARGET_FREQUENCIES)
+    target_frequency = models.ForeignKey(ReportingPeriod, verbose_name='Target Frequencies', null=True, max_length=100,
+                                         on_delete=models.SET_NULL)
     source = models.CharField('Source', max_length=255, blank=True)
     means_of_verification = models.TextField('Means of Verification', blank=True)
     method_of_data_collection = models.TextField('Method of Data Collection', max_length=765, blank=True)
