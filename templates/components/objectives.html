@@ -1,69 +1,95 @@
 {% extends "base.html" %} {% block content %}
+
 <script>
   $(document).ready(() => {
-    $('#parentObjective').select2({ placeholder: 'Select parent (optional)' });
+    $('#parentObjective').select2({
+      placeholder: 'Select parent (optional)',
+      theme: 'bootstrap',
+    });
     $('#objectivesTable').DataTable();
   });
 </script>
 
 <div class="container">
-  <div class="panel panel-default">
-    <div class="panel-heading clearfix">
-      <div class="pull-right">
-        <button
-          class="btn btn-sm hikaya-btn-secondary"
-          data-toggle="modal"
-          data-target="#addObjectiveModal"
-        >
-          <i class="fa fa-plus"></i> Add New Objective
-        </button>
+  <!-- Sub navigation -->
+  <div class="sub-navigation">
+    <div class="sub-navigation-header">
+      <h4 class="page-title">
+        Objectives
+      </h4>
+    </div>
+    <div class="sub-navigation-actions">
+      <!-- sample action buttons -->
+      <div class="sub-nav-item">
+        <div class="btn-group" role="group" aria-label="">
+          <a role="button" class="btn btn-sm btn-default disabled">
+            <i class="fa fa-list"></i> List
+          </a>
+
+          <a
+            role="button"
+            class="btn btn-sm btn-default"
+            href="{% url 'objectives-tree' %}"
+          >
+            <i class="fa fa-sitemap"></i> Tree
+          </a>
+        </div>
       </div>
 
-      <h4 class="panel-title">Objectives</h4>
+      <div class="sub-nav-item">
+        <div class="btn-group" role="group" aria-label="">
+          <button
+            class="btn btn-sm btn-info"
+            data-toggle="modal"
+            data-target="#addObjectiveModal"
+          >
+            <i class="fa fa-plus"></i> Add New Objective
+          </button>
+        </div>
+      </div>
     </div>
-
-    <div class="panel-body">
-      <table class="table table-striped table-bordered" id="objectivesTable">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Parent</th>
-            <th>Create Date</th>
-            <th class="text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for objective in get_all_objectives %}
-          <tr>
-            <td>{{ objective.name }}</td>
-            <td>{{ objective.parent }}</td>
-            <td>{{ objective.create_date | date }}</td>
-            <td class="text-right">
-              <!-- Action buttons -->
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-default"><i class="fa fa-pencil"></i> Update</button>
-                <button
-                  type="button"
-                  class="btn btn-default btn-sm dropdown-toggle"
-                  data-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                >
-                  <span class="caret"></span>
-                  <span class="sr-only">Toggle Dropdown</span>
-                </button>
-                <ul class="dropdown-menu">
-                  <li class="text-danger"><a href="#">Delete</a></li>
-                </ul>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
   </div>
+
+  <table class="table" id="objectivesTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Parent</th>
+        <th>Create Date</th>
+        <th class="text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for objective in get_all_objectives %}
+      <tr>
+        <td>{{ objective.name }}</td>
+        <td>{{ objective.parent }}</td>
+        <td>{{ objective.create_date | date }}</td>
+        <td class="text-right">
+          <!-- Action buttons -->
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-default">
+              Details
+            </button>
+            <button
+              type="button"
+              class="btn btn-default btn-sm dropdown-toggle"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              <span class="caret"></span>
+              <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu">
+              <li class="text-danger"><a href="#">Delete</a></li>
+            </ul>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 
 <!-- Modal -->
@@ -135,11 +161,7 @@
           >
             <i class="fa fa-close"></i> Close
           </button>
-          <button
-            type="submit"
-            class="btn hikaya-btn-primary"
-            id="saveObjective"
-          >
+          <button type="submit" class="btn btn-success" id="saveObjective">
             <i class="fa fa-save"></i> Save
           </button>
         </div>

@@ -45,7 +45,8 @@ class TrainingList(ListView):
         return render(request, self.template_name,
                       {'get_training': get_training,
                        'project_agreement_id': project_agreement_id,
-                       'get_programs': get_programs})
+                       'get_programs': get_programs,
+                       'active': ['forms', 'training_list']})
 
 
 class TrainingCreate(CreateView):
@@ -158,14 +159,13 @@ class BeneficiaryList(ListView):
     def get(self, request, *args, **kwargs):
 
         project_agreement_id = self.kwargs['pk']
-        countries = get_country(request.user)
+        organization = request.user.activity_user.organization
         get_programs = Program.objects.all().filter(
-            funding_status="Funded", country__in=countries).distinct()
+            funding_status="Funded", organization=organization).distinct()
 
         if int(self.kwargs['pk']) == 0:
             get_beneficiaries = Beneficiary.objects.all().filter(
-                Q(training__program__country__in=countries)
-                | Q(distribution__program__country__in=countries))
+                program__in=get_programs)
         else:
             get_beneficiaries = Beneficiary.objects.all().filter(
                 training__id=self.kwargs['pk'])
@@ -173,7 +173,8 @@ class BeneficiaryList(ListView):
         return render(request, self.template_name,
                       {'get_beneficiaries': get_beneficiaries,
                        'project_agreement_id': project_agreement_id,
-                       'get_programs': get_programs})
+                       'get_programs': get_programs,
+                       'active': ['forms', 'beneficiary_list']})
 
 
 class BeneficiaryCreate(CreateView):
@@ -192,8 +193,11 @@ class BeneficiaryCreate(CreateView):
             request, *args, **kwargs)
 
     def get_initial(self):
+        organization = self.request.user.activity_user.organization
         initial = {
-            'training': self.kwargs['id'],
+            # 'training': self.kwargs['id'],
+            "program": Program.objects.filter(
+                organization=organization).first()
         }
 
         return initial
@@ -214,7 +218,7 @@ class BeneficiaryCreate(CreateView):
         form.save()
         messages.success(self.request, 'Success, Beneficiary Created!')
         latest = Beneficiary.objects.latest('id')
-        redirect_url = '/formlibrary/beneficiary_update/' + str(latest.id)
+        redirect_url = '/formlibrary/beneficiary_list/' + str(latest.id)
         return HttpResponseRedirect(redirect_url)
 
     form_class = BeneficiaryForm
@@ -305,7 +309,7 @@ class DistributionList(ListView):
 
         return render(request, self.template_name,
                       {'get_distribution': get_distribution,
-                       'program_id': program_id, 'get_programs': get_programs})
+                       'program_id': program_id, 'get_programs': get_programs, 'active': ['forms', 'distribution_list']})
 
 
 class DistributionCreate(CreateView):
@@ -451,12 +455,11 @@ class BeneficiaryListObjects(View, AjaxableResponseMixin):
 
         program_id = int(self.kwargs['program'])
         project_id = int(self.kwargs['project'])
-        countries = get_country(request.user)
+        organization = self.request.user.activity_user.organization
 
         if program_id == 0:
             get_beneficiaries = Beneficiary.objects.all().filter(
-                Q(training__program__country__in=countries)
-                | Q(distribution__program__country__in=countries))\
+                Q(program__organization=organization))\
                 .values('id', 'beneficiary_name', 'create_date')
         elif program_id != 0 and project_id == 0:
             get_beneficiaries = Beneficiary.objects.all().filter(

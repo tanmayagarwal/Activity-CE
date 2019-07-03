@@ -77,7 +77,8 @@ def list_workflow_level1(request):
     programs = Program.objects.filter(organization=user.organization)
     get_all_sectors = Sector.objects.all()
 
-    context = {'programs': programs, 'get_all_sectors': get_all_sectors}
+    context = {'programs': programs,
+               'get_all_sectors': get_all_sectors, 'active': ['workflow']}
 
     return render(request, 'workflow/level1.html', context)
 
@@ -89,7 +90,8 @@ class ProjectDash(ListView):
 
         countries = get_country(request.user)
         get_programs = Program.objects.all().filter(
-            funding_status="Funded", country__in=countries)
+            funding_status="Funded",
+            organization=request.user.activity_user.organization)
         project_id = int(self.kwargs['pk'])
 
         if project_id == 0:
@@ -149,13 +151,13 @@ class ProgramDash(ListView):
     :param status: approval status of project
     :return:
     """
-    template_name = 'workflow/programdashboard_list.html'
+    template_name = 'workflow/projectdashboard_list.html'
 
     def get(self, request, *args, **kwargs):
 
         countries = get_country(request.user)
         get_programs = Program.objects.all().filter(
-            funding_status="Funded", country__in=countries).distinct()
+            organization=request.user.activity_user.organization).distinct()
         filtered_program = None
         if int(self.kwargs['pk']) == 0:
             get_dashboard = Program.objects.all().prefetch_related(
@@ -197,7 +199,8 @@ class ProgramDash(ListView):
                        'APPROVALS': APPROVALS,
                        'program_id': self.kwargs['pk'],
                        'status': status,
-                       'filtered_program': filtered_program})
+                       'filtered_program': filtered_program,
+                       'active': ['workflow']})
 
 
 class ProjectAgreementList(ListView):
@@ -1346,7 +1349,7 @@ class SiteProfileList(ListView):
                        'project_agreement_id': activity_id,
                        'country': countries,
                        'get_programs': get_programs, 'form': FilterForm(),
-                       'helper': FilterForm.helper})
+                       'helper': FilterForm.helper, 'active': ['components']})
 
 
 class SiteProfileReport(ListView):
@@ -1880,6 +1883,11 @@ class ContactDelete(DeleteView):
     form_class = ContactForm
 
 
+class CountryDoesNotExist(Exception):
+    """Raised when there is no country in database"""
+    pass
+
+
 class StakeholderList(ListView):
     """
     get_stakeholders
@@ -1896,11 +1904,16 @@ class StakeholderList(ListView):
         else:
             program_id = 0
 
-        countries = get_country(request.user)
+        try:
+            countries = get_country(request.user)
+            if countries.first() is None:
+                raise CountryDoesNotExist
+        except CountryDoesNotExist:
+            print("The user has no country in database.")
+            return render(request, self.template_name)
+
         get_programs = Program.objects.all().filter(
             funding_status="Funded", country__in=countries)
-
-        countries = get_country(request.user)
 
         if program_id != 0:
             get_stakeholders = Stakeholder.objects.all().filter(
@@ -1913,11 +1926,12 @@ class StakeholderList(ListView):
         else:
             get_stakeholders = Stakeholder.objects.all().filter(
                 country__in=countries)
-
         return render(request, self.template_name,
                       {'get_stakeholders': get_stakeholders,
                        'project_agreement_id': project_agreement_id,
-                       'program_id': program_id, 'get_programs': get_programs})
+                       'program_id': program_id,
+                       'get_programs': get_programs,
+                       'active': ['components']})
 
 
 class StakeholderCreate(CreateView):
@@ -1949,7 +1963,7 @@ class StakeholderCreate(CreateView):
 
     def get_initial(self):
 
-        country = get_country(self.request.user)[0]
+        country = get_country(self.request.user).first()
 
         initial = {
             'agreement': self.kwargs['id'],
@@ -2504,6 +2518,7 @@ class Report(View, AjaxableResponseMixin):
     def get(self, request, *args, **kwargs):
 
         countries = get_country(request.user)
+        organization = request.user.activity_user.organization
 
         if int(self.kwargs['pk']) != 0:
             get_agreements = ProjectAgreement.objects.all().filter(
@@ -2514,10 +2529,10 @@ class Report(View, AjaxableResponseMixin):
                 approval=self.kwargs['status'])
         else:
             get_agreements = ProjectAgreement.objects.select_related().filter(
-                program__country__in=countries)
+                program__organization=organization)
 
         get_programs = Program.objects.all().filter(
-            funding_status="Funded", country__in=countries).distinct()
+            funding_status="Funded", organization=organization)
 
         filtered = ProjectAgreementFilter(request.GET, queryset=get_agreements)
         table = ProjectAgreementTable(filtered.queryset)
@@ -2550,15 +2565,14 @@ class ReportData(View, AjaxableResponseMixin):
     """
 
     def get(self, request, *args, **kwargs):
-
-        countries = get_country(request.user)
+        organization = request.user.activity_user.organization
         filters = {}
         if int(self.kwargs['pk']) != 0:
             filters['program__id'] = self.kwargs['pk']
         elif self.kwargs['status'] != 'none':
             filters['approval'] = self.kwargs['status']
         else:
-            filters['program__country__in'] = countries
+            filters['program__organization'] = organization
 
         get_agreements = ProjectAgreement.objects.prefetch_related('sectors') \
             .select_related('program', 'project_type', 'office',
@@ -2646,16 +2660,38 @@ def objectives_list(request):
             description=data.get('description'),
             organization=activity_user.organization,
             parent=parent_objective)
-            
+
         objective.save()
 
         return HttpResponseRedirect('/workflow/objectives')
 
     get_all_objectives = StrategicObjective.objects.all()
 
-    context = {'get_all_objectives': get_all_objectives}
+    context = {'get_all_objectives': get_all_objectives,
+               'active': ['components']}
 
     return render(request, 'components/objectives.html', context)
+
+
+def objectives_tree(request):
+    get_all_objectives = StrategicObjective.objects.all()
+
+    objectives_as_json = [{'id': 0, 'name': 'Strategic Objectives'}]
+
+    for objective in get_all_objectives:
+        data = {'id': objective.id, 'name': objective.name}
+
+        if objective.parent is None:
+            data['parent'] = 0
+        else:
+            data['parent'] = objective.parent.id
+
+        objectives_as_json.append(data)
+
+    context = {'get_all_objectives': get_all_objectives,
+               'objectives_as_json': objectives_as_json}
+
+    return render(request, 'components/objectives-tree.html', context)
 
 
 def service_json(request, service):
@@ -2840,3 +2876,16 @@ class DocumentationListObjects(View, AjaxableResponseMixin):
         final_dict = {'get_documentation': get_documentation}
 
         return JsonResponse(final_dict, safe=False)
+
+
+def add_level2(request):
+    data = request.POST
+    program = Program.objects.get(id=data.get('program'))
+
+    level2 = ProjectAgreement(project_name=data.get(
+        'project_name'), program=program)
+
+    if level2.save():
+        return HttpResponse({'success': True})
+
+    return HttpResponse({'success': False})
