@@ -1315,6 +1315,17 @@ class Budget(models.Model):
                                                    default=Decimal('0.0000'))
     donor_currency = models.ForeignKey('activity.Currency', verbose_name='Donor Currency', null=True,
                                        on_delete=models.SET_NULL)
+    donor_currency_to_usd_exchange_rate = models.DecimalField('Donor Currency to USD Exchange Rate',decimal_places=4,
+                                                              max_digits=16, default=Decimal('0.0000'))
+    date_of_donor_currency_to_USD_exchange_rate = models.DecimalField('Date of Donor Currency to USD Exchange Rate',
+                                                                      decimal_places=4, max_digits=16,
+                                                                      default=Decimal('0.0000'))
+    usd_to_local_exchange_rate = models.DecimalField('USD to Local Exchange Rate', decimal_places=4, max_digits=16,
+                                                     default=Decimal('0.0000'))
+    date_of_usd_to_local_exchange_rate = models.DecimalField('Date of USD to Local Exchange Rate', decimal_places=4,
+                                                             max_digits=16, default=Decimal('0.0000'))
+    local_currency = models.ForeignKey('activity.Currency', verbose_name='Local Currency', null=True,
+                                       related_name='local_currency', on_delete=models.SET_NULL)
     history = HistoricalRecords()
     create_date = models.DateTimeField('Create Date', null=True, blank=True, editable=False)
     modified_date = models.DateTimeField('Modified Date', null=True, blank=True)
