@@ -33,7 +33,7 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponse
 from django_tables2 import RequestConfig
 
-from workflow.models import Program, SiteProfile, Country, Sector, ActivitySites, ActivityUser, FormGuidance
+from workflow.models import WorkflowLevel1, Location, Country, Sector, ActivitySites, ActivityUser, FormGuidance
 from workflow.mixins import AjaxableResponseMixin
 from workflow.admin import CountryResource
 from workflow.forms import FilterForm
@@ -139,7 +139,7 @@ def group_excluded(*group_names, **url):
 class IndicatorList(ListView):
     """
     Main Indicator Home Page,
-    displays a list of Indicators Filterable by Program
+    displays a list of Indicators Filterable by WorkflowLevel1
     """
     model = Indicator
     template_name = 'indicators/indicator_list.html'
@@ -149,7 +149,7 @@ class IndicatorList(ListView):
         # countries = get_country(request.user)
         countries = request.user.activity_user.countries.all()
         organization = request.user.activity_user.organization
-        get_programs = Program.objects.filter(
+        get_programs = WorkflowLevel1.objects.filter(
             funding_status="Funded", organization=organization)
         # .exclude(collecteddata__isnull=True)
         get_indicators = Indicator.objects.filter(
@@ -172,7 +172,7 @@ class IndicatorList(ListView):
         if indicator_id != 0:
             filters['indicator'] = indicator_id
 
-        programs = Program.objects.prefetch_related('indicator_set')\
+        programs = WorkflowLevel1.objects.prefetch_related('indicator_set')\
             .filter(funding_status="Funded", organization=organization)\
             .filter(**filters).order_by('name')\
             .annotate(indicator_count=Count('indicator'))
@@ -223,7 +223,7 @@ def indicator_create(request, id=0):
     countries = get_country(request.user)
     country_id = Country.objects.get(country=countries[0]).id
     organization = request.user.activity_user.organization
-    get_programs = Program.objects.all().filter(
+    get_programs = WorkflowLevel1.objects.all().filter(
         funding_status="Funded", organization=organization)
     get_services = ExternalService.objects.all()
     program_id = id
@@ -232,7 +232,7 @@ def indicator_create(request, id=0):
         # set vars from form and get values from user
 
         type = IndicatorType.objects.get(indicator_type="custom")
-        program = Program.objects.get(id=request.POST['program'])
+        program = WorkflowLevel1.objects.get(id=request.POST['program'])
         service = request.POST['services']
         level = Level.objects.all()[0]
         node_id = request.POST['service_indicator']
@@ -1158,7 +1158,7 @@ def tool(request):
 # REPORT VIEWS
 def indicator_report(request, program=0, indicator=0, type=0):
     organization = request.user.activity_user.organization
-    get_programs = Program.objects.filter(
+    get_programs = WorkflowLevel1.objects.filter(
         funding_status="Funded", organization=organization)
     get_indicator_types = IndicatorType.objects.all()
 
@@ -1201,7 +1201,7 @@ class IndicatorReport(View, AjaxableResponseMixin):
     def get(self, request, *args, **kwargs):
 
         organization = request.user.activity_user.organization
-        get_programs = Program.objects.all().filter(
+        get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", organization=organization)
 
         get_indicator_types = IndicatorType.objects.all()
@@ -1264,11 +1264,11 @@ def program_indicator_report(request, program=0):
     """
     program = int(program)
     organization = request.user.activity_user.organization
-    get_programs = Program.objects.all().filter(
+    get_programs = WorkflowLevel1.objects.all().filter(
         funding_status="Funded", organization=organization)
     get_indicators = Indicator.objects.all().filter(
         program__id=program).select_related().order_by('level', 'number')
-    get_program = Program.objects.get(id=program)
+    get_program = WorkflowLevel1.objects.get(id=program)
 
     get_indicator_types = IndicatorType.objects.all()
 
@@ -1297,7 +1297,7 @@ def program_indicator_report(request, program=0):
 def indicator_data_report(request, id=0, program=0, type=0):
     countries = request.user.activity_user.countries.all()
     organization = request.user.activity_user.organization
-    get_programs = Program.objects.all().filter(
+    get_programs = WorkflowLevel1.objects.all().filter(
         funding_status="Funded", organization=organization)
     get_indicators = Indicator.objects.select_related().filter(
         program__organization=organization)
@@ -1307,7 +1307,7 @@ def indicator_data_report(request, id=0, program=0, type=0):
     type_name = None
     q = {'indicator__id__isnull': False}
 
-    get_site_profile = SiteProfile.objects\
+    get_site_profile = Location.objects\
         .filter(projectagreement__program__organization=organization)\
         .select_related('country', 'district', 'province')
 
@@ -1318,10 +1318,10 @@ def indicator_data_report(request, id=0, program=0, type=0):
         q['indicator__program__organization'] = organization
 
     if int(program) != 0:
-        get_site_profile = SiteProfile.objects\
+        get_site_profile = Location.objects\
             .filter(projectagreement__program__id=program)\
             .select_related('country', 'district', 'province')
-        program_name = Program.objects.get(id=program).name
+        program_name = WorkflowLevel1.objects.get(id=program).name
         q = {'program__id': program}
         get_indicators = Indicator.objects.select_related()\
             .filter(program=program)
@@ -1347,7 +1347,7 @@ def indicator_data_report(request, id=0, program=0, type=0):
     RequestConfig(request).configure(table)
 
     filters = {'status': 1, 'country__in': countries}
-    get_site_profile_indicator = SiteProfile.objects\
+    get_site_profile_indicator = Location.objects\
         .select_related('country', 'district', 'province')\
         .prefetch_related('collecteddata_set')\
         .filter(**filters)
@@ -1381,7 +1381,7 @@ class IndicatorReportData(View, AjaxableResponseMixin):
     URL: indicators/report_data/[id]/[program]/
     :param request:
     :param id: Indicator ID
-    :param program: Program ID
+    :param program: WorkflowLevel1 ID
     :param type: Type ID
     :return: json dataset
     """
@@ -1532,7 +1532,7 @@ class DisaggregationReportMixin(object):
                         self).get_context_data(**kwargs)
 
         organization = self.request.user.activity_user.organization
-        programs = Program.objects.filter(
+        programs = WorkflowLevel1.objects.filter(
             funding_status="Funded", organization=organization)
         indicators = Indicator.objects.filter(
             program__organization=organization)
@@ -1540,7 +1540,7 @@ class DisaggregationReportMixin(object):
         program_id = int(kwargs.get('program', 0))
         program_selected = None
         if program_id:
-            program_selected = Program.objects.filter(id=program_id).first()
+            program_selected = WorkflowLevel1.objects.filter(id=program_id).first()
             if program_selected.indicator_set.count() > 0:
                 indicators = indicators.filter(program=program_id)
 
@@ -1639,7 +1639,7 @@ class TVAPrint(TemplateView):
     template_name = 'indicators/tva_print.html'
 
     def get(self, request, *args, **kwargs):
-        program = Program.objects.filter(
+        program = WorkflowLevel1.objects.filter(
             id=kwargs.get('program', None)).first()
         indicators = Indicator.objects\
             .select_related('sector')\
@@ -1685,7 +1685,7 @@ class TVAReport(TemplateView):
         context = super(TVAReport, self).get_context_data(**kwargs)
         organization = self.request.user.activity_user.organization
         filters = {'program__organization': organization}
-        program = Program.objects.filter(
+        program = WorkflowLevel1.objects.filter(
             id=kwargs.get('program', None)).first()
         indicator_type = IndicatorType.objects.filter(
             id=kwargs.get('type', None)).first()
@@ -1707,7 +1707,7 @@ class TVAReport(TemplateView):
         context['data'] = indicators
         context['get_indicators'] = Indicator.objects.filter(
             program__organization=organization)
-        context['get_programs'] = Program.objects.filter(
+        context['get_programs'] = WorkflowLevel1.objects.filter(
             funding_status="Funded", organization=organization)
         context['get_indicator_types'] = IndicatorType.objects.all()
         context['program'] = program
@@ -1723,7 +1723,7 @@ class CollectedDataList(ListView):
     URL: indicators/data/[id]/[program]/[type]
     :param request:
     :param indicator: Indicator ID
-    :param program: Program ID
+    :param program: WorkflowLevel1 ID
     :param type: Type ID
     :return:
     """
@@ -1734,7 +1734,7 @@ class CollectedDataList(ListView):
 
         countries = get_country(request.user)
         organization = request.user.activity_user.organization
-        get_programs = Program.objects.all().filter(
+        get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", organization=organization)
         get_indicators = Indicator.objects.all()\
             .filter(program__organization=organization).exclude(
@@ -1756,7 +1756,7 @@ class CollectedDataList(ListView):
             # redress the indicator list based on program
             get_indicators = Indicator.objects.select_related()\
                 .filter(program=program)
-            program_name = Program.objects.get(id=program)
+            program_name = WorkflowLevel1.objects.get(id=program)
         # if we have an indicator type active
         if int(type) != 0:
             r = {

@@ -4,7 +4,7 @@
 from django.db import models
 from django.contrib import admin
 
-from workflow.models import Program
+from workflow.models import WorkflowLevel1
 
 
 LINK_TYPE_CHOICES = (
@@ -15,7 +15,7 @@ LINK_TYPE_CHOICES = (
 
 class ProgramNarratives(models.Model):
     program = models.ForeignKey(
-        Program, blank=True, null=True, on_delete=models.SET_NULL)
+        WorkflowLevel1, blank=True, null=True, on_delete=models.SET_NULL)
     narrative_title = models.CharField(
         "Narrative Title", max_length=100, blank=True)
     narrative = models.TextField("Narrative Text", blank=True)
@@ -47,7 +47,7 @@ class LinkAdmin(admin.ModelAdmin):
 
 class ProgramLinks(models.Model):
     program = models.ForeignKey(
-        Program, blank=True, null=True, on_delete=models.SET_NULL)
+        WorkflowLevel1, blank=True, null=True, on_delete=models.SET_NULL)
     type = models.CharField("Type of Link", blank=True,
                             null=True, max_length=255,
                             choices=LINK_TYPE_CHOICES)
@@ -59,13 +59,13 @@ class ProgramLinks(models.Model):
 
 class ProgramLinksAdmin(admin.ModelAdmin):
     list_display = ('program', 'create_date', 'edit_date')
-    display = 'Program Link'
+    display = 'WorkflowLevel1 Link'
 
 
 class JupyterNotebooks(models.Model):
     name = models.CharField("Notebook Name", max_length=255)
     program = models.ForeignKey(
-        Program, blank=True, null=True, on_delete=models.SET_NULL)
+        WorkflowLevel1, blank=True, null=True, on_delete=models.SET_NULL)
     very_custom_dashboard = models.CharField(
         "Specialty Custom Dashboard Links", blank=True, null=True,
         max_length=255)

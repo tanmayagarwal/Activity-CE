@@ -17,17 +17,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='trainingattendance',
             name='program',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.Program'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel1'),
         ),
         migrations.AddField(
             model_name='trainingattendance',
             name='project_agreement',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.ProjectAgreement', verbose_name='Project Initiation'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel2', verbose_name='Project Initiation'),
         ),
         migrations.AddField(
             model_name='distribution',
             name='initiation',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.ProjectAgreement', verbose_name='Project Initiation'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel2', verbose_name='Project Initiation'),
         ),
         migrations.AddField(
             model_name='distribution',
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='distribution',
             name='program',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.Program'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel1'),
         ),
         migrations.AddField(
             model_name='distribution',
@@ -52,12 +52,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='beneficiary',
             name='program',
-            field=models.ManyToManyField(blank=True, to='workflow.Program'),
+            field=models.ManyToManyField(blank=True, to='workflow.WorkflowLevel1'),
         ),
         migrations.AddField(
             model_name='beneficiary',
             name='site',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.SiteProfile'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.Location'),
         ),
         migrations.AddField(
             model_name='beneficiary',

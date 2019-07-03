@@ -12,7 +12,7 @@ from decimal import Decimal
 from datetime import datetime, timedelta
 
 from workflow.models import (
-    Program, Sector, SiteProfile, ProjectAgreement, ProjectComplete,
+    WorkflowLevel1, Sector, Location, WorkflowLevel2, WorkflowLevel2,
     Country, Documentation, ActivityUser, Organization, Sector, WorkflowLevel1, WorkflowLevel2, Approval)
 
 from activity.middlewares.get_current_user import get_request
@@ -88,7 +88,7 @@ class StrategicObjectiveAdmin(admin.ModelAdmin):
 class Objective(models.Model):
     name = models.CharField(max_length=135, blank=True)
     program = models.ForeignKey(
-        Program, null=True, blank=True, on_delete=models.SET_NULL)
+        WorkflowLevel1, null=True, blank=True, on_delete=models.SET_NULL)
     description = models.TextField(max_length=765, blank=True)
     create_date = models.DateTimeField(null=True, blank=True)
     edit_date = models.DateTimeField(null=True, blank=True)
@@ -284,7 +284,7 @@ class Indicator(models.Model):
     EVENT = 8
 
     TARGET_FREQUENCIES = (
-        (LOP, 'Life of Program (LoP) only'),
+        (LOP, 'Life of WorkflowLevel1 (LoP) only'),
         (MID_END, 'Midline and endline'),
         (ANNUAL, 'Annual'),
         (SEMI_ANNUAL, 'Semi-annual'),
@@ -300,7 +300,7 @@ class Indicator(models.Model):
         IndicatorType, blank=True, help_text=" ")
     level = models.ManyToManyField(Level, blank=True, help_text=" ")
     objectives = models.ManyToManyField(
-        Objective, blank=True, verbose_name="Program Objective",
+        Objective, blank=True, verbose_name="WorkflowLevel1 Objective",
         related_name="obj_indicator", help_text=" ")
     strategic_objectives = models.ManyToManyField(
         StrategicObjective, verbose_name="Country Strategic Objective",
@@ -325,7 +325,7 @@ class Indicator(models.Model):
         help_text=" ")
     baseline_na = models.BooleanField(
         verbose_name="Not applicable", default=False, help_text=" ")
-    lop_target = models.CharField(verbose_name="Life of Program (LoP) target*",
+    lop_target = models.CharField(verbose_name="Life of WorkflowLevel1 (LoP) target*",
                                   max_length=255, null=True, blank=True,
                                   help_text=" ")
     rationale_for_target = models.TextField(
@@ -381,7 +381,7 @@ class Indicator(models.Model):
         verbose_name="Changes to Indicator", help_text=" ")
     comments = models.TextField(
         max_length=255, null=True, blank=True, help_text=" ")
-    program = models.ManyToManyField(Program, help_text=" ")
+    program = models.ManyToManyField(WorkflowLevel1, help_text=" ")
     sector = models.ForeignKey(
         Sector, null=True, blank=True, help_text=" ",
         on_delete=models.SET_NULL)
@@ -539,14 +539,14 @@ class CollectedData(models.Model):
         "Remarks/comments", blank=True, null=True, help_text=" ")
     indicator = models.ForeignKey(
         Indicator, help_text=" ", null=True, on_delete=models.SET_NULL)
-    agreement = models.ForeignKey(ProjectAgreement, blank=True, null=True,
+    agreement = models.ForeignKey(WorkflowLevel2, blank=True, null=True,
                                   related_name="q_agreement2",
                                   verbose_name="Project Initiation",
                                   help_text=" ", on_delete=models.SET_NULL)
-    complete = models.ForeignKey(ProjectComplete, blank=True, null=True,
+    complete = models.ForeignKey(WorkflowLevel2, blank=True, null=True,
                                  related_name="q_complete2",
                                  on_delete=models.SET_NULL, help_text=" ")
-    program = models.ForeignKey(Program, blank=True, null=True,
+    program = models.ForeignKey(WorkflowLevel1, blank=True, null=True,
                                 related_name="i_program", help_text=" ",
                                 on_delete=models.SET_NULL)
     date_collected = models.DateTimeField(null=True, blank=True, help_text=" ")
@@ -569,7 +569,7 @@ class CollectedData(models.Model):
         default=False, help_text=" ")
     create_date = models.DateTimeField(null=True, blank=True, help_text=" ")
     edit_date = models.DateTimeField(null=True, blank=True, help_text=" ")
-    site = models.ManyToManyField(SiteProfile, blank=True, help_text=" ")
+    site = models.ManyToManyField(Location, blank=True, help_text=" ")
     history = HistoricalRecords()
     objects = CollectedDataManager()
 
@@ -620,9 +620,9 @@ class ReportingPeriod(models.Model):
     create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
     modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
-                                   related_name='org_sub_created_by', on_delete=models.SET_NULL)
+                                   related_name='period_created_by', on_delete=models.SET_NULL)
     modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
-                                    related_name='org_sub_modified_by', on_delete=models.SET_NULL)
+                                    related_name='period_modified_by', on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ('create_date',)
@@ -652,9 +652,9 @@ class IndicatorLevel(models.Model):
     create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
     modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
-                                   related_name='org_sub_created_by', on_delete=models.SET_NULL)
+                                   related_name='indicator_level_created_by', on_delete=models.SET_NULL)
     modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
-                                    related_name='org_sub_modified_by', on_delete=models.SET_NULL)
+                                    related_name='indicator_level_modified_by', on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ('create_date',)
@@ -707,18 +707,19 @@ class IndicatorTag(models.Model):
         return super(IndicatorTag, self).save(*args, **kwargs)
 
 
-class IndicatorType(models.Model):
+class IndicatorType1(models.Model):
     """
     Indicator Type Model
     """
     indicator_type_uuid = models.UUIDField('Indicator Type UUID', editable=False, default=uuid.uuid4, unique=True)
     type = models.CharField('Indicator Type', max_length=100, unique=True)
+    description = models.TextField('Indicator Type Description', max_length=765, blank=True)
     create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
     modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
-                                   related_name='org_sub_created_by', on_delete=models.SET_NULL)
+                                   related_name='indicator_type_created_by', on_delete=models.SET_NULL)
     modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
-                                    related_name='org_sub_modified_by', on_delete=models.SET_NULL)
+                                    related_name='indicator_type_modified_by', on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ('create_date',)
@@ -749,9 +750,9 @@ class AdditionalField(models.Model):
     create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
     modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
-                                   related_name='org_sub_created_by', on_delete=models.SET_NULL)
+                                   related_name='add_field_created_by', on_delete=models.SET_NULL)
     modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
-                                    related_name='org_sub_modified_by', on_delete=models.SET_NULL)
+                                    related_name='add_field_modified_by', on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ('create_date',)
@@ -785,7 +786,7 @@ class Indicator1(models.Model):
     indicator_uuid = models.UUIDField('Indicator UUID', editable=False, default=uuid.uuid4, unique=True)
     name = models.TextField('Indicator Name', max_length=255)
     type = models.ForeignKey(IndicatorType, verbose_name='Indicator Type', null=True, on_delete=models.SET_NULL)
-    objective = models.ForeignKey(Objective, verbose_name='Program Objective', null=True, on_delete=models.SET_NULL)
+    objective = models.ForeignKey(Objective, verbose_name='WorkflowLevel1 Objective', null=True, on_delete=models.SET_NULL)
     level = models.ForeignKey(IndicatorLevel, verbose_name='Indicator Level', null=True, on_delete=models.SET_NULL)
     sector = models.ForeignKey(Sector, verbose_name='Indicator Sector', null=True, on_delete=models.SET_NULL)
     definition = models.TextField('Indicator Definition', blank=True)
@@ -794,7 +795,7 @@ class Indicator1(models.Model):
                                      verbose_name='Rationale or Justification for Indicator')
     unit_of_measure = models.TextField('Unit of Measure', max_length=500, blank=True,)
     disaggregation = models.ManyToManyField(DisaggregationType)
-    direction_of_change = models.CharField('Direction of Change', blank=True, choices=DIRECTION_CHOICES,
+    direction_of_change = models.CharField('Direction of Change', max_length=100, blank=True, choices=DIRECTION_CHOICES,
                                            default='increasing')
     baseline = models.DecimalField('Baseline', null=True, decimal_places=4, default=Decimal('0.0000'), max_digits=25)
     overall_target = models.DecimalField('Overall Target', null=True, default=Decimal('0.0000'), decimal_places=4,
@@ -807,18 +808,20 @@ class Indicator1(models.Model):
     source = models.CharField('Source', max_length=255, blank=True)
     means_of_verification = models.TextField('Means of Verification', blank=True)
     method_of_data_collection = models.TextField('Method of Data Collection', max_length=765, blank=True)
-    responsible_person = models.ForeignKey('activity.Contact', verbose_name='Responsible Person(s) and Team', null=False)
+    responsible_person = models.ForeignKey('activity.Contact', verbose_name='Responsible Person(s) and Team',
+                                           null=True, on_delete=models.SET_NULL)
     method_of_analysis = models.CharField('Method of Analysis', max_length=255, blank=True)
     information_use = models.TextField('Information Use', blank=True, max_length=765)
     quality_assurance = models.TextField('Quality Assurance Measures', blank=True, max_length=765)
     data_issues = models.TextField('Data Issues', blank=True, max_length=765)
     notes = models.TextField('Changes to Indicator', max_length=765, blank=True)
     comments = models.TextField('Comments', max_length=765, blank=True)
-    workflow_level1 = models.ForeignKey(WorkflowLevel1, null=True, verbose_name='Workflow Level1')
-    approved_by = models.ForeignKey(Approval, null=True, verbose_name='Approved By')
-    tags = models.ManyToManyField(IndicatorTag, verbose_name='Indicator Tags', related_name='tags')
+    workflow_level1 = models.ForeignKey(WorkflowLevel1, null=True, verbose_name='Workflow Level1',
+                                        on_delete=models.SET_NULL)
+    approved_by = models.ForeignKey(Approval, null=True, verbose_name='Approved By', on_delete=models.SET_NULL)
+    tags = models.ManyToManyField(IndicatorTag, verbose_name='Indicator Tags', related_name='indicator_tags')
     additional_fields = models.ManyToManyField(AdditionalField, verbose_name='Additional Fields',
-                                               related_name='additional_fields')
+                                               related_name='indiactor_additional_fields')
     additional_field_values = JSONField(null=True, verbose_name='Additional Values Object')
     add_to_library = models.BooleanField('Add Indicator to Library?', default=0)
     create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
@@ -852,7 +855,7 @@ class IndicatorLibrary(models.Model):
     indicator_lib_uuid = models.UUIDField('Indicator UUID', editable=False, default=uuid.uuid4, unique=True)
     name = models.CharField('Indicator Name', max_length=255)
     type = models.ForeignKey(IndicatorType, verbose_name='Indicator Type', null=True, on_delete=models.SET_NULL)
-    objective = models.ForeignKey(Objective, verbose_name='Program Objective', null=True, on_delete=models.SET_NULL)
+    objective = models.ForeignKey(Objective, verbose_name='WorkflowLevel1 Objective', null=True, on_delete=models.SET_NULL)
     level = models.ForeignKey(IndicatorLevel, verbose_name='Indicator Level', null=True, on_delete=models.SET_NULL)
     sector = models.ForeignKey(Sector, verbose_name='Indicator Sector', null=True, on_delete=models.SET_NULL)
     definition = models.TextField('Indicator Definition', blank=True)
@@ -861,7 +864,7 @@ class IndicatorLibrary(models.Model):
                                      verbose_name='Rationale or Justification for Indicator')
     unit_of_measure = models.TextField('Unit of Measure', max_length=500, blank=True, )
     disaggregation = models.ManyToManyField(DisaggregationValue)
-    direction_of_change = models.CharField('Direction of Change', blank=True, choices=DIRECTION_CHOICES,
+    direction_of_change = models.CharField('Direction of Change', max_length=100, blank=True, choices=DIRECTION_CHOICES,
                                            default='increasing')
     baseline = models.DecimalField('Baseline', null=True, decimal_places=4, default=Decimal('0.0000'), max_digits=25)
     overall_target = models.DecimalField('Overall Target', null=True, default=Decimal('0.0000'), decimal_places=4,
@@ -869,29 +872,31 @@ class IndicatorLibrary(models.Model):
     rationale_for_target = models.TextField('Rationale for Target', max_length=500, blank=True)
     number_of_target_periods = models.IntegerField('Number of Periodic Target', default=0)
     periodic_targets = models.ManyToManyField(PeriodicTarget, verbose_name='Periodic Target')
-    target_frequency = models.CharField('Target Frequencies', max_length=100, choices=TARGET_FREQUENCIES)
+    periodic_targets = models.ManyToManyField(PeriodicTarget, verbose_name='Periodic Target')
     source = models.CharField('Source', max_length=255, blank=True)
     means_of_verification = models.TextField('Means of Verification', blank=True)
     method_of_data_collection = models.TextField('Method of Data Collection', max_length=765, blank=True)
-    responsible_person = models.ForeignKey('activity.Contact', verbose_name='Responsible Person(s) and Team', null=False)
+    responsible_person = models.ForeignKey('activity.Contact', verbose_name='Responsible Person(s) and Team',
+                                           null=True, on_delete=models.SET_NULL)
     method_of_analysis = models.CharField('Method of Analysis', max_length=255, blank=True)
     information_use = models.TextField('Information Use', blank=True, max_length=765)
     quality_assurance = models.TextField('Quality Assurance Measures', blank=True, max_length=765)
     data_issues = models.TextField('Data Issues', blank=True, max_length=765)
     notes = models.TextField('Changes to Indicator', max_length=765, blank=True)
     comments = models.TextField('Comments', max_length=765, blank=True)
-    workflow_level1 = models.ForeignKey(WorkflowLevel1, null=True, verbose_name='Workflow Level1')
-    approved_by = models.ForeignKey(Approval, null=True, verbose_name='Approved By')
-    tags = models.ManyToManyField(IndicatorTag, verbose_name='Indicator Tags', related_name='tags')
+    workflow_level1 = models.ForeignKey(WorkflowLevel1, null=True, verbose_name='Workflow Level1',
+                                        on_delete=models.SET_NULL)
+    approved_by = models.ForeignKey(Approval, null=True, verbose_name='Approved By', on_delete=models.SET_NULL)
+    tags = models.ManyToManyField(IndicatorTag, verbose_name='Indicator Tags', related_name='indicator_lib_tags')
     additional_fields = models.ManyToManyField(AdditionalField, verbose_name='Additional Fields',
-                                               related_name='additional_fields')
+                                               related_name='lib_additional_fields')
     additional_field_values = JSONField(null=True, verbose_name='Additional Values Object')
     create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
     modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
-                                   related_name='indicator_created_by', on_delete=models.SET_NULL)
+                                   related_name='indicator_lib_created_by', on_delete=models.SET_NULL)
     modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
-                                    related_name='indicator_modified_by', on_delete=models.SET_NULL)
+                                    related_name='indicator_lib_modified_by', on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ('name',)
@@ -927,12 +932,12 @@ class IndicatorResult(models.Model):
     create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
     modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
-                                   related_name='indicator_created_by', on_delete=models.SET_NULL)
+                                   related_name='result_created_by', on_delete=models.SET_NULL)
     modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
-                                    related_name='indicator_modified_by', on_delete=models.SET_NULL)
+                                    related_name='result_modified_by', on_delete=models.SET_NULL)
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('indicator',)
 
     def save(self, *args, **kwargs):
         # get logged user

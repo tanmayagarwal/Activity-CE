@@ -127,7 +127,7 @@ class CustomDashboardForm(forms.ModelForm):
             <th>Description</th>
             <th>Public?</th>
             <th>Theme</th>
-            <th>Program</th>
+            <th>WorkflowLevel1</th>
             <th></th>
             </tr>
             <tr>

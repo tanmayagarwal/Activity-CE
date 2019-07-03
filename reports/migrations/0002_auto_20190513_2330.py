@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='report',
             name='agreement',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.ProjectAgreement'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel2'),
         ),
         migrations.AddField(
             model_name='report',
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='report',
             name='complete',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.ProjectComplete'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel2'),
         ),
         migrations.AddField(
             model_name='report',
@@ -43,6 +43,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='report',
             name='program',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.Program'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel1'),
         ),
     ]

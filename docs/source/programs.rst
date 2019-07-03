@@ -42,7 +42,7 @@ Response
         "name": "Financial Assistance to Affected Communities",
         "funding_status": "Funded",
         "cost_center": "12345",
-        "description": "DFID Funded Cash Emergency Distribution Program",
+        "description": "DFID Funded Cash Emergency Distribution WorkflowLevel1",
         "create_date": "2017-02-22T18:25:37Z",
         "edit_date": "2017-06-26T15:05:39Z",
         "budget_check": true,
@@ -139,7 +139,7 @@ Example
        curl -H "Authorization: Token adkai39a9sdfj239m0afi2" https://activity.Hikaya.io/api/programs/?country_country=Afghanistan
 
 
-Retrieve a specific Program
+Retrieve a specific WorkflowLevel1
 ----------------------------
 Provides a list of json submitted data for a specific program.
 
@@ -163,7 +163,7 @@ Response
     "name": "Financial Assistance to Affected Communities",
     "funding_status": "Funded",
     "cost_center": "12345",
-    "description": "DFID Funded Cash Emergency Distribution Program",
+    "description": "DFID Funded Cash Emergency Distribution WorkflowLevel1",
     "create_date": "2017-02-22T18:25:37Z",
     "edit_date": "2017-06-26T15:05:39Z",
     "budget_check": true,
@@ -194,7 +194,7 @@ Example
       curl -H "Authorization: Token adkai39a9sdfj239m0afi2" https://activity.Hikaya.io/api/programs/1.json?page=1&page_size=4
 
 
-Create a new Program
+Create a new WorkflowLevel1
 ^^^^^^^^^^^^^^^^^^^^^
 
 .. raw:: html
@@ -207,7 +207,7 @@ Example
 ::
 
         {
-            'name': 'My Program',
+            'name': 'My WorkflowLevel1',
             'gaitid': '1111',
             'country':  ["http://activity.Hikaya.io/api/country/1/"]
         }
@@ -220,7 +220,7 @@ Response
         {
         "url": "http://activity.Hikaya.io/api/programs/588/",
         "gaitid": "1111",
-        "name": "My Program",
+        "name": "My WorkflowLevel1",
         "funding_status": "",
         "cost_center": null,
         "description": null,

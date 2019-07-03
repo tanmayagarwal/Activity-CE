@@ -116,7 +116,7 @@ class Command(BaseCommand):
                         '%s, invalid longitude = %s' % (site_name, longitude)))
 
                 try:
-                    site, created = SiteProfile.objects.update_or_create(
+                    site, created = Location.objects.update_or_create(
                         name=site_name,
                         defaults={
                             'type': profile_type, 'office': office,

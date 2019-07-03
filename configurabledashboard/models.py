@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib import admin
 from datetime import datetime
-from workflow.models import Program
+from workflow.models import WorkflowLevel1
 
 try:
     from django.utils import timezone
@@ -126,7 +126,7 @@ class DashboardComponentAdmin(admin.ModelAdmin):
 
 
 # For programs that have custom dashboards. The default dashboard
-# for all other programs is 'Program Dashboard'
+# for all other programs is 'WorkflowLevel1 Dashboard'
 
 
 class CustomDashboard(models.Model):
@@ -139,7 +139,7 @@ class CustomDashboard(models.Model):
     theme = models.ForeignKey(
         DashboardTheme, blank=True, null=True, related_name='theme',
         on_delete=models.SET_NULL)
-    program = models.ForeignKey(Program, verbose_name="Program",
+    program = models.ForeignKey(WorkflowLevel1, verbose_name="WorkflowLevel1",
                                 related_name="dashboard_program", null=True,
                                 blank=True, on_delete=models.SET_NULL)
     color_palette = models.CharField(

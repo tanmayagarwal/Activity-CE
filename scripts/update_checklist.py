@@ -8,7 +8,7 @@ and get all country records
 Install module django-extensions
 Runs twice via function calls at bottom once
 """
-from workflow.models import ProjectAgreement, Checklist, ChecklistItem
+from workflow.models import WorkflowLevel2, Checklist, ChecklistItem
 from django.db import connection
 
 cursor = connection.cursor()
@@ -20,7 +20,7 @@ def run():
 
 def get_all_data():
     # get all the projects and loop over them
-    get_projects = ProjectAgreement.objects.all()
+    get_projects = WorkflowLevel2.objects.all()
     for item in get_projects:
         # if the project doesn't have a checklist create one
         try:

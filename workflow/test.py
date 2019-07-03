@@ -3,8 +3,8 @@
 
 from django.test import TestCase
 from workflow.models import (
-    Organization, Program, Country, Province, ProjectAgreement, Sector,
-    ProjectComplete, ProjectType, SiteProfile, Office, Monitor, Benchmarks, Budget
+    Organization, WorkflowLevel1, Country, Province, WorkflowLevel2, Sector,
+    WorkflowLevel2, ProjectType, Location, Office, Monitor, Benchmarks, Budget
 )
 
 
@@ -28,15 +28,15 @@ class SiteProfileTestCase(TestCase):
             name="testoffice", province=new_province)
         new_office.save()
         get_office = Office.objects.get(name="testoffice")
-        new_community = SiteProfile.objects.create(
+        new_community = Location.objects.create(
             name="testcommunity", country=get_country, office=get_office,
             province=get_province)
         new_community.save()
 
     def test_community_exists(self):
-        """Check for SiteProfile Object"""
-        get_community = SiteProfile.objects.get(name="testcommunity")
-        self.assertEqual(SiteProfile.objects.filter(
+        """Check for Location Object"""
+        get_community = Location.objects.get(name="testcommunity")
+        self.assertEqual(Location.objects.filter(
             id=get_community.id).count(), 1)
 
 
@@ -52,10 +52,10 @@ class AgreementTestCase(TestCase):
             country="testcountry", organization=get_organization)
         new_country.save()
         get_country = Country.objects.get(country="testcountry")
-        new_program = Program.objects.create(name="testprogram")
+        new_program = WorkflowLevel1.objects.create(name="testprogram")
         new_program.save()
         new_program.country.add(get_country)
-        get_program = Program.objects.get(name="testprogram")
+        get_program = WorkflowLevel1.objects.get(name="testprogram")
         new_province = Province.objects.create(
             name="testprovince", country=get_country)
         new_province.save()
@@ -64,15 +64,15 @@ class AgreementTestCase(TestCase):
             name="testoffice", province=new_province)
         new_office.save()
         get_office = Office.objects.get(name="testoffice")
-        new_community = SiteProfile.objects.create(
+        new_community = Location.objects.create(
             name="testcommunity", country=get_country, office=get_office,
             province=get_province)
         new_community.save()
-        get_community = SiteProfile.objects.get(name="testcommunity")
+        get_community = Location.objects.get(name="testcommunity")
         # load from fixtures
         get_project_type = ProjectType.objects.get(id='1')
         get_sector = Sector.objects.get(id='2')
-        new_agreement = ProjectAgreement.objects.create(
+        new_agreement = WorkflowLevel2.objects.create(
             program=get_program,
             project_name="testproject",
             project_type=get_project_type, activity_code="111222",
@@ -98,9 +98,9 @@ class AgreementTestCase(TestCase):
 
     def test_agreement_exists(self):
         """Check for Agreement object"""
-        get_agreement = ProjectAgreement.objects.get(
+        get_agreement = WorkflowLevel2.objects.get(
             project_name="testproject")
-        self.assertEqual(ProjectAgreement.objects.filter(
+        self.assertEqual(WorkflowLevel2.objects.filter(
             id=get_agreement.id).count(), 1)
 
     def test_benchmark_exists(self):
@@ -132,10 +132,10 @@ class CompleteTestCase(TestCase):
             country="testcountry", organization=get_organization)
         new_country.save()
         get_country = Country.objects.get(country="testcountry")
-        new_program = Program.objects.create(name="testprogram")
+        new_program = WorkflowLevel1.objects.create(name="testprogram")
         new_program.save()
         new_program.country.add(get_country)
-        get_program = Program.objects.get(name="testprogram")
+        get_program = WorkflowLevel1.objects.get(name="testprogram")
         new_province = Province.objects.create(
             name="testprovince", country=get_country)
         new_province.save()
@@ -144,24 +144,24 @@ class CompleteTestCase(TestCase):
             name="testoffice", province=new_province)
         new_office.save()
         get_office = Office.objects.get(name="testoffice")
-        new_community = SiteProfile.objects.create(
+        new_community = Location.objects.create(
             name="testcommunity", country=get_country, office=get_office,
             province=get_province)
         new_community.save()
-        get_community = SiteProfile.objects.get(name="testcommunity")
+        get_community = Location.objects.get(name="testcommunity")
         # load from fixtures
         get_project_type = ProjectType.objects.get(id='1')
         get_sector = Sector.objects.get(id='2')
-        new_agreement = ProjectAgreement.objects.create(
+        new_agreement = WorkflowLevel2.objects.create(
             program=get_program,
             project_name="testproject",
             project_type=get_project_type, activity_code="111222",
             office=get_office, sector=get_sector)
         new_agreement.save()
         new_agreement.site.add(get_community)
-        get_agreement = ProjectAgreement.objects.get(
+        get_agreement = WorkflowLevel2.objects.get(
             project_name="testproject")
-        new_complete = ProjectComplete.objects.create(
+        new_complete = WorkflowLevel2.objects.create(
             program=get_program, project_name="testproject",
             activity_code="111222", office=get_office, on_time=True,
             community_handover=1, project_agreement=get_agreement)
@@ -169,6 +169,6 @@ class CompleteTestCase(TestCase):
 
     def test_complete_exists(self):
         """Check for Complete object"""
-        get_complete = ProjectComplete.objects.get(project_name="testproject")
-        self.assertEqual(ProjectComplete.objects.filter(
+        get_complete = WorkflowLevel2.objects.get(project_name="testproject")
+        self.assertEqual(WorkflowLevel2.objects.filter(
             id=get_complete.id).count(), 1)

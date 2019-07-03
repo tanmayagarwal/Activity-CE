@@ -5,7 +5,7 @@ import uuid
 
 
 def gen_uuid(apps, schema_editor):
-    program = apps.get_model('workflow', 'Program')
+    program = apps.get_model('workflow', 'WorkflowLevel1')
     for row in program.objects.all():
         row.program_uuid = uuid.uuid4()
         row.save(update_fields=['program_uuid'])

@@ -7,7 +7,7 @@ from .models import TrainingAttendance, Beneficiary, Distribution
 from django.urls import reverse_lazy
 
 from .forms import TrainingAttendanceForm, BeneficiaryForm, DistributionForm
-from workflow.models import FormGuidance, Program, ProjectAgreement
+from workflow.models import FormGuidance, WorkflowLevel1, WorkflowLevel2
 from django.utils.decorators import method_decorator
 from activity.util import get_country, group_excluded
 
@@ -33,7 +33,7 @@ class TrainingList(ListView):
 
         project_agreement_id = self.kwargs['pk']
         countries = get_country(request.user)
-        get_programs = Program.objects.all().filter(
+        get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries).distinct()
         if int(self.kwargs['pk']) == 0:
             get_training = TrainingAttendance.objects.all().filter(
@@ -160,7 +160,7 @@ class BeneficiaryList(ListView):
 
         project_agreement_id = self.kwargs['pk']
         organization = request.user.activity_user.organization
-        get_programs = Program.objects.all().filter(
+        get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", organization=organization).distinct()
 
         if int(self.kwargs['pk']) == 0:
@@ -196,7 +196,7 @@ class BeneficiaryCreate(CreateView):
         organization = self.request.user.activity_user.organization
         initial = {
             # 'training': self.kwargs['id'],
-            "program": Program.objects.filter(
+            "program": WorkflowLevel1.objects.filter(
                 organization=organization).first()
         }
 
@@ -297,7 +297,7 @@ class DistributionList(ListView):
 
         program_id = self.kwargs['pk']
         countries = get_country(request.user)
-        get_programs = Program.objects.all().filter(
+        get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries).distinct()
 
         if int(self.kwargs['pk']) == 0:
@@ -516,7 +516,7 @@ class GetAgreements(View, AjaxableResponseMixin):
         program_id = self.kwargs['program']
         countries = get_country(request.user)
         if program_id != 0:
-            get_agreements = ProjectAgreement.objects.all().filter(
+            get_agreements = WorkflowLevel2.objects.all().filter(
                 program=program_id).values('id', 'project_name')
         else:
             pass

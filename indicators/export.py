@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from import_export import resources
-from .models import Indicator, CollectedData, Program, Sector, ReportingFrequency
-from workflow.models import ProjectAgreement, ProjectComplete, ActivityUser
+from .models import Indicator, CollectedData, WorkflowLevel1, Sector, ReportingFrequency
+from workflow.models import WorkflowLevel2, WorkflowLevel2, ActivityUser
 from import_export.admin import ImportExportModelAdmin
 from import_export.widgets import ForeignKeyWidget
 from import_export import fields
@@ -58,12 +58,12 @@ class CollectedDataResource(resources.ModelResource):
         widget=ForeignKeyWidget(Indicator, 'levels'))
     agreement = fields.Field(column_name='agreement', attribute='agreement',
                              widget=ForeignKeyWidget(
-                                 ProjectAgreement, 'project_name_clean'))
+                                 WorkflowLevel2, 'project_name_clean'))
     complete = fields.Field(column_name='complete', attribute='complete',
                             widget=ForeignKeyWidget(
-                                ProjectComplete, 'project_name_clean'))
+                                WorkflowLevel2, 'project_name_clean'))
     program = fields.Field(column_name='program', attribute='program',
-                           widget=ForeignKeyWidget(Program, 'name'))
+                           widget=ForeignKeyWidget(WorkflowLevel1, 'name'))
     disaggregations = fields.Field(
         column_name='dissaggregations', attribute='disaggregations')
 

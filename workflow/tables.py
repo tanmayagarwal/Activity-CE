@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import django_tables2 as tables
-from .models import ProjectAgreement
+from .models import WorkflowLevel2
 
 TEMPLATE = '''
 <div class="btn-group btn-group-xs">
@@ -20,7 +20,7 @@ class ProjectAgreementTable(tables.Table):
         accessor='projectcomplete.actual_budget', verbose_name="Total Cost")
 
     class Meta:
-        model = ProjectAgreement
+        model = WorkflowLevel2
         attrs = {"class": "paleblue"}
         fields = ('program', 'project_name', 'sites', 'activity_code',
                   'office', 'project_name', 'sector', 'project_activity',

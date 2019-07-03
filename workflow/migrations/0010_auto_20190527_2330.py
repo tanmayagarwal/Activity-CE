@@ -23,6 +23,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='program',
             name='name',
-            field=models.CharField(max_length=255, verbose_name='Program Name'),
+            field=models.CharField(max_length=255, verbose_name='WorkflowLevel1 Name'),
         ),
     ]

@@ -14,9 +14,9 @@ class DocumentationResource(resources.ModelResource):
     country = fields.Field(column_name='country', attribute='country',
                            widget=ForeignKeyWidget(Country, 'country'))
     program = fields.Field(column_name='program', attribute='program',
-                           widget=ForeignKeyWidget(Program, 'name'))
+                           widget=ForeignKeyWidget(WorkflowLevel1, 'name'))
     project = fields.Field(column_name='project', attribute='project',
-                           widget=ForeignKeyWidget(ProjectAgreement,
+                           widget=ForeignKeyWidget(WorkflowLevel2,
                                                    'project_name'))
 
     class Meta:
@@ -38,7 +38,7 @@ class DocumentationAdmin(ImportExportModelAdmin):
 # Resource for CSV export
 class ProjectAgreementResource(resources.ModelResource):
     class Meta:
-        model = ProjectAgreement
+        model = WorkflowLevel2
         widgets = {
             'create_date': {'format': '%d/%m/%Y'},
             'edit_date': {'format': '%d/%m/%Y'},
@@ -70,7 +70,7 @@ class ProjectAgreementAdmin(ImportExportModelAdmin):
 # Resource for CSV export
 class ProjectCompleteResource(resources.ModelResource):
     class Meta:
-        model = ProjectComplete
+        model = WorkflowLevel2
         widgets = {
             'create_date': {'format': '%d/%m/%Y'},
             'edit_date': {'format': '%d/%m/%Y'},
@@ -134,7 +134,7 @@ class SiteProfileResource(resources.ModelResource):
         widget=ForeignKeyWidget(AdminLevelThree, 'name'))
 
     class Meta:
-        model = SiteProfile
+        model = Location
         skip_unchanged = True
         report_skipped = False
 
@@ -152,7 +152,7 @@ class ProgramAdmin(admin.ModelAdmin):
     list_display = ('id', 'program_uuid', 'name', 'start_date', 'end_date')
     search_fields = ('name', 'program_uuid')
     list_filter = ('funding_status', 'country', 'program_uuid', 'start_date')
-    display = 'Program'
+    display = 'WorkflowLevel1'
 
 
 class ApprovalAuthorityAdmin(admin.ModelAdmin):
@@ -221,19 +221,18 @@ admin.site.register(Office, OfficeAdmin)
 admin.site.register(District, DistrictAdmin)
 admin.site.register(AdminLevelThree, AdminLevelThreeAdmin)
 admin.site.register(Village)
-admin.site.register(Program, ProgramAdmin)
+admin.site.register(WorkflowLevel1, ProgramAdmin)
 admin.site.register(Sector)
-admin.site.register(ProjectAgreement, ProjectAgreementAdmin)
-admin.site.register(ProjectComplete, ProjectCompleteAdmin)
+admin.site.register(WorkflowLevel2, ProjectAgreementAdmin)
+admin.site.register(WorkflowLevel2, ProjectCompleteAdmin)
 admin.site.register(Documentation, DocumentationAdmin)
 admin.site.register(Template)
-admin.site.register(SiteProfile, SiteProfileAdmin)
+admin.site.register(Location, SiteProfileAdmin)
 admin.site.register(Capacity)
 admin.site.register(Monitor)
 admin.site.register(Benchmarks)
 admin.site.register(Evaluate)
 admin.site.register(ProjectType, ProjectTypeAdmin)
-admin.site.register(Budget)
 admin.site.register(ProfileType)
 admin.site.register(ApprovalAuthority, ApprovalAuthorityAdmin)
 admin.site.register(ChecklistItem, ChecklistItemAdmin)
@@ -270,7 +269,7 @@ class ApprovalAdmin(admin.ModelAdmin):
 @admin.register(WorkflowLevel1)
 class WorkflowLevel1Admin(admin.ModelAdmin):
     list_display = ('name', 'workspace', 'organization', 'portfolio', 'created_by')
-    list_filter = ('workspace__name', 'organization__name', 'portfolio__name')
+    list_filter = ('workspace', 'organization')
     display = 'Workflow Level1s'
 
 
@@ -288,7 +287,7 @@ class WorkflowLevel2PlanAdmin(admin.ModelAdmin):
     display = 'Workflow Level2 Plans'
 
 
-@admin.register(Budget1)
+@admin.register(Budget)
 class BudgetAdmin(admin.ModelAdmin):
     list_display = ('contributor', 'workflow_level2', 'actual_budget_donor_currency', 'create_date')
     list_filter = ('workflow_level2',)

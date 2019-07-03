@@ -56,7 +56,7 @@ admin.site.register(User, MyUserAdmin)
 # NEW MODELS
 @admin.register(Workspace)
 class WorkspaceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'created_by', 'create_date', 'updated_by',)
+    list_display = ('name', 'created_by', 'create_date', 'modified_by',)
     list_filter = ('created_by',)
     display = 'Workspaces'
 
@@ -82,7 +82,7 @@ class Organization1Admin(admin.ModelAdmin):
     display = 'Organizations'
 
 
-@admin.register(Sector)
+@admin.register(Sector1)
 class Sector1Admin(admin.ModelAdmin):
     list_display = ('sector', 'created_by', 'create_date')
     list_filter = ('parent_sector', 'created_by')
@@ -92,7 +92,7 @@ class Sector1Admin(admin.ModelAdmin):
 @admin.register(Contact)
 class Contact1Admin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'created_by', 'create_date')
-    list_filter = ('organization__name', 'created_by__name')
+    list_filter = ('organization', 'created_by')
     display = 'Contacts'
 
 

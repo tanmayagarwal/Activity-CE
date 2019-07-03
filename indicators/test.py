@@ -4,7 +4,7 @@
 from django.test import TestCase
 from indicators.models import Indicator, IndicatorType, DisaggregationType, \
     ReportingFrequency, CollectedData
-from workflow.models import Program, Country, Organization
+from workflow.models import WorkflowLevel1, Country, Organization
 from django.contrib.auth.models import User
 
 
@@ -19,10 +19,10 @@ class IndicatorTestCase(TestCase):
             country="testcountry", organization=get_organization)
         new_country.save()
         get_country = Country.objects.get(country="testcountry")
-        new_program = Program.objects.create(name="testprogram")
+        new_program = WorkflowLevel1.objects.create(name="testprogram")
         new_program.save()
         new_program.country.add(get_country)
-        get_program = Program.objects.get(name="testprogram")
+        get_program = WorkflowLevel1.objects.get(name="testprogram")
         new_indicator_type = IndicatorType.objects.create(
             indicator_type="testtype")
         new_indicator_type.save()

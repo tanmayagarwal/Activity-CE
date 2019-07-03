@@ -9,8 +9,8 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from .models import (
-    Program, Country, Province, AdminLevelThree, District, ProjectAgreement,
-    ProjectComplete, SiteProfile, Documentation, Monitor, Benchmarks, Budget,
+    WorkflowLevel1, Country, Province, AdminLevelThree, District, WorkflowLevel2,
+    WorkflowLevel2, Location, Documentation, Monitor, Benchmarks, Budget,
     ApprovalAuthority, Checklist, ChecklistItem, Contact, Stakeholder,
     FormGuidance,
     ActivityBookmarks, ActivityUser, Sector
@@ -74,7 +74,7 @@ def date_handler(obj):
 
 def list_workflow_level1(request):
     user = ActivityUser.objects.filter(user=request.user).first()
-    programs = Program.objects.filter(organization=user.organization)
+    programs = WorkflowLevel1.objects.filter(organization=user.organization)
     get_all_sectors = Sector.objects.all()
 
     context = {'programs': programs,
@@ -89,7 +89,7 @@ class ProjectDash(ListView):
     def get(self, request, *args, **kwargs):
 
         countries = get_country(request.user)
-        get_programs = Program.objects.all().filter(
+        get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded",
             organization=request.user.activity_user.organization)
         project_id = int(self.kwargs['pk'])
@@ -104,15 +104,15 @@ class ProjectDash(ListView):
             get_distribution_count = 0
             get_checklist_count = 0
         else:
-            get_agreement = ProjectAgreement.objects.get(id=project_id)
+            get_agreement = WorkflowLevel2.objects.get(id=project_id)
             try:
-                get_complete = ProjectComplete.objects.get(
+                get_complete = WorkflowLevel2.objects.get(
                     project_agreement__id=self.kwargs['pk'])
-            except ProjectComplete.DoesNotExist:
+            except WorkflowLevel2.DoesNotExist:
                 get_complete = None
             get_document_count = Documentation.objects.all().filter(
                 project_id=self.kwargs['pk']).count()
-            get_community_count = SiteProfile.objects.all().filter(
+            get_community_count = Location.objects.all().filter(
                 projectagreement__id=self.kwargs['pk']).count()
             get_training_count = TrainingAttendance.objects.all().filter(
                 project_agreement_id=self.kwargs['pk']).count()
@@ -124,10 +124,10 @@ class ProjectDash(ListView):
                 checklist__agreement_id=self.kwargs['pk'])
 
         if int(self.kwargs['pk']) == 0:
-            get_program = Program.objects.all().filter(
+            get_program = WorkflowLevel1.objects.all().filter(
                 funding_status="Funded", country__in=countries).distinct()
         else:
-            get_program = Program.objects.get(agreement__id=self.kwargs['pk'])
+            get_program = WorkflowLevel1.objects.get(agreement__id=self.kwargs['pk'])
 
         return render(request, self.template_name,
                       {'get_program': get_program,
@@ -156,11 +156,11 @@ class ProgramDash(ListView):
     def get(self, request, *args, **kwargs):
 
         countries = get_country(request.user)
-        get_programs = Program.objects.all().filter(
+        get_programs = WorkflowLevel1.objects.all().filter(
             organization=request.user.activity_user.organization).distinct()
         filtered_program = None
         if int(self.kwargs['pk']) == 0:
-            get_dashboard = Program.objects.all().prefetch_related(
+            get_dashboard = WorkflowLevel1.objects.all().prefetch_related(
                 'agreement', 'agreement__projectcomplete',
                 'agreement__office').filter(
                 funding_status='Funded', country__in=countries) \
@@ -168,12 +168,12 @@ class ProgramDash(ListView):
                 .annotate(has_agreement=Count('agreement'),
                           has_complete=Count('complete'))
         else:
-            get_dashboard = Program.objects.all() \
+            get_dashboard = WorkflowLevel1.objects.all() \
                 .prefetch_related('agreement', 'agreement__projectcomplete',
                                   'agreement__office').filter(
                 id=self.kwargs['pk'], funding_status="Funded",
                 country__in=countries).order_by('name')
-            filtered_program = Program.objects.only(
+            filtered_program = WorkflowLevel1.objects.only(
                 'name').get(pk=self.kwargs['pk']).name
 
         if self.kwargs.get('status', None):
@@ -208,18 +208,18 @@ class ProjectAgreementList(ListView):
     Project Agreement
     :param request:
     """
-    model = ProjectAgreement
+    model = WorkflowLevel2
     template_name = 'workflow/projectagreement_list.html'
 
     def get(self, request, *args, **kwargs):
         countries = get_country(request.user)
-        get_programs = Program.objects.all().filter(
+        get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries).distinct()
 
         if int(self.kwargs['pk']) != 0:
-            get_dashboard = ProjectAgreement.objects.all().filter(
+            get_dashboard = WorkflowLevel2.objects.all().filter(
                 program__id=self.kwargs['pk'])
-            get_program = Program.objects.get(id=self.kwargs['pk'])
+            get_program = WorkflowLevel1.objects.get(id=self.kwargs['pk'])
             return render(request, self.template_name,
                           {'form': FilterForm(), 'get_program': get_program,
                            'get_dashboard': get_dashboard,
@@ -227,7 +227,7 @@ class ProjectAgreementList(ListView):
                            'APPROVALS': APPROVALS})
 
         elif self.kwargs['status'] != 'none':
-            get_dashboard = ProjectAgreement.objects.all().filter(
+            get_dashboard = WorkflowLevel2.objects.all().filter(
                 approval=self.kwargs['status'])
             return render(request, self.template_name,
                           {'form': FilterForm(),
@@ -236,7 +236,7 @@ class ProjectAgreementList(ListView):
                            'APPROVALS': APPROVALS})
 
         else:
-            get_dashboard = ProjectAgreement.objects.all().filter(
+            get_dashboard = WorkflowLevel2.objects.all().filter(
                 program__country__in=countries)
 
             return render(request, self.template_name,
@@ -255,7 +255,7 @@ class ProjectAgreementImport(ListView):
 
     def get(self, request, *args, **kwargs):
         countries = get_country(request.user)
-        get_programs = Program.objects.all().filter(
+        get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries)
         get_services = ExternalService.objects.all()
         get_countries = Country.objects.all().filter(country__in=countries)
@@ -275,7 +275,7 @@ class ProjectAgreementCreate(CreateView):
     m the simple form in the project dashboard
     """
 
-    model = ProjectAgreement
+    model = WorkflowLevel2
     template_name = 'workflow/projectagreement_form.html'
     guidance = None
 
@@ -325,11 +325,11 @@ class ProjectAgreementCreate(CreateView):
         # save formset from context
         context = self.get_context_data()
 
-        latest = ProjectAgreement.objects.latest('id')
-        get_agreement = ProjectAgreement.objects.get(id=latest.id)
+        latest = WorkflowLevel2.objects.latest('id')
+        get_agreement = WorkflowLevel2.objects.get(id=latest.id)
 
         # create a new dashbaord entry for the project
-        get_program = Program.objects.get(id=latest.program_id)
+        get_program = WorkflowLevel1.objects.get(id=latest.program_id)
 
         create_checklist = Checklist(agreement=get_agreement)
         create_checklist.save()
@@ -354,7 +354,7 @@ class ProjectAgreementUpdate(UpdateView):
     :param request:
     :param id: project_agreement_id
     """
-    model = ProjectAgreement
+    model = WorkflowLevel2
     form_class = ProjectAgreementForm
     guidance = None
 
@@ -368,7 +368,7 @@ class ProjectAgreementUpdate(UpdateView):
                                                             **kwargs)
 
     def get_form(self, form_class=None):
-        check_form_type = ProjectAgreement.objects.get(id=self.kwargs['pk'])
+        check_form_type = WorkflowLevel2.objects.get(id=self.kwargs['pk'])
 
         if check_form_type.short:
             form_class = ProjectAgreementSimpleForm
@@ -383,7 +383,7 @@ class ProjectAgreementUpdate(UpdateView):
         pk = self.kwargs['pk']
         context.update({'pk': pk})
         context.update({'program': pk})
-        get_agreement = ProjectAgreement.objects.get(id=self.kwargs['pk'])
+        get_agreement = WorkflowLevel2.objects.get(id=self.kwargs['pk'])
         context.update({'p_agreement': get_agreement.project_name})
         context.update({'p_agreement_program': get_agreement.program})
 
@@ -441,10 +441,10 @@ class ProjectAgreementUpdate(UpdateView):
 
         # get the approval status of the form before it was submitted and
         # set vars for use in condtions
-        check_agreement_status = ProjectAgreement.objects.get(
+        check_agreement_status = WorkflowLevel2.objects.get(
             id=str(self.kwargs['pk']))
         is_approved = str(form.instance.approval)
-        get_program = Program.objects.get(
+        get_program = WorkflowLevel1.objects.get(
             agreement__id=check_agreement_status.id)
         country = get_program.country
 
@@ -526,9 +526,9 @@ class ProjectAgreementUpdate(UpdateView):
 
 
 class ProjectAgreementDetail(DetailView):
-    model = ProjectAgreement
+    model = WorkflowLevel2
     context_object_name = 'agreement'
-    queryset = ProjectAgreement.objects.all()
+    queryset = WorkflowLevel2.objects.all()
 
     def get_context_data(self, **kwargs):
         context = super(ProjectAgreementDetail,
@@ -579,7 +579,7 @@ class ProjectAgreementDelete(DeleteView):
     """
     Project Agreement Delete
     """
-    model = ProjectAgreement
+    model = WorkflowLevel2
     success_url = '/workflow/dashboard/0/'
 
     @method_decorator(group_required('Country', url='workflow/permission'))
@@ -606,24 +606,24 @@ class ProjectCompleteList(ListView):
     :param request:
     :param pk: program_id
     """
-    model = ProjectComplete
+    model = WorkflowLevel2
     template_name = 'workflow/projectcomplete_list.html'
 
     def get(self, request, *args, **kwargs):
         countries = get_country(request.user)
-        get_programs = Program.objects.all().filter(
+        get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries)
 
         if int(self.kwargs['pk']) == 0:
-            get_dashboard = ProjectComplete.objects.all().filter(
+            get_dashboard = WorkflowLevel2.objects.all().filter(
                 program__country__in=countries)
             return render(request, self.template_name,
                           {'get_dashboard': get_dashboard,
                            'get_programs': get_programs})
         else:
-            get_dashboard = ProjectComplete.objects.all().filter(
+            get_dashboard = WorkflowLevel2.objects.all().filter(
                 program__id=self.kwargs['pk'])
-            get_program = Program.objects.get(id=self.kwargs['pk'])
+            get_program = WorkflowLevel1.objects.get(id=self.kwargs['pk'])
 
             return render(request, self.template_name,
                           {'get_program': get_program,
@@ -635,7 +635,7 @@ class ProjectCompleteCreate(CreateView):
     """
     Project Complete Form
     """
-    model = ProjectComplete
+    model = WorkflowLevel2
     template_name = 'workflow/projectcomplete_form.html'
     guidance = None
 
@@ -655,7 +655,7 @@ class ProjectCompleteCreate(CreateView):
 
     # get shared data from project agreement and pre-populate form with it
     def get_initial(self):
-        get_project_agreement = ProjectAgreement.objects.get(
+        get_project_agreement = WorkflowLevel2.objects.get(
             id=self.kwargs['pk'])
         initial = {
             'approved_by': self.request.user,
@@ -674,13 +674,13 @@ class ProjectCompleteCreate(CreateView):
         }
 
         try:
-            get_sites = SiteProfile.objects.filter(
+            get_sites = Location.objects.filter(
                 projectagreement__id=get_project_agreement.id).values_list(
                 'id', flat=True)
             site = {'site': [o for o in get_sites]}
             initial['site'] = get_sites
 
-        except SiteProfile.DoesNotExist:
+        except Location.DoesNotExist:
             get_sites = None
 
         try:
@@ -713,9 +713,9 @@ class ProjectCompleteCreate(CreateView):
         context = self.get_context_data()
         self.object = form.save()
 
-        latest = ProjectComplete.objects.latest('id')
-        get_complete = ProjectComplete.objects.get(id=latest.id)
-        get_agreement = ProjectAgreement.objects.get(
+        latest = WorkflowLevel2.objects.latest('id')
+        get_complete = WorkflowLevel2.objects.get(id=latest.id)
+        get_agreement = WorkflowLevel2.objects.get(
             id=self.request.POST['project_agreement'])
 
         # update the quantitative data fields to include the newly
@@ -735,7 +735,7 @@ class ProjectCompleteCreate(CreateView):
             complete=get_complete)
 
         # update main compelte fields
-        ProjectComplete.objects.filter(id=get_complete.id).update(
+        WorkflowLevel2.objects.filter(id=get_complete.id).update(
             account_code=get_agreement.account_code,
             lin_code=get_agreement.lin_code)
 
@@ -750,7 +750,7 @@ class ProjectCompleteUpdate(UpdateView):
     """
     Project Tracking Form
     """
-    model = ProjectComplete
+    model = WorkflowLevel2
     template_name = 'workflow/projectcomplete_form.html'
     guidance = None
 
@@ -763,7 +763,7 @@ class ProjectCompleteUpdate(UpdateView):
                                                            **kwargs)
 
     def get_form(self, form_class=None):
-        check_form_type = ProjectComplete.objects.get(id=self.kwargs['pk'])
+        check_form_type = WorkflowLevel2.objects.get(id=self.kwargs['pk'])
 
         if check_form_type.project_agreement.short:
             form_class = ProjectCompleteSimpleForm
@@ -774,7 +774,7 @@ class ProjectCompleteUpdate(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(ProjectCompleteUpdate, self).get_context_data(**kwargs)
-        get_complete = ProjectComplete.objects.get(id=self.kwargs['pk'])
+        get_complete = WorkflowLevel2.objects.get(id=self.kwargs['pk'])
         # id = get_complete.project_agreement_id
 
         context.update({'id': get_complete.pk})
@@ -841,7 +841,7 @@ class ProjectCompleteUpdate(UpdateView):
                 complete_id=self.kwargs['pk'])
             # if there aren't any budget try importing from the agreement
             if not get_budget:
-                get_complete = ProjectComplete.objects.get(
+                get_complete = WorkflowLevel2.objects.get(
                     id=self.kwargs['pk'])
                 Budget.objects.filter(
                     agreement=get_complete.project_agreement_id).update(
@@ -870,13 +870,13 @@ class ProjectCompleteUpdate(UpdateView):
 
 
 class ProjectCompleteDetail(DetailView):
-    model = ProjectComplete
+    model = WorkflowLevel2
     context_object_name = 'complete'
 
-    def get_object(self, queryset=ProjectComplete.objects.all()):
+    def get_object(self, queryset=WorkflowLevel2.objects.all()):
         try:
             return queryset.get(project_agreement__id=self.kwargs['pk'])
-        except ProjectComplete.DoesNotExist:
+        except WorkflowLevel2.DoesNotExist:
             return None
 
     def get_context_data(self, **kwargs):
@@ -910,7 +910,7 @@ class ProjectCompleteDelete(DeleteView):
     """
     Project Complete Delete
     """
-    model = ProjectComplete
+    model = WorkflowLevel2
     success_url = '/workflow/projectcomplete_list/0/'
 
     @method_decorator(group_required('Country', url='workflow/permission'))
@@ -952,7 +952,7 @@ class DocumentationList(ListView):
 
         project_agreement_id = self.kwargs['project']
         countries = get_country(request.user)
-        get_programs = Program.objects.all().filter(
+        get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries)
 
         if int(self.kwargs['program']) != 0 & int(self.kwargs['project']) == 0:
@@ -984,7 +984,7 @@ class DocumentationAgreementList(AjaxableResponseMixin, CreateView):
 
     def get(self, request, *args, **kwargs):
         countries = get_country(request.user)
-        get_programs = Program.objects.all().filter(
+        get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries)
 
         get_documentation = Documentation.objects.all().prefetch_related(
@@ -1022,14 +1022,14 @@ class DocumentationAgreementCreate(AjaxableResponseMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super(DocumentationAgreementCreate,
                         self).get_context_data(**kwargs)
-        get_project = ProjectAgreement.objects.get(id=self.kwargs['id'])
+        get_project = WorkflowLevel2.objects.get(id=self.kwargs['id'])
         context.update({'program': get_project.program})
         context.update({'project': get_project})
         context.update({'id': self.kwargs['id']})
         return context
 
     def get_initial(self):
-        get_project = ProjectAgreement.objects.get(id=self.kwargs['id'])
+        get_project = WorkflowLevel2.objects.get(id=self.kwargs['id'])
         initial = {
             'project': self.kwargs['id'],
             'program': get_project.program,
@@ -1080,7 +1080,7 @@ class DocumentationAgreementUpdate(AjaxableResponseMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super(DocumentationAgreementUpdate,
                         self).get_context_data(**kwargs)
-        get_project = ProjectAgreement.objects.get(id=self.kwargs['id'])
+        get_project = WorkflowLevel2.objects.get(id=self.kwargs['id'])
         context.update({'project': get_project})
         context.update({'id': self.kwargs['id']})
         context.update({'pk': self.kwargs['pk']})
@@ -1236,7 +1236,7 @@ class IndicatorDataBySite(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(IndicatorDataBySite, self).get_context_data(**kwargs)
-        context['site'] = SiteProfile.objects.get(
+        context['site'] = Location.objects.get(
             pk=self.kwargs.get('site_id'))
         return context
 
@@ -1252,23 +1252,23 @@ class ProjectCompleteBySite(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(ProjectCompleteBySite, self).get_context_data(**kwargs)
-        context['site'] = SiteProfile.objects.get(
+        context['site'] = Location.objects.get(
             pk=self.kwargs.get('site_id'))
         return context
 
     def get_queryset(self):
-        q = ProjectComplete.objects.filter(
+        q = WorkflowLevel2.objects.filter(
             site__id=self.kwargs.get('site_id')).order_by('program')
         return q
 
 
 class SiteProfileList(ListView):
     """
-    SiteProfile list creates a map and list of sites by user country access
+    Location list creates a map and list of sites by user country access
     and filters by either direct link from project or by program
     dropdown filter
     """
-    model = SiteProfile
+    model = Location
     template_name = 'workflow/site_profile_list.html'
 
     def dispatch(self, request, *args, **kwargs):
@@ -1283,33 +1283,33 @@ class SiteProfileList(ListView):
         program_id = int(self.kwargs['program_id'])
 
         countries = get_country(request.user)
-        get_programs = Program.objects.all().filter(
+        get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries)
 
         # this date, 3 months ago, a site is considered inactive
         inactive_site = pytz.UTC.localize(
             datetime.now()) - relativedelta(months=3)
 
-        # Filter SiteProfile list and map by activity or program
+        # Filter Location list and map by activity or program
         if activity_id != 0:
-            get_site_profile = SiteProfile.objects.all().prefetch_related(
+            get_site_profile = Location.objects.all().prefetch_related(
                 'country', 'district',
                 'province').filter(
                 projectagreement__id=activity_id).distinct()
         elif program_id != 0:
-            get_site_profile = SiteProfile.objects.all().prefetch_related(
+            get_site_profile = Location.objects.all().prefetch_related(
                 'country', 'district', 'province').filter(
                 Q(projectagreement__program__id=program_id) | Q(
                     collecteddata__program__id=program_id)).distinct()
         else:
-            get_site_profile = SiteProfile.objects.all().prefetch_related(
+            get_site_profile = Location.objects.all().prefetch_related(
                 'country', 'district', 'province').filter(
                 country__in=countries).distinct()
         if request.method == "GET" and "search" in request.GET:
             """
              fields = ('name', 'office')
             """
-            get_site_profile = SiteProfile.objects.all() \
+            get_site_profile = Location.objects.all() \
                 .filter(Q(country__in=countries),
                         Q(name__contains=request.GET["search"]) |
                         Q(office__name__contains=request.GET["search"]) |
@@ -1354,9 +1354,9 @@ class SiteProfileList(ListView):
 
 class SiteProfileReport(ListView):
     """
-    SiteProfile Report filtered by project
+    Location Report filtered by project
     """
-    model = SiteProfile
+    model = Location
     template_name = 'workflow/site_profile_report.html'
 
     def get(self, request, *args, **kwargs):
@@ -1364,15 +1364,15 @@ class SiteProfileReport(ListView):
         project_agreement_id = self.kwargs['pk']
 
         if int(self.kwargs['pk']) == 0:
-            get_site_profile = SiteProfile.objects.all().prefetch_related(
+            get_site_profile = Location.objects.all().prefetch_related(
                 'country', 'district', 'province').filter(
                 country__in=countries).filter(status=1)
-            get_site_profile_indicator = SiteProfile.objects.all()\
+            get_site_profile_indicator = Location.objects.all()\
                 .prefetch_related('country', 'district', 'province').filter(
                 Q(collecteddata__program__country__in=countries)).filter(
                 status=1)
         else:
-            get_site_profile = SiteProfile.objects.all().prefetch_related(
+            get_site_profile = Location.objects.all().prefetch_related(
                 'country', 'district', 'province').filter(
                 projectagreement__id=self.kwargs['pk']).filter(status=1)
             get_site_profile_indicator = None
@@ -1389,15 +1389,15 @@ class SiteProfileReport(ListView):
 
 class SiteProfileCreate(CreateView):
     """
-    Using SiteProfile Form, create a new site profile
+    Using Location Form, create a new site profile
     """
-    model = SiteProfile
+    model = Location
     guidance = None
 
     @method_decorator(group_excluded('ViewOnly', url='workflow/permission'))
     def dispatch(self, request, *args, **kwargs):
         try:
-            self.guidance = FormGuidance.objects.get(form="SiteProfile")
+            self.guidance = FormGuidance.objects.get(form="Location")
         except FormGuidance.DoesNotExist:
             self.guidance = None
         return super(SiteProfileCreate, self).dispatch(request, *args,
@@ -1431,7 +1431,7 @@ class SiteProfileCreate(CreateView):
     def form_valid(self, form):
         form.save()
         messages.success(self.request, 'Success, Site Profile Created!')
-        latest = SiteProfile.objects.latest('id')
+        latest = Location.objects.latest('id')
         redirect_url = '/workflow/siteprofile_update/' + str(latest.id)
         return HttpResponseRedirect(redirect_url)
 
@@ -1440,15 +1440,15 @@ class SiteProfileCreate(CreateView):
 
 class SiteProfileUpdate(UpdateView):
     """
-    SiteProfile Form Update an existing site profile
+    Location Form Update an existing site profile
     """
-    model = SiteProfile
+    model = Location
     guidance = None
 
     @method_decorator(group_excluded('ViewOnly', url='workflow/permission'))
     def dispatch(self, request, *args, **kwargs):
         try:
-            self.guidance = FormGuidance.objects.get(form="SiteProfile")
+            self.guidance = FormGuidance.objects.get(form="Location")
         except FormGuidance.DoesNotExist:
             self.guidance = None
         return super(SiteProfileUpdate, self).dispatch(request, *args,
@@ -1462,7 +1462,7 @@ class SiteProfileUpdate(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(SiteProfileUpdate, self).get_context_data(**kwargs)
-        get_projects = ProjectAgreement.objects.all().filter(
+        get_projects = WorkflowLevel2.objects.all().filter(
             site__id=self.kwargs['pk'])
         context.update({'get_projects': get_projects})
         return context
@@ -1473,7 +1473,7 @@ class SiteProfileUpdate(UpdateView):
 
     def form_valid(self, form):
         form.save()
-        messages.success(self.request, 'Success, SiteProfile Updated!')
+        messages.success(self.request, 'Success, Location Updated!')
 
         return self.render_to_response(self.get_context_data(form=form))
 
@@ -1482,9 +1482,9 @@ class SiteProfileUpdate(UpdateView):
 
 class SiteProfileDelete(DeleteView):
     """
-    SiteProfile Form Delete an existing community
+    Location Form Delete an existing community
     """
-    model = SiteProfile
+    model = Location
     success_url = "/workflow/siteprofile_list/0/0/"
 
     @method_decorator(group_required('Country', url='workflow/permission'))
@@ -1500,7 +1500,7 @@ class SiteProfileDelete(DeleteView):
     def form_valid(self, form):
         form.save()
 
-        messages.success(self.request, 'Success, SiteProfile Deleted!')
+        messages.success(self.request, 'Success, Location Deleted!')
         return self.render_to_response(self.get_context_data(form=form))
 
     form_class = SiteProfileForm
@@ -1627,10 +1627,10 @@ class BenchmarkCreate(AjaxableResponseMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super(BenchmarkCreate, self).get_form_kwargs()
         try:
-            get_complete = ProjectComplete.objects.get(
+            get_complete = WorkflowLevel2.objects.get(
                 project_agreement__id=self.kwargs['id'])
             kwargs['complete'] = get_complete.id
-        except ProjectComplete.DoesNotExist:
+        except WorkflowLevel2.DoesNotExist:
             kwargs['complete'] = None
 
         kwargs['request'] = self.request
@@ -1644,9 +1644,9 @@ class BenchmarkCreate(AjaxableResponseMixin, CreateView):
         context = super(BenchmarkCreate, self).get_context_data(**kwargs)
         context.update({'id': self.kwargs['id']})
         try:
-            get_complete = ProjectComplete.objects.get(id=self.kwargs['id'])
+            get_complete = WorkflowLevel2.objects.get(id=self.kwargs['id'])
             context.update({'p_name': get_complete.project_name})
-        except ProjectComplete.DoesNotExist:
+        except WorkflowLevel2.DoesNotExist:
             # do nothing
             context = context
         return context
@@ -1912,7 +1912,7 @@ class StakeholderList(ListView):
             print("The user has no country in database.")
             return render(request, self.template_name)
 
-        get_programs = Program.objects.all().filter(
+        get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries)
 
         if program_id != 0:
@@ -2075,9 +2075,9 @@ class QuantitativeOutputsCreate(AjaxableResponseMixin, CreateView):
             self.request.POST.get(
             'is_it_project_complete_form', None)
         if is_it_project_complete_form == 'true':
-            get_program = Program.objects.get(complete__id=self.kwargs['id'])
+            get_program = WorkflowLevel1.objects.get(complete__id=self.kwargs['id'])
         else:
-            get_program = Program.objects.get(agreement__id=self.kwargs['id'])
+            get_program = WorkflowLevel1.objects.get(agreement__id=self.kwargs['id'])
         context.update({'id': self.kwargs['id']})
         context.update({'program': get_program})
         return context
@@ -2094,14 +2094,14 @@ class QuantitativeOutputsCreate(AjaxableResponseMixin, CreateView):
             'is_it_project_complete_form', None)
 
         if is_it_project_complete_form == 'true':
-            get_program = Program.objects.get(complete__id=self.kwargs['id'])
+            get_program = WorkflowLevel1.objects.get(complete__id=self.kwargs['id'])
             initial = {
                 'complete': self.kwargs['id'],
                 'program': get_program.id,
                 'is_it_project_complete_form': 'true',
             }
         else:
-            get_program = Program.objects.get(agreement__id=self.kwargs['id'])
+            get_program = WorkflowLevel1.objects.get(agreement__id=self.kwargs['id'])
             initial = {
                 'agreement': self.kwargs['id'],
                 'program': get_program.id,
@@ -2146,7 +2146,7 @@ class QuantitativeOutputsUpdate(AjaxableResponseMixin, UpdateView):
         colelcteddata is i_program we should change that name at somepoint
         as it is very confusing
         """
-        get_program = Program.objects.get(i_program__pk=self.kwargs['pk'])
+        get_program = WorkflowLevel1.objects.get(i_program__pk=self.kwargs['pk'])
         # indicator = Indicator.objects.get(id)
         is_it_project_complete_form = self.request.GET.get(
             'is_it_project_complete_form', None) or \
@@ -2521,17 +2521,17 @@ class Report(View, AjaxableResponseMixin):
         organization = request.user.activity_user.organization
 
         if int(self.kwargs['pk']) != 0:
-            get_agreements = ProjectAgreement.objects.all().filter(
+            get_agreements = WorkflowLevel2.objects.all().filter(
                 program__id=self.kwargs['pk'])
 
         elif self.kwargs['status'] != 'none':
-            get_agreements = ProjectAgreement.objects.all().filter(
+            get_agreements = WorkflowLevel2.objects.all().filter(
                 approval=self.kwargs['status'])
         else:
-            get_agreements = ProjectAgreement.objects.select_related().filter(
+            get_agreements = WorkflowLevel2.objects.select_related().filter(
                 program__organization=organization)
 
-        get_programs = Program.objects.all().filter(
+        get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", organization=organization)
 
         filtered = ProjectAgreementFilter(request.GET, queryset=get_agreements)
@@ -2539,7 +2539,7 @@ class Report(View, AjaxableResponseMixin):
         table.paginate(page=request.GET.get('page', 1), per_page=20)
 
         if request.method == "GET" and "search" in request.GET:
-            get_agreements = ProjectAgreement.objects.filter(
+            get_agreements = WorkflowLevel2.objects.filter(
                 Q(project_name__contains=request.GET["search"]) |
                 Q(activity_code__contains=request.GET["search"]))
 
@@ -2574,7 +2574,7 @@ class ReportData(View, AjaxableResponseMixin):
         else:
             filters['program__organization'] = organization
 
-        get_agreements = ProjectAgreement.objects.prefetch_related('sectors') \
+        get_agreements = WorkflowLevel2.objects.prefetch_related('sectors') \
             .select_related('program', 'project_type', 'office',
                             'estimated_by').filter(**filters) \
             .values('id', 'program__id', 'approval', 'program__name',
@@ -2729,7 +2729,7 @@ def export_sites_list(request, **kwargs):
     #    get_sites = Sites.objects.prefetch_related('sector').filter(
     #    projectagreement__program__id=program_id).distinct()
     # else:
-    get_sites = SiteProfile.objects.prefetch_related(
+    get_sites = Location.objects.prefetch_related(
         'sector').filter(country__in=countries)
 
     dataset = SiteProfileResource().export(get_sites)
@@ -2820,16 +2820,16 @@ class SiteProfileObjects(View, AjaxableResponseMixin):
         countries = get_country(request.user)
 
         if program_id != 0:
-            get_sites = SiteProfile.objects.all().filter(
+            get_sites = Location.objects.all().filter(
                 projectagreement__program__id=program_id).distinct().values(
                 'id')
 
         elif int(self.kwargs['pk']) != 0:
-            get_sites = SiteProfile.objects.all().filter(
+            get_sites = Location.objects.all().filter(
                 projectagreement=self.kwargs['pk']).distinct().values('id')
 
         else:
-            get_sites = SiteProfile.objects.all().filter(
+            get_sites = Location.objects.all().filter(
                 country__in=countries).values('id')
 
         get_sites = json.dumps(list(get_sites), cls=DjangoJSONEncoder)
@@ -2845,7 +2845,7 @@ class DocumentationListObjects(View, AjaxableResponseMixin):
 
         project_agreement_id = self.kwargs['project']
         countries = get_country(request.user)
-        get_programs = Program.objects.all().filter(
+        get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries)
 
         if int(self.kwargs['program']) != 0 & int(self.kwargs['project']) == 0:
@@ -2880,9 +2880,9 @@ class DocumentationListObjects(View, AjaxableResponseMixin):
 
 def add_level2(request):
     data = request.POST
-    program = Program.objects.get(id=data.get('program'))
+    program = WorkflowLevel1.objects.get(id=data.get('program'))
 
-    level2 = ProjectAgreement(project_name=data.get(
+    level2 = WorkflowLevel2(project_name=data.get(
         'project_name'), program=program)
 
     if level2.save():

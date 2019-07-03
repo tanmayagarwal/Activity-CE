@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from .models import *
-from workflow.models import Sector, Program
+from workflow.models import Sector, WorkflowLevel1
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 from import_export.admin import ImportExportModelAdmin
@@ -24,7 +24,7 @@ class IndicatorResource(resources.ModelResource):
         widget=ForeignKeyWidget(ReportingFrequency, 'frequency'))
     sector = fields.Field(column_name='sector', attribute='sector',
                           widget=ForeignKeyWidget(Sector, 'sector'))
-    program = ManyToManyWidget(Program, separator=" | ", field="name")
+    program = ManyToManyWidget(WorkflowLevel1, separator=" | ", field="name")
 
     class Meta:
         model = Indicator
@@ -88,14 +88,7 @@ class ReportingFrequencyAdmin(admin.ModelAdmin):
     display = 'Reporting Frequency'
 
 
-@admin.register(StrategicObjective)
-class StrategicObjectiveAdmin(admin.ModelAdmin):
-    list_display = ('name', 'organization', 'create_date', 'parent')
-    list_filter = ('parent', 'name', 'organization')
-    display = 'Objectives'
 
-
-admin.site.register(IndicatorType)
 admin.site.register(Indicator, IndicatorAdmin)
 admin.site.register(ReportingFrequency)
 admin.site.register(DisaggregationType, DisaggregationTypeAdmin)
@@ -114,14 +107,22 @@ admin.site.register(PeriodicTarget, PeriodicTargetAdmin)
 @admin.register(IndicatorLevel)
 class IndicatorLevelAdmin(admin.ModelAdmin):
     list_display = ('level', 'created_by', 'create_date')
-    list_filter = ('type', 'created_by')
+    list_filter = ('level', 'created_by')
     display = 'Indicator Types'
+
+
+@admin.register(StrategicObjective)
+class StrategicObjectiveAdmin(admin.ModelAdmin):
+    list_display = ('name', 'organization', 'create_date', 'parent')
+    list_filter = ('parent', 'name', 'organization')
+    display = 'Objectives'
 
 
 @admin.register(IndicatorType)
 class IndicatorTypeAdmin(admin.ModelAdmin):
-    list_display = ('type', 'created_by', 'create_date')
-    list_filter = ('type', 'created_by')
+    # list_display = ('type', 'created_by', 'create_date')
+    # list_filter = ('type', 'created_by')
+    display = 'Indicator Types'
 
 
 @admin.register(IndicatorTag)
@@ -133,7 +134,7 @@ class IndicatorTagAdmin(admin.ModelAdmin):
 
 @admin.register(Indicator1)
 class Indicator1Admin(admin.ModelAdmin):
-    list_display = ('name', 'parent_location', 'type', 'key_performance_indicator')
+    list_display = ('name', 'type', 'key_performance_indicator')
     list_filter = ('name', 'level', 'workflow_level1')
     display = 'Indicators'
 

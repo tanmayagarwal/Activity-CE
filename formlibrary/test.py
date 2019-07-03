@@ -3,8 +3,8 @@
 
 from django.test import TestCase
 from workflow.models import (
-    Program, Country, Province, ProjectAgreement, Sector,
-    ProjectType, SiteProfile, Office
+    WorkflowLevel1, Country, Province, WorkflowLevel2, Sector,
+    ProjectType, Location, Office
 )
 from formlibrary.models import TrainingAttendance, Distribution, Beneficiary
 from datetime import datetime
@@ -13,9 +13,9 @@ from datetime import datetime
 class TrainingAttendanceTestCase(TestCase):
 
     def setUp(self):
-        new_program = Program.objects.create(name="testprogram")
+        new_program = WorkflowLevel1.objects.create(name="testprogram")
         new_program.save()
-        get_program = Program.objects.get(name="testprogram")
+        get_program = WorkflowLevel1.objects.get(name="testprogram")
         new_training = TrainingAttendance.objects.create(
             training_name="testtraining", program=get_program,
             implementer="34",
@@ -53,9 +53,9 @@ class DistributionTestCase(TestCase):
     fixtures = ['fixtures/projecttype.json', 'fixtures/sectors.json']
 
     def setUp(self):
-        new_program = Program.objects.create(name="testprogram")
+        new_program = WorkflowLevel1.objects.create(name="testprogram")
         new_program.save()
-        get_program = Program.objects.get(name="testprogram")
+        get_program = WorkflowLevel1.objects.get(name="testprogram")
         new_country = Country.objects.create(country="testcountry")
         new_country.save()
         get_country = Country.objects.get(country="testcountry")
@@ -68,21 +68,21 @@ class DistributionTestCase(TestCase):
         new_office.save()
         get_office = Office.objects.get(name="testoffice")
         # create project agreement -- and load from fixtures
-        new_community = SiteProfile.objects.create(
+        new_community = Location.objects.create(
             name="testcommunity", country=get_country, office=get_office,
             province=get_province)
         new_community.save()
-        get_community = SiteProfile.objects.get(name="testcommunity")
+        get_community = Location.objects.get(name="testcommunity")
         get_project_type = ProjectType.objects.get(id='1')
         get_sector = Sector.objects.get(id='2')
-        new_agreement = ProjectAgreement.objects.create(
+        new_agreement = WorkflowLevel2.objects.create(
             program=get_program,
             project_name="testproject", project_type=get_project_type,
             activity_code="111222", office=get_office,
             sector=get_sector)
         new_agreement.save()
         new_agreement.site.add(get_community)
-        get_agreement = ProjectAgreement.objects.get(
+        get_agreement = WorkflowLevel2.objects.get(
             project_name="testproject")
         new_distribution = Distribution.objects.create(
             distribution_name="testdistribution", program=get_program,
@@ -134,9 +134,9 @@ class DistributionTestCase(TestCase):
 class BeneficiaryTestCase(TestCase):
 
     def setUp(self):
-        new_program = Program.objects.create(name="testprogram")
+        new_program = WorkflowLevel1.objects.create(name="testprogram")
         new_program.save()
-        get_program = Program.objects.get(name="testprogram")
+        get_program = WorkflowLevel1.objects.get(name="testprogram")
         new_training = TrainingAttendance.objects.create(
             training_name="testtraining", program=get_program)
         new_training.save()

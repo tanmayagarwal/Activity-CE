@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='objective',
             name='program',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.Program'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel1'),
         ),
         migrations.AddField(
             model_name='indicator',
@@ -74,12 +74,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='indicator',
             name='objectives',
-            field=models.ManyToManyField(blank=True, help_text=' ', related_name='obj_indicator', to='indicators.Objective', verbose_name='Program Objective'),
+            field=models.ManyToManyField(blank=True, help_text=' ', related_name='obj_indicator', to='indicators.Objective', verbose_name='WorkflowLevel1 Objective'),
         ),
         migrations.AddField(
             model_name='indicator',
             name='program',
-            field=models.ManyToManyField(help_text=' ', to='workflow.Program'),
+            field=models.ManyToManyField(help_text=' ', to='workflow.WorkflowLevel1'),
         ),
         migrations.AddField(
             model_name='indicator',
@@ -139,7 +139,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='historicalcollecteddata',
             name='agreement',
-            field=models.ForeignKey(blank=True, db_constraint=False, help_text=' ', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.ProjectAgreement', verbose_name='Project Initiation'),
+            field=models.ForeignKey(blank=True, db_constraint=False, help_text=' ', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.WorkflowLevel2', verbose_name='Project Initiation'),
         ),
         migrations.AddField(
             model_name='historicalcollecteddata',
@@ -149,7 +149,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='historicalcollecteddata',
             name='complete',
-            field=models.ForeignKey(blank=True, db_constraint=False, help_text=' ', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.ProjectComplete'),
+            field=models.ForeignKey(blank=True, db_constraint=False, help_text=' ', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.WorkflowLevel2'),
         ),
         migrations.AddField(
             model_name='historicalcollecteddata',
@@ -174,7 +174,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='historicalcollecteddata',
             name='program',
-            field=models.ForeignKey(blank=True, db_constraint=False, help_text=' ', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.Program'),
+            field=models.ForeignKey(blank=True, db_constraint=False, help_text=' ', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.WorkflowLevel1'),
         ),
         migrations.AddField(
             model_name='externalservicerecord',
@@ -204,7 +204,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='collecteddata',
             name='agreement',
-            field=models.ForeignKey(blank=True, help_text=' ', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='q_agreement2', to='workflow.ProjectAgreement', verbose_name='Project Initiation'),
+            field=models.ForeignKey(blank=True, help_text=' ', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='q_agreement2', to='workflow.WorkflowLevel2', verbose_name='Project Initiation'),
         ),
         migrations.AddField(
             model_name='collecteddata',
@@ -214,7 +214,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='collecteddata',
             name='complete',
-            field=models.ForeignKey(blank=True, help_text=' ', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='q_complete2', to='workflow.ProjectComplete'),
+            field=models.ForeignKey(blank=True, help_text=' ', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='q_complete2', to='workflow.WorkflowLevel2'),
         ),
         migrations.AddField(
             model_name='collecteddata',
@@ -239,12 +239,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='collecteddata',
             name='program',
-            field=models.ForeignKey(blank=True, help_text=' ', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='i_program', to='workflow.Program'),
+            field=models.ForeignKey(blank=True, help_text=' ', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='i_program', to='workflow.WorkflowLevel1'),
         ),
         migrations.AddField(
             model_name='collecteddata',
             name='site',
-            field=models.ManyToManyField(blank=True, help_text=' ', to='workflow.SiteProfile'),
+            field=models.ManyToManyField(blank=True, help_text=' ', to='workflow.Location'),
         ),
         migrations.AddField(
             model_name='activitytable',

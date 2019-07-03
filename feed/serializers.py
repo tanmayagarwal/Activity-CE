@@ -14,9 +14,9 @@ from indicators.models import (
     PeriodicTarget
 )
 from workflow.models import (
-    Program, Sector, ProjectType, Office, SiteProfile, Country,
-    ProjectComplete,
-    ProjectAgreement, Stakeholder, Capacity, Evaluate, ProfileType,
+    WorkflowLevel1, Sector, ProjectType, Office, Location, Country,
+    WorkflowLevel2,
+    WorkflowLevel2, Stakeholder, Capacity, Evaluate, ProfileType,
     Province, District, AdminLevelThree, Village, StakeholderType,
     Contact, Documentation, LoggedUser, Checklist, Organization
 )
@@ -71,7 +71,7 @@ class PeriodicTargetSerializer(serializers.ModelSerializer):
 
 class ProgramSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Program
+        model = WorkflowLevel1
         fields = '__all__'
 
 
@@ -95,19 +95,19 @@ class OfficeSerializer(serializers.HyperlinkedModelSerializer):
 
 class SiteProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = SiteProfile
+        model = Location
         fields = '__all__'
 
 
 class CompleteSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = ProjectComplete
+        model = WorkflowLevel2
         fields = '__all__'
 
 
 class AgreementSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = ProjectAgreement
+        model = WorkflowLevel2
         fields = (
             'id',
             'program',
@@ -214,7 +214,7 @@ class ProgramIndicatorSerializer(serializers.ModelSerializer):
         return obj.indicator_set.count()
 
     class Meta:
-        model = Program
+        model = WorkflowLevel1
         fields = ('id', 'name', 'indicators_count', 'indicator_set')
 
 

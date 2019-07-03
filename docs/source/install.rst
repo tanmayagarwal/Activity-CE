@@ -1,7 +1,7 @@
 Install
 ====
 
-Activity includes a set of forms and reports for managing project activities for a Program.  
+Activity includes a set of forms and reports for managing project activities for a WorkflowLevel1.
 It includes workflow for approving and completing projects as well as sharing the output data.
 
 Activity functionality http://github.com/hikaya/Activity-CE is intended to allow importing

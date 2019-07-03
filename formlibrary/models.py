@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib import admin
 from datetime import datetime
-from workflow.models import Program, SiteProfile, ProjectAgreement, Office, Province
+from workflow.models import WorkflowLevel1, Location, WorkflowLevel2, Office, Province
 
 try:
     from django.utils import timezone
@@ -16,9 +16,9 @@ except ImportError:
 class TrainingAttendance(models.Model):
     training_name = models.CharField(max_length=255)
     program = models.ForeignKey(
-        Program, null=True, blank=True, on_delete=models.SET_NULL)
+        WorkflowLevel1, null=True, blank=True, on_delete=models.SET_NULL)
     project_agreement = models.ForeignKey(
-        ProjectAgreement, null=True, blank=True,
+        WorkflowLevel2, null=True, blank=True,
         verbose_name="Project Initiation", on_delete=models.SET_NULL)
     implementer = models.CharField(max_length=255, null=True, blank=True)
     reporting_period = models.CharField(max_length=255, null=True, blank=True)
@@ -70,8 +70,8 @@ class TrainingAttendanceAdmin(admin.ModelAdmin):
 class Distribution(models.Model):
     distribution_name = models.CharField(max_length=255)
     program = models.ForeignKey(
-        Program, null=True, blank=True, on_delete=models.SET_NULL)
-    initiation = models.ForeignKey(ProjectAgreement, null=True, blank=True,
+        WorkflowLevel1, null=True, blank=True, on_delete=models.SET_NULL)
+    initiation = models.ForeignKey(WorkflowLevel2, null=True, blank=True,
                                    verbose_name="Project Initiation",
                                    on_delete=models.SET_NULL)
     office_code = models.ForeignKey(
@@ -137,7 +137,7 @@ class Distribution(models.Model):
 class DistributionAdmin(admin.ModelAdmin):
     list_display = ('distribution_name', 'program',
                     'initiation', 'create_date', 'edit_date')
-    display = 'Program Dashboard'
+    display = 'WorkflowLevel1 Dashboard'
 
 
 class Beneficiary(models.Model):
@@ -147,11 +147,11 @@ class Beneficiary(models.Model):
     father_name = models.CharField(max_length=255, null=True, blank=True)
     age = models.IntegerField(null=True, blank=True)
     gender = models.CharField(max_length=255, null=True, blank=True)
-    site = models.ForeignKey(SiteProfile, null=True,
+    site = models.ForeignKey(Location, null=True,
                              blank=True, on_delete=models.SET_NULL)
     signature = models.BooleanField(default=True)
     remarks = models.CharField(max_length=255, null=True, blank=True)
-    program = models.ManyToManyField(Program, blank=True)
+    program = models.ManyToManyField(WorkflowLevel1, blank=True)
     create_date = models.DateTimeField(null=True, blank=True)
     edit_date = models.DateTimeField(null=True, blank=True)
 

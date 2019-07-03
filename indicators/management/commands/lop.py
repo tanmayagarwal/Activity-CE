@@ -12,10 +12,10 @@ class Command(BaseCommand):
         any data records associated with it.
         1. If NO, don't do anything further with this indicator.
         2. If YES, do the following:
-            2.1. Set target frequency to "Life of Program only".
+            2.1. Set target frequency to "Life of WorkflowLevel1 only".
             2.2. Save this target frequency even if other required fields 
             have errors or are incomplete.
-            2.2. Assign all data records to the Life of Program target.'
+            2.2. Assign all data records to the Life of WorkflowLevel1 target.'
         """
 
     def add_arguments(self, parser):
@@ -52,7 +52,7 @@ class Command(BaseCommand):
                     # if it is not then exception will be raised.
                     lop = float(ind.lop_target)
 
-                    # create a "Life of Program (LOP) Only" target
+                    # create a "Life of WorkflowLevel1 (LOP) Only" target
                     lop_pt = PeriodicTarget.objects.create(
                         indicator=ind,
                         period=ind.TARGET_FREQUENCIES[0][1],
@@ -61,11 +61,11 @@ class Command(BaseCommand):
 
                     # associate all collected_data records of this indicator
                     # with the newly created
-                    # "Life of Program (LOP) Only" target
+                    # "Life of WorkflowLevel1 (LOP) Only" target
                     ind.collecteddata_set.update(periodic_target=lop_pt)
 
                     # set the target_frequency of this indicator to "Life of
-                    # Program (LOP) Only" target
+                    # WorkflowLevel1 (LOP) Only" target
                     ind.target_frequency = Indicator.LOP
                     ind.save()
 

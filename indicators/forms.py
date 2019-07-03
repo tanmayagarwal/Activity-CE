@@ -17,8 +17,8 @@ from indicators.models import (
     Indicator, PeriodicTarget, CollectedData, Objective,
     StrategicObjective, ActivityTable, DisaggregationType
 )
-from workflow.models import Program, SiteProfile, Documentation, \
-    ProjectComplete, ActivityUser
+from workflow.models import WorkflowLevel1, Location, Documentation, \
+    WorkflowLevel2, ActivityUser
 from activity.util import get_country
 
 
@@ -230,7 +230,7 @@ class IndicatorForm(forms.ModelForm):
                                 </td>
                                 <td align="left" style="padding-left:0px;
                                 border:none; vertical-align: middle;">
-                                    <strong>Life of Program (LoP) target
+                                    <strong>Life of WorkflowLevel1 (LoP) target
                                     </strong>
                                 </td>
                                 <td align="right" style="border:none;
@@ -307,7 +307,7 @@ class IndicatorForm(forms.ModelForm):
 
         # override the program queryset to use request.user for country
         countries = get_country(self.request.user)
-        self.fields['program'].queryset = Program.objects.filter(
+        self.fields['program'].queryset = WorkflowLevel1.objects.filter(
             funding_status="Funded", country__in=countries)
         self.fields['disaggregation'].queryset = DisaggregationType.objects. \
             filter(country__in=countries).filter(standard=False)
@@ -358,7 +358,7 @@ class CollectedDataForm(forms.ModelForm):
         return date_collected
 
     program2 = forms.CharField(widget=forms.TextInput(
-        attrs={'readonly': 'readonly', 'label': 'Program'}))
+        attrs={'readonly': 'readonly', 'label': 'WorkflowLevel1'}))
     indicator2 = forms.CharField(widget=forms.TextInput(
         attrs={'readonly': 'readonly', 'label': 'Indicator'}))
     target_frequency = forms.CharField()
@@ -524,17 +524,17 @@ class CollectedDataForm(forms.ModelForm):
             program=self.program)
 
         # override the program queryset to use request.user for country
-        self.fields['complete'].queryset = ProjectComplete.objects.filter(
+        self.fields['complete'].queryset = WorkflowLevel2.objects.filter(
             program=self.program)
         self.fields['complete'].label = "Project"
 
         # override the program queryset to use request.user for country
         countries = get_country(self.request.user)
-        # self.fields['program'].queryset = Program.objects\
+        # self.fields['program'].queryset = WorkflowLevel1.objects\
         #   .filter(funding_status="Funded", country__in=countries).distinct()
         try:
             int(self.program)
-            self.program = Program.objects.get(id=self.program)
+            self.program = WorkflowLevel1.objects.get(id=self.program)
         except TypeError:
             pass
 
@@ -543,7 +543,7 @@ class CollectedDataForm(forms.ModelForm):
             .order_by('customsort', 'create_date', 'period')
 
         self.fields['program2'].initial = self.program
-        self.fields['program2'].label = "Program"
+        self.fields['program2'].label = "WorkflowLevel1"
 
         try:
             int(self.indicator)
@@ -559,7 +559,7 @@ class CollectedDataForm(forms.ModelForm):
             self.indicator.target_frequency
         self.fields['target_frequency'].widget = forms.HiddenInput()
         # override the program queryset to use request.user for country
-        self.fields['site'].queryset = SiteProfile.objects.filter(
+        self.fields['site'].queryset = Location.objects.filter(
             country__in=countries)
 
         # self.fields['indicator'].queryset = Indicator.objects\

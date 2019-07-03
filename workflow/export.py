@@ -5,15 +5,15 @@ from import_export import resources
 from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 from import_export import fields
 from .models import (
-    ProjectAgreement, Program, SiteProfile, Capacity, Evaluate, Documentation,
-    Stakeholder, Sector, ProjectType, Office, ActivityUser, ProjectComplete,
+    WorkflowLevel2, WorkflowLevel1, Location, Capacity, Evaluate, Documentation,
+    Stakeholder, Sector, ProjectType, Office, ActivityUser, WorkflowLevel2,
     Country, Contact, StakeholderType, ProfileType
 )
 
 
 class ProjectAgreementResource(resources.ModelResource):
     site = fields.Field(column_name='site', attribute='site',
-                        widget=ManyToManyWidget(SiteProfile, 'name'))
+                        widget=ManyToManyWidget(Location, 'name'))
     capacity = fields.Field(column_name='capacity', attribute='capacity',
                             widget=ManyToManyWidget(Capacity, 'capacity'))
     evaluate = fields.Field(column_name='evaluate', attribute='evaluate',
@@ -22,7 +22,7 @@ class ProjectAgreementResource(resources.ModelResource):
         column_name='stakeholder', attribute='stakeholder',
         widget=ManyToManyWidget(Stakeholder, 'name'))
     program = fields.Field(column_name='program', attribute='program',
-                           widget=ForeignKeyWidget(Program, 'name'))
+                           widget=ForeignKeyWidget(WorkflowLevel1, 'name'))
     sector = fields.Field(column_name='sector', attribute='sector',
                           widget=ForeignKeyWidget(Sector, 'sector'))
     project_type = fields.Field(
@@ -38,12 +38,12 @@ class ProjectAgreementResource(resources.ModelResource):
         widget=ForeignKeyWidget(ActivityUser, 'name'))
 
     class Meta:
-        model = ProjectAgreement
+        model = WorkflowLevel2
 
 
 class ProjectCompleteResource(resources.ModelResource):
     site = fields.Field(column_name='site', attribute='site',
-                        widget=ManyToManyWidget(SiteProfile, 'name'))
+                        widget=ManyToManyWidget(Location, 'name'))
     capacity = fields.Field(column_name='capacity', attribute='capacity',
                             widget=ManyToManyWidget(Capacity, 'capacity'))
     evaluate = fields.Field(column_name='evaluate', attribute='evaluate',
@@ -52,7 +52,7 @@ class ProjectCompleteResource(resources.ModelResource):
         column_name='stakeholder', attribute='stakeholder',
         widget=ManyToManyWidget(Stakeholder, 'name'))
     program = fields.Field(column_name='program', attribute='program',
-                           widget=ForeignKeyWidget(Program, 'name'))
+                           widget=ForeignKeyWidget(WorkflowLevel1, 'name'))
     sector = fields.Field(column_name='sector', attribute='sector',
                           widget=ForeignKeyWidget(Sector, 'sector'))
     project_type = fields.Field(
@@ -68,12 +68,12 @@ class ProjectCompleteResource(resources.ModelResource):
         widget=ForeignKeyWidget(ActivityUser, 'name'))
 
     class Meta:
-        model = ProjectComplete
+        model = WorkflowLevel2
 
 
 class ProgramResource(resources.ModelResource):
     class Meta:
-        model = Program
+        model = WorkflowLevel1
 
 
 class StakeholderResource(resources.ModelResource):
@@ -125,4 +125,4 @@ class SiteProfileResource(resources.ModelResource):
         widget=ForeignKeyWidget(ActivityUser, 'name'))
 
     class Meta:
-        model = SiteProfile
+        model = Location

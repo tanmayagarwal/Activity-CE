@@ -14,5 +14,5 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='program',
             name='program_uuid',
-            field=models.UUIDField(editable=False, default=uuid.uuid4, unique=True, verbose_name='Program UUID'), ),
+            field=models.UUIDField(editable=False, default=uuid.uuid4, unique=True, verbose_name='WorkflowLevel1 UUID'), ),
     ]

@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='programnarratives',
             name='program',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.Program'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel1'),
         ),
         migrations.AddField(
             model_name='programlinks',
@@ -27,11 +27,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='programlinks',
             name='program',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.Program'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel1'),
         ),
         migrations.AddField(
             model_name='jupyternotebooks',
             name='program',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.Program'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel1'),
         ),
     ]

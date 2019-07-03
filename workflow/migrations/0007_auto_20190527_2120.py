@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='program',
             name='program_uuid',
-            field=models.UUIDField(editable=False, null=True, verbose_name='Program UUID'),
+            field=models.UUIDField(editable=False, null=True, verbose_name='WorkflowLevel1 UUID'),
         ),
         migrations.AlterField(
             model_name='activityuser',

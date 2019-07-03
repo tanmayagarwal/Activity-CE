@@ -12,7 +12,7 @@
   <div class="sub-navigation">
     <div class="sub-navigation-header">
       <h4 class="page-title">
-        Program Index
+        WorkflowLevel1 Index
       </h4>
     </div>
 
@@ -42,7 +42,7 @@
 >
   <thead>
     <tr>
-      <th>Program</th>
+      <th>WorkflowLevel1</th>
       <th>Project</th>
       <th>Actions</th>
     </tr>
@@ -53,7 +53,7 @@
     {% if get_dashboard %} {% ifnotequal status 'none' %}
     <p>Filtered by (Status): {{ status }}</p>
     {% endifnotequal %} {% if filtered_program %}
-    <p>Filtered by (Program): {{ filtered_program }}</p>
+    <p>Filtered by (WorkflowLevel1): {{ filtered_program }}</p>
     {% endif %} {% for program in get_dashboard %}
     {% if program.agreement.all %}
     <div class="panel panel-default">

@@ -14,8 +14,8 @@ from activity.util import get_country
 from workflow.mixins import APIDefaultsMixin
 
 from workflow.models import (
-    Program, Sector, ProjectType, Office, SiteProfile, Country, ProjectComplete, Checklist,
-    ProjectAgreement, Stakeholder, Capacity, Evaluate, ProfileType, Contact, Documentation,
+    WorkflowLevel1, Sector, ProjectType, Office, Location, Country, WorkflowLevel2, Checklist,
+    WorkflowLevel2, Stakeholder, Capacity, Evaluate, ProfileType, Contact, Documentation,
     Province, District, AdminLevelThree, Village, StakeholderType
 )
 from indicators.models import (
@@ -59,7 +59,7 @@ class PogramIndicatorReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
-        queryset = Program.objects.prefetch_related(
+        queryset = WorkflowLevel1.objects.prefetch_related(
             'indicator_set',
             'indicator_set__indicator_type',
             'indicator_set__sector', 'indicator_set__level',
@@ -87,13 +87,13 @@ class ProgramViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         user_countries = get_country(request.user)
-        queryset = Program.objects.all().filter(country__in=user_countries)
+        queryset = WorkflowLevel1.objects.all().filter(country__in=user_countries)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     filter_fields = ('country__country', 'name')
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    queryset = Program.objects.all()
+    queryset = WorkflowLevel1.objects.all()
     serializer_class = ProgramSerializer
 
 
@@ -134,13 +134,13 @@ class SiteProfileViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         user_countries = get_country(request.user)
-        queryset = SiteProfile.objects.all().filter(country__in=user_countries)
+        queryset = Location.objects.all().filter(country__in=user_countries)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     filter_fields = ('country__country',)
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    queryset = SiteProfile .objects.all()
+    queryset = Location .objects.all()
     serializer_class = SiteProfileSerializer
 
 
@@ -163,7 +163,7 @@ class AgreementViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         user_countries = get_country(request.user)
-        queryset = ProjectAgreement.objects.all().filter(
+        queryset = WorkflowLevel2.objects.all().filter(
             program__country__in=user_countries)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
@@ -180,7 +180,7 @@ class AgreementViewSet(viewsets.ModelViewSet):
 
     filter_fields = ('program__country__country', 'program__name')
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    queryset = ProjectAgreement.objects.all()
+    queryset = WorkflowLevel2.objects.all()
     serializer_class = AgreementSerializer
     pagination_class = SmallResultsSetPagination
 
@@ -195,14 +195,14 @@ class CompleteViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         user_countries = get_country(request.user)
-        queryset = ProjectComplete.objects.all().filter(
+        queryset = WorkflowLevel2.objects.all().filter(
             program__country__in=user_countries)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     filter_fields = ('program__country__country', 'program__name')
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    queryset = ProjectComplete.objects.all()
+    queryset = WorkflowLevel2.objects.all()
     serializer_class = CompleteSerializer
     pagination_class = SmallResultsSetPagination
 
@@ -503,9 +503,9 @@ class DisaggregationValueViewSet(viewsets.ModelViewSet):
 
 
 class ProjectAgreementViewSet(APIDefaultsMixin, viewsets.ModelViewSet):
-    """API endpoint for getting ProjectAgreement."""
+    """API endpoint for getting WorkflowLevel2."""
 
-    queryset = ProjectAgreement.objects.order_by('create_date')
+    queryset = WorkflowLevel2.objects.order_by('create_date')
     serializer_class = AgreementSerializer
 
 

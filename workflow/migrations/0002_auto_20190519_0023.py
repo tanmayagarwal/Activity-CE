@@ -65,7 +65,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='program',
             name='organization',
-            field=models.ForeignKey(blank=True, help_text='Program Organization', null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.Organization'),
+            field=models.ForeignKey(blank=True, help_text='WorkflowLevel1 Organization', null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.Organization'),
         ),
         migrations.AddField(
             model_name='program',

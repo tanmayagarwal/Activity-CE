@@ -10,7 +10,7 @@ from functools import partial
 from .widgets import GoogleMapsWidget
 from django import forms
 from .models import (
-    ProjectAgreement, ProjectComplete, Program, SiteProfile, Documentation,
+    WorkflowLevel2, WorkflowLevel2, WorkflowLevel1, Location, Documentation,
     Benchmarks, Monitor, Budget, Office, ChecklistItem, Province, Stakeholder,
     ActivityUser, Contact, Sector
 )
@@ -103,7 +103,7 @@ class BudgetForm(forms.ModelForm):
         self.fields['complete'].widget = forms.HiddenInput()  # TextInput()
         # countries = get_country(self.request.user)
 
-        # self.fields['agreement'].queryset = ProjectAgreement.objects\
+        # self.fields['agreement'].queryset = WorkflowLevel2.objects\
         #   .filter(program__country__in = countries)
 
     def save(self, *args, **kwargs):
@@ -114,7 +114,7 @@ class BudgetForm(forms.ModelForm):
 
 class ProjectAgreementCreateForm(forms.ModelForm):
     class Meta:
-        model = ProjectAgreement
+        model = WorkflowLevel2
         fields = '__all__'
 
     def __init__(self, *args, **kwargs):
@@ -135,7 +135,7 @@ class ProjectAgreementCreateForm(forms.ModelForm):
 
 class ProjectAgreementForm(forms.ModelForm):
     class Meta:
-        model = ProjectAgreement
+        model = WorkflowLevel2
         fields = '__all__'
         exclude = ['create_date', 'edit_date', 'short']
 
@@ -524,12 +524,12 @@ class ProjectAgreementForm(forms.ModelForm):
 
         # override the program queryset to use request.user for country
         countries = get_country(self.request.user)
-        # self.fields['program'].queryset = Program.objects.filter(
+        # self.fields['program'].queryset = WorkflowLevel1.objects.filter(
         #      funding_status="Funded", country__in=countries).distinct()
 
         self.fields['program'].widget = forms.HiddenInput()
         self.fields['program2'].initial = self.instance.program
-        self.fields['program2'].label = "Program"
+        self.fields['program2'].label = "WorkflowLevel1"
 
         self.fields['approved_by'].queryset = ActivityUser.objects.filter(
             country__in=countries).distinct()
@@ -551,7 +551,7 @@ class ProjectAgreementForm(forms.ModelForm):
             province__country__in=countries)
 
         # override the site queryset to use request.user for country
-        self.fields['site'].queryset = SiteProfile.objects.filter(
+        self.fields['site'].queryset = Location.objects.filter(
             country__in=countries)
 
         # override the stakeholder queryset to use request.user for country
@@ -575,7 +575,7 @@ class ProjectAgreementForm(forms.ModelForm):
 
 class ProjectAgreementSimpleForm(forms.ModelForm):
     class Meta:
-        model = ProjectAgreement
+        model = WorkflowLevel2
         fields = '__all__'
         exclude = ['create_date', 'edit_date', 'account_code', 'lin_code',
                    'mc_estimated_budget',
@@ -893,11 +893,11 @@ class ProjectAgreementSimpleForm(forms.ModelForm):
 
         # override the program queryset to use request.user for country
         countries = get_country(self.request.user)
-        # self.fields['program'].queryset = Program.objects.filter(
+        # self.fields['program'].queryset = WorkflowLevel1.objects.filter(
         #   funding_status="Funded", country__in=countries).distinct()
         self.fields['program'].widget = forms.HiddenInput()
         self.fields['program2'].initial = self.instance.program
-        self.fields['program2'].label = "Program"
+        self.fields['program2'].label = "WorkflowLevel1"
 
         self.fields['approved_by'].queryset = ActivityUser.objects.filter(
             country__in=countries).distinct()
@@ -911,7 +911,7 @@ class ProjectAgreementSimpleForm(forms.ModelForm):
             province__country__in=countries)
 
         # override the site queryset to use request.user for country
-        self.fields['site'].queryset = SiteProfile.objects.filter(
+        self.fields['site'].queryset = Location.objects.filter(
             country__in=countries)
 
         # override the stakeholder queryset to use request.user for country
@@ -935,7 +935,7 @@ class ProjectAgreementSimpleForm(forms.ModelForm):
 
 class ProjectCompleteCreateForm(forms.ModelForm):
     class Meta:
-        model = ProjectComplete
+        model = WorkflowLevel2
         fields = '__all__'
 
     program2 = forms.CharField(
@@ -957,7 +957,7 @@ class ProjectCompleteCreateForm(forms.ModelForm):
         widget=DatePicker.DateInput(), required=False)
 
     program = forms.ModelChoiceField(
-        queryset=Program.objects.filter(funding_status="Funded"))
+        queryset=WorkflowLevel1.objects.filter(funding_status="Funded"))
 
     def __init__(self, *args, **kwargs):
         # get the user object from request to check permissions
@@ -972,14 +972,14 @@ class ProjectCompleteCreateForm(forms.ModelForm):
         self.helper.help_text_inline = True
         self.helper.html5_required = True
         if kwargs['initial'].get('short'):
-            fieldset = Fieldset('Program', 'program2', 'program',
+            fieldset = Fieldset('WorkflowLevel1', 'program2', 'program',
                                 'project_agreement2', 'project_agreement',
                                 'activity_code', 'office', 'sector',
                                 'project_name', 'estimated_budget', 'site',
                                 'stakeholder',
                                 )
         else:
-            fieldset = Fieldset('Program', 'program2', 'program',
+            fieldset = Fieldset('WorkflowLevel1', 'program2', 'program',
                                 'project_agreement', 'project_agreement2',
                                 'activity_code', 'account_code', 'lin_code',
                                 'office', 'sector', 'project_name',
@@ -1007,15 +1007,15 @@ class ProjectCompleteCreateForm(forms.ModelForm):
 
         # override the program queryset to use request.user for country
         countries = get_country(self.request.user)
-        self.fields['program'].queryset = Program.objects.filter(
+        self.fields['program'].queryset = WorkflowLevel1.objects.filter(
             funding_status="Funded", country__in=countries)
-        self.fields['site'].queryset = SiteProfile.objects.filter(
+        self.fields['site'].queryset = Location.objects.filter(
             country__in=countries)
         self.fields['stakeholder'].queryset = Stakeholder.objects.filter(
             country__in=countries)
         self.fields['program2'].initial = kwargs['initial'].get('program')
         self.fields['program'].widget = forms.HiddenInput()
-        self.fields['program2'].label = "Program"
+        self.fields['program2'].label = "WorkflowLevel1"
         self.fields['project_agreement2'].initial = "%s - %s" % (
         kwargs['initial'].get(
             'office'),
@@ -1029,7 +1029,7 @@ class ProjectCompleteCreateForm(forms.ModelForm):
 
 class ProjectCompleteForm(forms.ModelForm):
     class Meta:
-        model = ProjectComplete
+        model = WorkflowLevel2
         fields = '__all__'
 
     map = forms.CharField(widget=GoogleMapsWidget(
@@ -1313,14 +1313,14 @@ class ProjectCompleteForm(forms.ModelForm):
 
         # override the program queryset to use request.user for country
         countries = get_country(self.request.user)
-        # self.fields['program'].queryset = Program.objects.filter(
+        # self.fields['program'].queryset = WorkflowLevel1.objects.filter(
         # funding_status="Funded", country__in=countries)
         self.fields['program'].widget = forms.HiddenInput()
         self.fields['program2'].initial = self.instance.program
-        self.fields['program2'].label = "Program"
+        self.fields['program2'].label = "WorkflowLevel1"
 
         # self.fields['project_agreement'].queryset =
-        # ProjectAgreement.objects.filter(program__country__in = countries)
+        # WorkflowLevel2.objects.filter(program__country__in = countries)
         # TextInput()
         self.fields['project_agreement'].widget = forms.HiddenInput()
         self.fields[
@@ -1335,7 +1335,7 @@ class ProjectCompleteForm(forms.ModelForm):
             province__country__in=countries)
 
         # override the community queryset to use request.user for country
-        self.fields['site'].queryset = SiteProfile.objects.filter(
+        self.fields['site'].queryset = Location.objects.filter(
             country__in=countries)
 
         # override the stakeholder queryset to use request.user for country
@@ -1361,7 +1361,7 @@ class ProjectCompleteForm(forms.ModelForm):
 
 class ProjectCompleteSimpleForm(forms.ModelForm):
     class Meta:
-        model = ProjectComplete
+        model = WorkflowLevel2
         fields = '__all__'
 
         exclude = ['create_date', 'edit_date', 'project_activity',
@@ -1418,7 +1418,7 @@ class ProjectCompleteSimpleForm(forms.ModelForm):
             HTML("""<br/>"""),
             TabHolder(
                 Tab('Executive Summary',
-                    Fieldset('Program',
+                    Fieldset('WorkflowLevel1',
                              'program', 'program2', 'project_agreement',
                              'project_agreement2', 'activity_code',
                              'office', 'sector', 'project_name', 'site',
@@ -1625,14 +1625,14 @@ class ProjectCompleteSimpleForm(forms.ModelForm):
         # override the program queryset to use request.user for country
         countries = get_country(self.request.user)
 
-        # self.fields['program'].queryset = Program.objects.filter(
+        # self.fields['program'].queryset = WorkflowLevel1.objects.filter(
         # funding_status="Funded", country__in=countries)
         self.fields['program'].widget = forms.HiddenInput()
         self.fields['program2'].initial = self.instance.program
-        self.fields['program2'].label = "Program"
+        self.fields['program2'].label = "WorkflowLevel1"
 
         # self.fields['project_agreement'].queryset =
-        # ProjectAgreement.objects.filter(program__country__in = countries)
+        # WorkflowLevel2.objects.filter(program__country__in = countries)
         # TextInput()
         self.fields['project_agreement'].widget = forms.HiddenInput()
         self.fields[
@@ -1647,7 +1647,7 @@ class ProjectCompleteSimpleForm(forms.ModelForm):
             province__country__in=countries)
 
         # override the community queryset to use request.user for country
-        self.fields['site'].queryset = SiteProfile.objects.filter(
+        self.fields['site'].queryset = Location.objects.filter(
             country__in=countries)
 
         # override the stakeholder queryset to use request.user for country
@@ -1673,7 +1673,7 @@ class ProjectCompleteSimpleForm(forms.ModelForm):
 
 class SiteProfileForm(forms.ModelForm):
     class Meta:
-        model = SiteProfile
+        model = Location
         exclude = ['create_date', 'edit_date']
 
     map = forms.CharField(widget=GoogleMapsWidget(
@@ -1772,7 +1772,7 @@ class SiteProfileForm(forms.ModelForm):
                       <table class="table">
                        <tr>
                          <th>Project Name</th>
-                         <th>Program</th>
+                         <th>WorkflowLevel1</th>
                          <th>Activity Code</th>
                          <th>View</th>
                        </tr>
@@ -1844,9 +1844,9 @@ class DocumentationForm(forms.ModelForm):
 
         # override the program queryset to use request.user for country
         countries = get_country(self.request.user)
-        self.fields['project'].queryset = ProjectAgreement.objects.filter(
+        self.fields['project'].queryset = WorkflowLevel2.objects.filter(
             program__country__in=countries)
-        self.fields['program'].queryset = Program.objects.filter(
+        self.fields['program'].queryset = WorkflowLevel1.objects.filter(
             country__in=countries)
 
 
@@ -1907,7 +1907,7 @@ class QuantitativeOutputsForm(forms.ModelForm):
         countries = get_country(self.request.user)
         self.fields['indicator'].queryset = Indicator.objects.filter(
             program__id=kwargs['initial']['program'])
-        self.fields['agreement'].queryset = ProjectAgreement.objects.filter(
+        self.fields['agreement'].queryset = WorkflowLevel2.objects.filter(
             program__country__in=countries)
         # self.fields['periodic_target'].queryset =
         # PeriodicTarget.objects.all()
@@ -1963,7 +1963,7 @@ class BenchmarkForm(forms.ModelForm):
 
         countries = get_country(self.request.user)
         # override the site queryset to use request.user for country
-        self.fields['site'].queryset = SiteProfile.objects.filter(
+        self.fields['site'].queryset = Location.objects.filter(
             country__in=countries)
 
         self.fields['agreement'].widget = HiddenInput()
@@ -2124,5 +2124,5 @@ class FilterForm(forms.Form):
 
 class ProjectCompleteTable(forms.ModelForm):
     class Meta:
-        model = ProjectComplete
+        model = WorkflowLevel2
         fields = '__all__'

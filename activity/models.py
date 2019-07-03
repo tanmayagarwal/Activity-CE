@@ -36,7 +36,6 @@ class Workspace(models.Model):
     class Meta:
         ordering = ('name',)
         verbose_name_plural = 'Workspaces'
-        app_label = 'activity'
 
     # displayed in admin templates
     def __str__(self):
@@ -204,7 +203,7 @@ class Office(models.Model):
         return new_name
 
 
-class Sector(models.Model):
+class Sector1(models.Model):
     """
     Sector Model
     """
@@ -235,7 +234,7 @@ class Sector(models.Model):
             self.created_by = logged_user
         self.modified_date = timezone.now()
         self.modified_by = logged_user
-        return super(Sector, self).save(*args, **kwargs)
+        return super(Sector1, self).save(*args, **kwargs)
 
 
 class Contact(models.Model):
@@ -295,9 +294,9 @@ class LocationType(models.Model):
     create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
     modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
-                                   related_name='org_sub_created_by', on_delete=models.SET_NULL)
+                                   related_name='location_type_created_by', on_delete=models.SET_NULL)
     modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
-                                    related_name='org_sub_modified_by', on_delete=models.SET_NULL)
+                                    related_name='location_type_modified_by', on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ('create_date',)
@@ -334,9 +333,8 @@ class AdministrativeLevel(models.Model):
                                     related_name='admin_level_modified_by', on_delete=models.SET_NULL)
 
     class Meta:
-        ordering = ('name',)
-        verbose_name_plural = 'Sites'
-        app_label = 'site'
+        ordering = ('level_1',)
+        verbose_name_plural = 'Administrative Levels'
 
     # displayed in admin templates
     def __str__(self):
@@ -496,87 +494,5 @@ class Currency(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class IatiAidType(models.Model):
-    iati_type_uuid = models.UUIDField('IATI Finance Type UUID', editable=False, default=uuid.uuid4, unique=True)
-    aid_type = models.CharField('IATI Type', max_length=100)
-    code = model.Char
-    create_date = models.DateTimeField('Create Date', null=True, editable=False)
-    modified_date = models.DateTimeField('Modified Date', null=True, editable=False)
-    created_by = models.ForeignKey(ActivityUser, verbose_name='Created Vy', editable=False, null=True,
-                                   related_name='currency_created_by', on_delete=models.SET_NULL)
-    modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
-                                    related_name='currency_modified_by', on_delete=models.SET_NULL)
-
-    class Meta:
-        ordering = ('finance_type',)
-        verbose_name_plural = 'IATI Finance Type'
-
-    def save(self, *args, **kwargs):
-        # get logged user
-        logged_user = ActivityUser.objects.get(user=get_request().user)
-        if not self.id:
-            self.create_date = timezone.now()
-            self.created_by = logged_user
-        self.modified_date = timezone.now()
-        self.modified_by = logged_user
-        return super(IatiFinanceType, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return self.finance_type or ''
-
-
-class Iati(models.Model):
-    """
-    IAT information Model
-    """
-    iati_uuid = models.UUIDField('IATI UUID', editable=False, default=uuid.uuid4, unique=True)
-    activity_identifier = models.CharField('IATI Activity Identifier', max_length=100)
-    aid_type = models.CharField('IATI Aid Type', max_length=100, blank=True)
-    aid_code = models.TextField('IATI Aid Code', max_length=255)
-    collaboration_type = models.CharField('IATI collaboration Type', max_length=255, blank=True)
-    collaboration_type_code = models.CharField('IATI Collaboration Type Code', max_length=255, blank=True)
-    condition = models.CharField('IATI Condition', max_length=100, blank=True,
-                                 help_text='Specify terms and conditions attached to the activity that, if not met,'
-                                           'may influence the delivery of commitments made by participating'
-                                           ' organizations.')
-    condition_attached = models.BooleanField('IATI Condition Attached?', default=0)
-    condition_type = models.CharField('IATI Condition Type', blank=True, max_length=100)
-    condition_type_code = models.CharField('IATI Condition Type Code', blank=True, max_length=100)
-    finance_type = models.CharField('IATI Finance Type', blank=True, max_length=255)
-    finance_type_code = models.CharField('IATI Finance Type Code', blank=True, max_length=100)
-    flow_type = models.CharField('IATI FLow Type', blank=True, max_length=255)
-    flow_type_code = models.CharField('IATI FLow Type Code', blank=True, max_length=100)
-    humanitarian_scope = models.CharField('IATI Humanitarian Scope', blank=True, max_length=255)
-    humanitarian_scope_code = models.CharField('IATI Humanitarian Scope Code', blank=True, max_length=100)
-    project_status = models.CharField('IATI Project Status', blank=True, max_length=100)
-    project_status_code = models.CharField('IATI Project Status Code', blank=True, max_length=100)
-    tied_status = models.CharField('IATI Tied Status', blank=True, max_length=100)
-    tied_status_code = models.CharField('IATI Tied Status Code', blank=True, max_length=100)
-    ready_for_reporting = models.BooleanField('Ready for IATI reporting?', default=0)
-    create_date = models.DateTimeField('Create Date', null=True, editable=False)
-    modified_date = models.DateTimeField('Modified Date', null=True, editable=False)
-    created_by = models.ForeignKey(ActivityUser, verbose_name='Created Vy', editable=False, null=True,
-                                   related_name='iati_created_by', on_delete=models.SET_NULL)
-    modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', editable=False, null=True,
-                                    related_name='iati_modified_by', on_delete=models.SET_NULL)
-
-    class Meta:
-        ordering = ('activity_identifier',)
-        verbose_name_plural = 'IATI'
-
-    def save(self, *args, **kwargs):
-        # get logged user
-        logged_user = ActivityUser.objects.get(user=get_request().user)
-        if not self.id:
-            self.create_date = timezone.now()
-            self.created_by = logged_user
-        self.modified_date = timezone.now()
-        self.modified_by = logged_user
-        return super(Iati, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return self.activity_identifier or ''
 
 

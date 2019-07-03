@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from django.views.generic import TemplateView, View
-from workflow.models import ProjectAgreement, Program
+from workflow.models import WorkflowLevel2, WorkflowLevel1
 from indicators.models import CollectedData, Indicator
 from .forms import FilterForm
 
@@ -102,19 +102,19 @@ class ReportData(View, AjaxableResponseMixin):
         project_filter = filter['project']
         indicator_filter = filter['indicator']
 
-        program = Program.objects.all().filter(**program_filter).values(
+        program = WorkflowLevel1.objects.all().filter(**program_filter).values(
             'name', 'funding_status', 'cost_center',
             'country__country', 'sector__sector')
 
-        approval_count = ProjectAgreement.objects.all().filter(
+        approval_count = WorkflowLevel2.objects.all().filter(
             **project_filter).filter(approval='awaiting approval').count()
-        approved_count = ProjectAgreement.objects.all().filter(
+        approved_count = WorkflowLevel2.objects.all().filter(
             **project_filter).filter(approval='approved').count()
-        rejected_count = ProjectAgreement.objects.all().filter(
+        rejected_count = WorkflowLevel2.objects.all().filter(
             **project_filter).filter(approval='rejected').count()
-        inprogress_count = ProjectAgreement.objects.all().filter(
+        inprogress_count = WorkflowLevel2.objects.all().filter(
             **project_filter).filter(approval='in progress').count()
-        nostatus_count = ProjectAgreement.objects.all().filter(
+        nostatus_count = WorkflowLevel2.objects.all().filter(
             **project_filter).filter(
             Q(Q(approval=None) | Q(approval=""))).count()
 
@@ -137,7 +137,7 @@ class ReportData(View, AjaxableResponseMixin):
         }
 
         if request.GET.get('export'):
-            program_export = Program.objects.all().filter(**program_filter)
+            program_export = WorkflowLevel1.objects.all().filter(**program_filter)
             program_dataset = ProgramResource().export(program_export)
             response = HttpResponse(
                 program_dataset.csv, content_type='application/ms-excel')
@@ -159,25 +159,25 @@ class ProjectReportData(View, AjaxableResponseMixin):
         project_filter = filter['project']
         indicator_filter = filter['indicator']
 
-        project = ProjectAgreement.objects.all().filter(
+        project = WorkflowLevel2.objects.all().filter(
             **project_filter).values(
             'program__name', 'project_name',
             'activity_code', 'project_type__name',
             'sector__sector', 'total_estimated_budget', 'approval')
-        approval_count = ProjectAgreement.objects.all().filter(
+        approval_count = WorkflowLevel2.objects.all().filter(
             **project_filter).filter(
             program__funding_status="Funded",
             approval='awaiting approval').count()
-        approved_count = ProjectAgreement.objects.all().filter(
+        approved_count = WorkflowLevel2.objects.all().filter(
             **project_filter).filter(program__funding_status="Funded",
                                      approval='approved').count()
-        rejected_count = ProjectAgreement.objects.all().filter(
+        rejected_count = WorkflowLevel2.objects.all().filter(
             **project_filter).filter(program__funding_status="Funded",
                                      approval='rejected').count()
-        inprogress_count = ProjectAgreement.objects.all().filter(
+        inprogress_count = WorkflowLevel2.objects.all().filter(
             **project_filter).filter(program__funding_status="Funded",
                                      approval='in progress').count()
-        nostatus_count = ProjectAgreement.objects.all().filter(
+        nostatus_count = WorkflowLevel2.objects.all().filter(
             **project_filter).filter(
             Q(Q(approval=None) | Q(approval=""))).count()
         indicator_count = Indicator.objects.all().filter(
@@ -199,7 +199,7 @@ class ProjectReportData(View, AjaxableResponseMixin):
         }
 
         if request.GET.get('export'):
-            project_export = ProjectAgreement.objects.all().filter(
+            project_export = WorkflowLevel2.objects.all().filter(
                 **project_filter)
             dataset = ProjectAgreementResource().export(project_export)
             response = HttpResponse(

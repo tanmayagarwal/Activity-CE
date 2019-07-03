@@ -66,7 +66,7 @@ Response
         "name": "Financial Assistance to Affected Communities",
         "funding_status": "Funded",
         "cost_center": "12345",
-        "description": "DFID Funded Cash Emergency Distribution Program",
+        "description": "DFID Funded Cash Emergency Distribution WorkflowLevel1",
         "create_date": "2017-02-22T18:25:37Z",
         "edit_date": "2017-06-26T15:05:39Z",
         "budget_check": true,

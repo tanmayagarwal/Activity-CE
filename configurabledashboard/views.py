@@ -9,7 +9,7 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from .models import CustomDashboard, DashboardComponent, ComponentDataSource, \
     DashboardTheme
-from workflow.models import Program, FormGuidance
+from workflow.models import WorkflowLevel1, FormGuidance
 from .forms import (
     CustomDashboardCreateForm, CustomDashboardForm, CustomDashboardModalForm,
     CustomDashboardMapForm, DashboardThemeCreateForm, DashboardThemeForm,
@@ -39,15 +39,15 @@ class CustomDashboardList(ListView):
 
     def get(self, request, *args, **kwargs):
         # retrieve program
-        model = Program
+        model = WorkflowLevel1
         program_id = int(self.kwargs['pk'])
-        get_program = Program.objects.all().filter(id=program_id)
+        get_program = WorkflowLevel1.objects.all().filter(id=program_id)
 
         # retrieve the coutries the user has data access for
         countries = get_country(request.user)
 
         # retrieve projects for a program
-        # get_projects = ProjectAgreement.objects.all()
+        # get_projects = WorkflowLevel2.objects.all()
         #   .filter(program__id=program__id, program__country__in=countries)
 
         # retrieve projects for a program
@@ -589,7 +589,7 @@ class DashboardComponentList(ListView):
 
     def get(self, request, *args, **kwargs):
         # retrieve program
-        model = Program
+        model = WorkflowLevel1
         # retrieve the countries the user has data access for
         countries = get_country(request.user)
         dashboard_id = int(self.kwargs['pk'])

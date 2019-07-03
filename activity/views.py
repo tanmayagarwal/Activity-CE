@@ -16,8 +16,8 @@ from django.db import IntegrityError
 from indicators.models import CollectedData, Indicator
 
 from workflow.models import (
-    ProjectAgreement, ProjectComplete, Program,
-    SiteProfile, Sector, Country, ActivityUser,
+    WorkflowLevel2, WorkflowLevel2, WorkflowLevel1,
+    Location, Sector, Country, ActivityUser,
     ActivitySites, ActivityBookmarks, FormGuidance, Organization
 )
 from activity.tables import IndicatorDataTable
@@ -67,13 +67,13 @@ def index(request, selected_countries=None, id=0, sector=0):
 
     # limit the programs by the selected sector
     if int(sector) == 0:
-        get_programs = Program.objects.all()\
+        get_programs = WorkflowLevel1.objects.all()\
             .prefetch_related('agreement', 'agreement__office').filter(
             funding_status="Funded", country__in=selected_countries)
         # .exclude(agreement__isnull=True)
         sectors = Sector.objects.all()
     else:
-        get_programs = Program.objects.all()\
+        get_programs = WorkflowLevel1.objects.all()\
             .filter(funding_status="Funded",
                     country__in=selected_countries, sector=sector)
         sectors = Sector.objects.all().filter(id=sector)
@@ -94,51 +94,51 @@ def index(request, selected_countries=None, id=0, sector=0):
         if int(sector) > 0:
             filter_for_quantitative_data_sums[
                 'agreement__sector__in'] = sectors
-            get_site_profile = SiteProfile.objects.all().prefetch_related(
+            get_site_profile = Location.objects.all().prefetch_related(
                 'country', 'district', 'province').filter(
                 Q(Q(projectagreement__sector__in=sectors)),
                 country__in=selected_countries).filter(status=1)
-            get_site_profile_indicator = SiteProfile.objects.all()\
+            get_site_profile_indicator = Location.objects.all()\
                 .prefetch_related('country', 'district', 'province').filter(
                 Q(collecteddata__program__country__in=selected_countries))\
                 .filter(status=1)
-            agreement_total_count = ProjectAgreement.objects.all().filter(
+            agreement_total_count = WorkflowLevel2.objects.all().filter(
                 sector__in=sectors,
                 program__country__in=selected_countries).count()
-            complete_total_count = ProjectComplete.objects.all().filter(
+            complete_total_count = WorkflowLevel2.objects.all().filter(
                 project_agreement__sector__in=sectors,
                 program__country__in=selected_countries).count()
-            agreement_approved_count = ProjectAgreement.objects.all().filter(
+            agreement_approved_count = WorkflowLevel2.objects.all().filter(
                 approval='approved', sector__in=sectors,
                 program__country__in=selected_countries).count()
-            complete_approved_count = ProjectComplete.objects.all().filter(
+            complete_approved_count = WorkflowLevel2.objects.all().filter(
                 approval='approved', project_agreement__sector__in=sectors,
                 program__country__in=selected_countries).count()
 
-            agreement_awaiting_count = ProjectAgreement.objects.all().filter(
+            agreement_awaiting_count = WorkflowLevel2.objects.all().filter(
                 approval='awaiting approval', sector__in=sectors,
                 program__country__in=selected_countries).count()
 
-            complete_awaiting_count = ProjectComplete.objects.all().filter(
+            complete_awaiting_count = WorkflowLevel2.objects.all().filter(
                 approval='awaiting approval',
                 project_agreement__sector__in=sectors,
                 program__country__in=selected_countries).count()
 
-            agreement_open_count = ProjectAgreement.objects.all().filter(
+            agreement_open_count = WorkflowLevel2.objects.all().filter(
                 Q(Q(approval='open') | Q(approval="") | Q(
                     approval=None)), sector__id__in=sectors,
                 program__country__in=selected_countries).count()
-            complete_open_count = ProjectComplete.objects.all().filter(
+            complete_open_count = WorkflowLevel2.objects.all().filter(
                 Q(Q(approval='open') | Q(approval="") | Q(approval=None)),
                 project_agreement__sector__in=sectors,
                 program__country__in=selected_countries).count()
-            agreement_wait_count = ProjectAgreement.objects.all().filter(
+            agreement_wait_count = WorkflowLevel2.objects.all().filter(
                 Q(approval='in progress') & Q(
                     Q(approval='in progress') | Q(approval=None) | Q(
                         approval="")),
                 sector__in=sectors,
                 program__country__in=selected_countries).count()
-            complete_wait_count = ProjectComplete.objects.all().filter(
+            complete_wait_count = WorkflowLevel2.objects.all().filter(
                 Q(approval='in progress') & Q(
                     Q(approval='in progress') | Q(approval=None) | Q(
                         approval="")),
@@ -146,44 +146,44 @@ def index(request, selected_countries=None, id=0, sector=0):
                 program__country__in=selected_countries).count()
 
         else:
-            get_site_profile = SiteProfile.objects.all().prefetch_related(
+            get_site_profile = Location.objects.all().prefetch_related(
                 'country', 'district', 'province').filter(
                 country__in=selected_countries).filter(status=1)
-            get_site_profile_indicator = SiteProfile.objects.all()\
+            get_site_profile_indicator = Location.objects.all()\
                 .prefetch_related('country', 'district', 'province').filter(
                 Q(collecteddata__program__country__in=selected_countries))\
                 .filter(status=1)
-            agreement_total_count = ProjectAgreement.objects.all().filter(
+            agreement_total_count = WorkflowLevel2.objects.all().filter(
                 program__country__in=selected_countries).count()
-            complete_total_count = ProjectComplete.objects.all().filter(
+            complete_total_count = WorkflowLevel2.objects.all().filter(
                 program__country__in=selected_countries).count()
-            agreement_approved_count = ProjectAgreement.objects.all().filter(
+            agreement_approved_count = WorkflowLevel2.objects.all().filter(
                 approval='approved',
                 program__country__in=selected_countries).count()
-            complete_approved_count = ProjectComplete.objects.all().filter(
+            complete_approved_count = WorkflowLevel2.objects.all().filter(
                 approval='approved',
                 program__country__in=selected_countries).count()
 
-            agreement_awaiting_count = ProjectAgreement.objects.all().filter(
+            agreement_awaiting_count = WorkflowLevel2.objects.all().filter(
                 approval='awaiting approval',
                 program__country__in=selected_countries).count()
-            complete_awaiting_count = ProjectComplete.objects.all().filter(
+            complete_awaiting_count = WorkflowLevel2.objects.all().filter(
                 approval='awaiting approval',
                 program__country__in=selected_countries).count()
-            agreement_open_count = ProjectAgreement.objects.all().filter(
+            agreement_open_count = WorkflowLevel2.objects.all().filter(
                 Q(Q(approval='open') | Q(
                     approval="") | Q(approval=None)),
                 program__country__in=selected_countries).count()
-            complete_open_count = ProjectComplete.objects.all().filter(
+            complete_open_count = WorkflowLevel2.objects.all().filter(
                 Q(Q(approval='open') | Q(
                     approval="") | Q(approval=None)),
                 program__country__in=selected_countries).count()
-            agreement_wait_count = ProjectAgreement.objects.all().filter(
+            agreement_wait_count = WorkflowLevel2.objects.all().filter(
                 Q(approval='in progress') & Q(
                     Q(approval='in progress') | Q(approval=None) | Q(
                         approval="")),
                 program__country__in=selected_countries).count()
-            complete_wait_count = ProjectComplete.objects.all().filter(
+            complete_wait_count = WorkflowLevel2.objects.all().filter(
                 Q(approval='in progress') &
                 Q(Q(approval='in progress') |
                   Q(approval=None) | Q(approval="")),
@@ -193,40 +193,40 @@ def index(request, selected_countries=None, id=0, sector=0):
         filter_for_quantitative_data_sums[
             'indicator__program__id'] = program_id
 
-        get_filtered_name = Program.objects.get(id=program_id)
-        agreement_total_count = ProjectAgreement.objects.all().filter(
+        get_filtered_name = WorkflowLevel1.objects.get(id=program_id)
+        agreement_total_count = WorkflowLevel2.objects.all().filter(
             program__id=program_id).count()
-        complete_total_count = ProjectComplete.objects.all().filter(
+        complete_total_count = WorkflowLevel2.objects.all().filter(
             program__id=program_id).count()
-        agreement_approved_count = ProjectAgreement.objects.all().filter(
+        agreement_approved_count = WorkflowLevel2.objects.all().filter(
             program__id=program_id, approval='approved').count()
-        complete_approved_count = ProjectComplete.objects.all().filter(
+        complete_approved_count = WorkflowLevel2.objects.all().filter(
             program__id=program_id, approval='approved').count()
-        agreement_open_count = ProjectAgreement.objects.all().filter(
+        agreement_open_count = WorkflowLevel2.objects.all().filter(
             program__id=program_id, approval='open').count()
-        complete_open_count = ProjectComplete.objects.all().filter(
+        complete_open_count = WorkflowLevel2.objects.all().filter(
             Q(Q(approval='open') | Q(approval="")),
             program__id=program_id).count()
-        agreement_wait_count = ProjectAgreement.objects.all().filter(
+        agreement_wait_count = WorkflowLevel2.objects.all().filter(
             Q(program__id=program_id), Q(
                 approval='in progress') & Q(
                 Q(approval='in progress') | Q(approval=None) | Q(
                     approval=""))).count()
-        complete_wait_count = ProjectComplete.objects.all().filter(
+        complete_wait_count = WorkflowLevel2.objects.all().filter(
             Q(program__id=program_id), Q(
                 approval='in progress') & Q(
                 Q(approval='in progress') | Q(approval=None) | Q(
                     approval=""))).count()
-        get_site_profile = SiteProfile.objects.all().prefetch_related(
+        get_site_profile = Location.objects.all().prefetch_related(
             'country', 'district', 'province').filter(
             projectagreement__program__id=program_id).filter(status=1)
-        get_site_profile_indicator = SiteProfile.objects.all()\
+        get_site_profile_indicator = Location.objects.all()\
             .prefetch_related('country', 'district', 'province').filter(
             Q(collecteddata__program__id=program_id)).filter(status=1)
 
-        agreement_awaiting_count = ProjectAgreement.objects.all().filter(
+        agreement_awaiting_count = WorkflowLevel2.objects.all().filter(
             program__id=program_id, approval='awaiting approval').count()
-        complete_awaiting_count = ProjectComplete.objects.all().filter(
+        complete_awaiting_count = WorkflowLevel2.objects.all().filter(
             program__id=program_id, approval='awaiting approval').count()
 
     get_quantitative_data_sums = CollectedData.objects.all() \
@@ -261,14 +261,14 @@ def index(request, selected_countries=None, id=0, sector=0):
     table = IndicatorDataTable(get_quantitative_data_sums)
     table.paginate(page=request.GET.get('page', 1), per_page=20)
 
-    count_program = Program.objects.all().filter(
+    count_program = WorkflowLevel1.objects.all().filter(
         country__in=selected_countries, funding_status='Funded').count()
 
     approved_by = ActivityUser.objects.get(user_id=request.user)
-    user_pending_approvals = ProjectAgreement.objects.filter(
+    user_pending_approvals = WorkflowLevel2.objects.filter(
         approved_by=approved_by).exclude(approval='approved')
 
-    count_program_agreement = ProjectAgreement.objects.all().filter(
+    count_program_agreement = WorkflowLevel2.objects.all().filter(
         program__country__in=selected_countries,
         program__funding_status='Funded').values('program').distinct().count()
     count_indicator = Indicator.objects.all().filter(
@@ -601,7 +601,7 @@ def add_program(request):
     """
     data = request.POST
     activity_user = ActivityUser.objects.filter(user=request.user).first()
-    program = Program(name=data.get(
+    program = WorkflowLevel1(name=data.get(
         'program_name'), start_date=data.get('start_date'),
         end_date=data.get('end_date'), organization=activity_user.organization)
 

@@ -218,10 +218,10 @@ class Migration(migrations.Migration):
                 ('description', models.TextField(blank=True, max_length=765, null=True, verbose_name='Description/Notes')),
                 ('logo', models.FileField(blank=True, null=True, upload_to='static/img/', verbose_name='Your Organization Logo')),
                 ('organization_url', models.CharField(blank=True, max_length=255, null=True)),
-                ('level_1_label', models.CharField(blank=True, default='Program', max_length=255, verbose_name='Project/Program Organization Level 1 label')),
-                ('level_2_label', models.CharField(blank=True, default='Project', max_length=255, verbose_name='Project/Program Organization Level 2 label')),
-                ('level_3_label', models.CharField(blank=True, default='Component', max_length=255, verbose_name='Project/Program Organization Level 3 label')),
-                ('level_4_label', models.CharField(blank=True, default='Activity', max_length=255, verbose_name='Project/Program Organization Level 4 label')),
+                ('level_1_label', models.CharField(blank=True, default='WorkflowLevel1', max_length=255, verbose_name='Project/WorkflowLevel1 Organization Level 1 label')),
+                ('level_2_label', models.CharField(blank=True, default='Project', max_length=255, verbose_name='Project/WorkflowLevel1 Organization Level 2 label')),
+                ('level_3_label', models.CharField(blank=True, default='Component', max_length=255, verbose_name='Project/WorkflowLevel1 Organization Level 3 label')),
+                ('level_4_label', models.CharField(blank=True, default='Activity', max_length=255, verbose_name='Project/WorkflowLevel1 Organization Level 4 label')),
                 ('create_date', models.DateTimeField(blank=True, null=True)),
                 ('edit_date', models.DateTimeField(blank=True, null=True)),
             ],
@@ -243,14 +243,14 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='Program',
+            name='WorkflowLevel1',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('gaitid', models.CharField(blank=True, max_length=255, unique=True, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=255, verbose_name='Program Name')),
+                ('name', models.CharField(blank=True, max_length=255, verbose_name='WorkflowLevel1 Name')),
                 ('funding_status', models.CharField(blank=True, max_length=255, verbose_name='Funding Status')),
                 ('cost_center', models.CharField(blank=True, max_length=255, null=True, verbose_name='Fund Code')),
-                ('description', models.TextField(blank=True, max_length=765, null=True, verbose_name='Program Description')),
+                ('description', models.TextField(blank=True, max_length=765, null=True, verbose_name='WorkflowLevel1 Description')),
                 ('create_date', models.DateTimeField(blank=True, null=True)),
                 ('edit_date', models.DateTimeField(blank=True, null=True)),
                 ('budget_check', models.BooleanField(default=False, verbose_name='Enable Approval Authority')),
@@ -263,7 +263,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='ProjectAgreement',
+            name='WorkflowLevel2',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('short', models.BooleanField(default=True, verbose_name='Short Form (recommended)')),
@@ -340,7 +340,7 @@ class Migration(migrations.Migration):
                 ('finance_reviewed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='finance_reviewing', to='workflow.ActivityUser')),
                 ('me_reviewed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='reviewing_me', to='workflow.ActivityUser', verbose_name='M&E Reviewed by')),
                 ('office', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.Office', verbose_name='Office')),
-                ('program', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='agreement', to='workflow.Program', verbose_name='Program')),
+                ('program', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='agreement', to='workflow.WorkflowLevel1', verbose_name='WorkflowLevel1')),
             ],
             options={
                 'verbose_name_plural': 'Project Initiation',
@@ -457,7 +457,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='SiteProfile',
+            name='Location',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=255, verbose_name='Site Name')),
@@ -523,7 +523,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='ProjectComplete',
+            name='WorkflowLevel2',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('short', models.BooleanField(default=True, verbose_name='Short Form (recommended)')),
@@ -575,12 +575,12 @@ class Migration(migrations.Migration):
                 ('checked_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='checking_complete', to='workflow.ActivityUser')),
                 ('estimated_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='estimating_complete', to='workflow.ActivityUser')),
                 ('office', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.Office')),
-                ('program', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='complete', to='workflow.Program')),
-                ('project_agreement', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='workflow.ProjectAgreement', verbose_name='Project Initiation')),
+                ('program', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='complete', to='workflow.WorkflowLevel1')),
+                ('project_agreement', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='workflow.WorkflowLevel2', verbose_name='Project Initiation')),
                 ('project_type', models.ForeignKey(blank=True, max_length=255, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.ProjectType')),
                 ('reviewed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='reviewing_complete', to='workflow.ActivityUser')),
                 ('sector', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.Sector')),
-                ('site', models.ManyToManyField(blank=True, to='workflow.SiteProfile')),
+                ('site', models.ManyToManyField(blank=True, to='workflow.Location')),
                 ('stakeholder', models.ManyToManyField(blank=True, to='workflow.Stakeholder')),
             ],
             options={
@@ -606,7 +606,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='projectagreement',
             name='site',
-            field=models.ManyToManyField(blank=True, to='workflow.SiteProfile'),
+            field=models.ManyToManyField(blank=True, to='workflow.Location'),
         ),
         migrations.AddField(
             model_name='projectagreement',
@@ -637,8 +637,8 @@ class Migration(migrations.Migration):
                 ('type', models.TextField(blank=True, null=True, verbose_name='Type')),
                 ('create_date', models.DateTimeField(blank=True, null=True)),
                 ('edit_date', models.DateTimeField(blank=True, null=True)),
-                ('agreement', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.ProjectAgreement', verbose_name='Project Initiation')),
-                ('complete', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.ProjectComplete')),
+                ('agreement', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel2', verbose_name='Project Initiation')),
+                ('complete', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel2')),
             ],
             options={
                 'verbose_name_plural': 'Monitors',
@@ -776,8 +776,8 @@ class Migration(migrations.Migration):
                 ('estimated_by', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.ActivityUser')),
                 ('history_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL)),
                 ('office', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.Office')),
-                ('program', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.Program')),
-                ('project_agreement', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.ProjectAgreement', verbose_name='Project Initiation')),
+                ('program', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.WorkflowLevel1')),
+                ('project_agreement', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.WorkflowLevel2', verbose_name='Project Initiation')),
                 ('project_type', models.ForeignKey(blank=True, db_constraint=False, max_length=255, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.ProjectType')),
                 ('reviewed_by', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.ActivityUser')),
                 ('sector', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.Sector')),
@@ -870,7 +870,7 @@ class Migration(migrations.Migration):
                 ('history_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL)),
                 ('me_reviewed_by', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.ActivityUser', verbose_name='M&E Reviewed by')),
                 ('office', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.Office', verbose_name='Office')),
-                ('program', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.Program', verbose_name='Program')),
+                ('program', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.WorkflowLevel1', verbose_name='WorkflowLevel1')),
                 ('project_type', models.ForeignKey(blank=True, db_constraint=False, max_length=255, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.ProjectType', verbose_name='Project Type')),
                 ('reviewed_by', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.ActivityUser', verbose_name='Request review')),
                 ('sector', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.Sector', verbose_name='Sector')),
@@ -895,8 +895,8 @@ class Migration(migrations.Migration):
                 ('history_date', models.DateTimeField()),
                 ('history_change_reason', models.CharField(max_length=100, null=True)),
                 ('history_type', models.CharField(choices=[('+', 'Created'), ('~', 'Changed'), ('-', 'Deleted')], max_length=1)),
-                ('agreement', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.ProjectAgreement', verbose_name='Project Initiation')),
-                ('complete', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.ProjectComplete')),
+                ('agreement', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.WorkflowLevel2', verbose_name='Project Initiation')),
+                ('complete', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='workflow.WorkflowLevel2')),
                 ('history_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -909,12 +909,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='documentation',
             name='program',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.Program'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel1'),
         ),
         migrations.AddField(
             model_name='documentation',
             name='project',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.ProjectAgreement'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel2'),
         ),
         migrations.AddField(
             model_name='documentation',
@@ -956,7 +956,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='checklist',
             name='agreement',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.ProjectAgreement', verbose_name='Project Initiation'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel2', verbose_name='Project Initiation'),
         ),
         migrations.AddField(
             model_name='checklist',
@@ -972,8 +972,8 @@ class Migration(migrations.Migration):
                 ('proposed_value', models.IntegerField(blank=True, default=0, null=True, verbose_name='Value')),
                 ('create_date', models.DateTimeField(blank=True, null=True)),
                 ('edit_date', models.DateTimeField(blank=True, null=True)),
-                ('agreement', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.ProjectAgreement', verbose_name='Project Initiation')),
-                ('complete', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.ProjectComplete')),
+                ('agreement', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel2', verbose_name='Project Initiation')),
+                ('complete', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel2')),
             ],
             options={
                 'ordering': ('contributor',),
@@ -994,9 +994,9 @@ class Migration(migrations.Migration):
                 ('description', models.CharField(blank=True, max_length=255, verbose_name='Description')),
                 ('create_date', models.DateTimeField(blank=True, null=True)),
                 ('edit_date', models.DateTimeField(blank=True, null=True)),
-                ('agreement', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.ProjectAgreement', verbose_name='Project Initiation')),
-                ('complete', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.ProjectComplete')),
-                ('site', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.SiteProfile')),
+                ('agreement', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel2', verbose_name='Project Initiation')),
+                ('complete', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel2')),
+                ('site', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.Location')),
             ],
             options={
                 'verbose_name_plural': 'Project Components',
@@ -1072,7 +1072,7 @@ class Migration(migrations.Migration):
                 ('bookmark_url', models.CharField(blank=True, max_length=255, null=True)),
                 ('create_date', models.DateTimeField(blank=True, null=True)),
                 ('edit_date', models.DateTimeField(blank=True, null=True)),
-                ('program', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.Program')),
+                ('program', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='workflow.WorkflowLevel1')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='activitybookmark', to='workflow.ActivityUser')),
             ],
             options={

@@ -35,7 +35,7 @@
         data,
         success: function(resp, status) {
           // notify success
-          toastr.success('Program was added sucessfully', `${resp}`);
+          toastr.success('WorkflowLevel1 was added sucessfully', `${resp}`);
 
           //close modal
           $('#addProgramModal').modal('hide');
@@ -77,19 +77,19 @@
         >
           <span aria-hidden="true">&times;</span>
         </button>
-        <h4 class="modal-title" id="addProgramModalLabel">Add Program</h4>
+        <h4 class="modal-title" id="addProgramModalLabel">Add WorkflowLevel1</h4>
       </div>
       <div class="modal-body">
         <form id="addProgramForm">
           {% csrf_token %}
           <div class="form-group">
-            <label for="programName">Program Name</label>
+            <label for="programName">WorkflowLevel1 Name</label>
             <input
               type="text"
               id="programName"
               name="program_name"
               class="form-control"
-              placeholder="Program"
+              placeholder="WorkflowLevel1"
             />
           </div>
 

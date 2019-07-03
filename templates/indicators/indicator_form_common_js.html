@@ -306,7 +306,7 @@
                                 <td class="pt-delete-row" style="border: none;">
                                 </td>
                                 <td align="left" style="padding-left: 0px; border: none; vertical-align: middle;">
-                                    <strong>Life of Program (LoP) target</strong>
+                                    <strong>Life of WorkflowLevel1 (LoP) target</strong>
                                 </td>
                                 <td align="right" style="vertical-align: middle; border: none;">
                                     <div style="margin: 5px 10px;">
@@ -353,7 +353,7 @@
             });
             return;
             */
-            if (!confirm(`Warning: This action cannot be undone. If we make these changes, ${numDataPoints} data record/s will no longer be associated with the Life of Program target, and will need to be reassigned to new targets. \n\nProceed anyway?`)) {
+            if (!confirm(`Warning: This action cannot be undone. If we make these changes, ${numDataPoints} data record/s will no longer be associated with the Life of WorkflowLevel1 target, and will need to be reassigned to new targets. \n\nProceed anyway?`)) {
                 initalTargetFrequency = undefined;
                 return;
             }
@@ -480,7 +480,7 @@
         $("#addNewPeriodicTarget").html(label);
         var selected_option = $("#id_target_frequency").find("option:selected").text();
         if ( (lock == true || $('#id_target_frequency').is('[readonly="readonly"]'))
-                 && selected_option != 'Life of Program (LoP) only') {
+                 && selected_option != 'Life of WorkflowLevel1 (LoP) only') {
             $("#id_target_frequency option:not(:selected)").attr("disabled", true);
             $("#id_target_frequency").attr("readonly", true);
             $("#id_create_targets_btn").attr("disabled", true);
@@ -489,7 +489,7 @@
             $("#div_id_target_frequency_custom").hide();
             lock = true;
         }
-        if (selected_option == 'Life of Program (LoP) only' || selected_option == '---------') {
+        if (selected_option == 'Life of WorkflowLevel1 (LoP) only' || selected_option == '---------') {
             $("#div_id_create_targets_btn").hide();
         } else {
             if ($("#id_div_periodic_tables_placeholder").children().length > 0) {
@@ -510,7 +510,7 @@
 
 
         if (lock == false) {
-            if (selected_option == 'Life of Program (LoP) only' ||
+            if (selected_option == 'Life of WorkflowLevel1 (LoP) only' ||
                 selected_option == 'Midline and endline' ||
                 selected_option == '---------') {
                 $("#div_id_target_frequency_start").hide();

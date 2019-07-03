@@ -8,7 +8,7 @@ and get all country records
 Install module django-extensions
 Runs twice via function calls at bottom once
 """
-from workflow.models import Country, Program
+from workflow.models import Country, WorkflowLevel1
 from datetime import date
 import urllib.request
 import sys
@@ -22,7 +22,7 @@ def run():
     print("Uploading JSON data")
 
 
-type = "Program"
+type = "WorkflowLevel1"
 program_country = 1
 
 
@@ -88,7 +88,7 @@ def get_all_data(url, type, program_country):
             sys.stderr.write('ERROR: %s\n' % str(err))
         pass
 
-        latest = Program.objects.latest('id')
+        latest = WorkflowLevel1.objects.latest('id')
 
         query2 = "INSERT INTO activitydb_program_country " \
                  "(country_id,program_id) VALUES (%s,%s)" % (
@@ -123,7 +123,7 @@ def get_all_data(url, type, program_country):
                             new_key = 'code'
                         keys_to_sql.append(new_key)
                         vars_to_sql.append(new_value)
-            elif type == "Program":
+            elif type == "WorkflowLevel1":
                 if new_value:
                     # country or region related columns only
                     if new_key in ('gaitid', 'funding_status', 'granttitle',
@@ -149,13 +149,13 @@ def get_all_data(url, type, program_country):
 
         if type == "Country":
             save_countries(keys_to_sql, vars_to_sql)
-        elif type == "Program":
+        elif type == "WorkflowLevel1":
             save_programs(keys_to_sql, vars_to_sql, program_country)
 
 
 # TODO : Change urls or delete lines
 # get an updated json data file for the hub and update or insert new records
-print("Program")
+print("WorkflowLevel1")
 get_countries = Country.objects.all()
 for country in get_countries:
     print(country.country)
@@ -164,6 +164,6 @@ for country in get_countries:
         "http://mcapi.mercycorps.org/gaitprogram/?country=%s&format=json" % (
             safe_country)
     print(program_url)
-    get_all_data(program_url, "Program", int(country.id))
+    get_all_data(program_url, "WorkflowLevel1", int(country.id))
 
 print("Alright, all done.")

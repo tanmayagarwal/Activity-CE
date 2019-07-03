@@ -5,7 +5,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
 from .models import TrainingAttendance, Distribution, Beneficiary
-from workflow.models import Program, ProjectAgreement, Office, Province, SiteProfile
+from workflow.models import WorkflowLevel1, WorkflowLevel2, Office, Province, Location
 from functools import partial
 from activity.util import get_country
 
@@ -42,8 +42,8 @@ class TrainingAttendanceForm(forms.ModelForm):
 
         countries = get_country(self.request.user)
         self.fields['project_agreement'].queryset = \
-            ProjectAgreement.objects.filter(program__country__in=countries)
-        self.fields['program'].queryset = Program.objects.filter(
+            WorkflowLevel2.objects.filter(program__country__in=countries)
+        self.fields['program'].queryset = WorkflowLevel1.objects.filter(
             country__in=countries)
 
 
@@ -72,9 +72,9 @@ class DistributionForm(forms.ModelForm):
         super(DistributionForm, self).__init__(*args, **kwargs)
 
         countries = get_country(self.request.user)
-        self.fields['initiation'].queryset = ProjectAgreement.objects.filter(
+        self.fields['initiation'].queryset = WorkflowLevel2.objects.filter(
             program__country__in=countries)
-        self.fields['program'].queryset = Program.objects.filter(
+        self.fields['program'].queryset = WorkflowLevel1.objects.filter(
             country__in=countries)
         self.fields['office_code'].queryset = Office.objects.filter(
             province__country__in=countries)
@@ -107,9 +107,9 @@ class BeneficiaryForm(forms.ModelForm):
         countries = get_country(self.request.user)
         self.fields['training'].queryset = TrainingAttendance.objects.filter(
             program__organization=organization)
-        self.fields['program'].queryset = Program.objects.filter(
+        self.fields['program'].queryset = WorkflowLevel1.objects.filter(
             organization=organization)
         self.fields['distribution'].queryset = Distribution.objects.filter(
             program__organization=organization)
-        self.fields['site'].queryset = SiteProfile.objects.filter(
+        self.fields['site'].queryset = Location.objects.filter(
             country__in=countries)
