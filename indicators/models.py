@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 
 from workflow.models import (
     Program, Sector, SiteProfile, ProjectAgreement, ProjectComplete,
-    Country, Documentation, ActivityUser, Organization, Sector, WorkflowLevel1, Approval)
+    Country, Documentation, ActivityUser, Organization, Sector, WorkflowLevel1, WorkflowLevel2, Approval)
 
 from activity.middlewares.get_current_user import get_request
 
@@ -614,12 +614,6 @@ class CollectedDataAdmin(admin.ModelAdmin):
 
 # NEW MODELS
 
-DIRECTION_CHOICES = (
-        ('increasing', 'Increasing'),
-        ('decreasing', 'Decreasing')
-    )
-
-
 class ReportingPeriod(models.Model):
     period_uuid = models.UUIDField('Periodic Target UUID', editable=False, default=uuid.uuid4, unique=True)
     period = models.CharField('Reporting Period', max_length=65)
@@ -778,11 +772,16 @@ class AdditionalField(models.Model):
         return super(AdditionalField, self).save(*args, **kwargs)
 
 
+DIRECTION_CHOICES = (
+        ('increasing', 'Increasing'),
+        ('decreasing', 'Decreasing')
+    )
+
+
 class Indicator1(models.Model):
     """
     Indicator Model
     """
-
     indicator_uuid = models.UUIDField('Indicator UUID', editable=False, default=uuid.uuid4, unique=True)
     name = models.TextField('Indicator Name', max_length=255)
     type = models.ForeignKey(IndicatorType, verbose_name='Indicator Type', null=True, on_delete=models.SET_NULL)
@@ -850,6 +849,7 @@ class IndicatorLibrary(models.Model):
     """
     Indicator Library Model
     """
+    indicator_lib_uuid = models.UUIDField('Indicator UUID', editable=False, default=uuid.uuid4, unique=True)
     name = models.CharField('Indicator Name', max_length=255)
     type = models.ForeignKey(IndicatorType, verbose_name='Indicator Type', null=True, on_delete=models.SET_NULL)
     objective = models.ForeignKey(Objective, verbose_name='Program Objective', null=True, on_delete=models.SET_NULL)
@@ -909,13 +909,21 @@ class IndicatorLibrary(models.Model):
 
 class IndicatorResult(models.Model):
     """
-    Indicator Library Model
+    Indicator Result Model
     """
+    result_uuid = models.UUIDField('Indicator Result UUID', editable=False, default=uuid.uuid4, unique=True)
     indicator = models.ForeignKey(Indicator, verbose_name='Indicator', on_delete=models.CASCADE)
-    disaggregation_label = models.ForeignKey(DisaggregationLabel, verbose_name='Disaggregation Label',
-                                             null=True, on_delete=models.SET_NULL)
-    disaggregation_value = models.CharField(max_length=765, blank=True, null=True)
+    disaggregation_value = models.ManyToManyField(DisaggregationValue, verbose_name='Disaggregation Values',
+                                                  related_name='disaggregation_values', blank=True)
     description = models.TextField('Indicator Results Description', max_length=765, blank=True)
+    comment = models.TextField('Comment/Explanation', max_length=765, blank=True)
+    result = models.DecimalField('Result', max_digits=20, decimal_places=4, default=Decimal('0.0000'))
+    workflow_level1 = models.ForeignKey(WorkflowLevel1, verbose_name='Related WorkflowLevel1', null=True,
+                                        on_delete=models.SET_NULL)
+    workflow_level2 = models.ForeignKey(WorkflowLevel2, verbose_name='Related WorkflowLevel1', null=True,
+                                        on_delete=models.SET_NULL)
+    reporting_period = models.ForeignKey(ReportingPeriod, verbose_name='Reporting Period', null=True,
+                                         on_delete=models.SET_NULL)
     create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
     modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
@@ -935,3 +943,11 @@ class IndicatorResult(models.Model):
         self.modified_date = timezone.now()
         self.modified_by = logged_user
         return super(IndicatorResult, self).save(*args, **kwargs)
+
+    @property
+    def disaggregation_set(self):
+        return ', '.join(
+            ['{} : {}'.format(y.disaggregation_label.label, y.value)
+             for y in self.disaggregation_value.all()]
+        )
+
