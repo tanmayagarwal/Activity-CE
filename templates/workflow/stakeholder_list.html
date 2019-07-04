@@ -3,7 +3,7 @@
   <!-- Sub navigation -->
   <div class="sub-navigation">
     <div class="sub-navigation-header">
-      <h4 class="page-title">Stakeholder List</h4>
+      <h4 class="page-title">Organization List</h4>
     </div>
     <div class="sub-navigation-actions">
       <div class="sub-nav-item">
@@ -40,7 +40,7 @@
             href="/workflow/stakeholder_add/0/"
             class="btn btn-sm btn-info"
           >
-            <i class="fa fa-plus"></i> New Stakeholder
+            <i class="fa fa-plus"></i> New Organization
           </a>
           <a
             role="button"
@@ -108,7 +108,7 @@
             defaultContent: '<i>Not set</i>',
           },
           {
-            title: 'Stakeholder Name',
+            title: 'Organization Name',
             data: 'name',
             mRender: function(data, name, row) {
               return (
@@ -124,7 +124,7 @@
             defaultContent: '<i>Not set</i>',
           },
           {
-            title: 'Stakeholder Type',
+            title: 'Organization Type',
             data: 'type__name',
             mRender: function(data, type, row) {
               return (
@@ -173,7 +173,7 @@
               return (
                 '<a href="/workflow/stakeholder_delete/' +
                 row.id +
-                '" class="btn btn-xs btn-danger">Delete Stakeholder</a>'
+                '" class="btn btn-xs btn-danger">Delete Organization</a>'
               );
             },
           },

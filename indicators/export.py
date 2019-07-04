@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from import_export import resources
-from .models import Indicator, CollectedData, WorkflowLevel1, Sector, ReportingFrequency
+from .models import Indicator, IndicatorResult, WorkflowLevel1, Sector, ReportingPeriod
 from workflow.models import WorkflowLevel2, WorkflowLevel2, ActivityUser
 from import_export.admin import ImportExportModelAdmin
 from import_export.widgets import ForeignKeyWidget
@@ -24,7 +24,7 @@ class IndicatorResource(resources.ModelResource):
     reporting_frequency = fields.Field(column_name='reporting_frequency',
                                        attribute='reporting_frequency',
                                        widget=ForeignKeyWidget(
-                                           ReportingFrequency, 'frequency'))
+                                           ReportingPeriod, 'frequency'))
     level = fields.Field(column_name='levels', attribute='levels')
     disaggregation = fields.Field(
         column_name='disaggregation', attribute='disaggregations')
@@ -68,7 +68,7 @@ class CollectedDataResource(resources.ModelResource):
         column_name='dissaggregations', attribute='disaggregations')
 
     class Meta:
-        model = CollectedData
+        model = IndicatorResult
         exclude = ('create_date', 'edit_date')
 
 

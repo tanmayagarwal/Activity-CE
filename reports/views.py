@@ -3,7 +3,7 @@
 
 from django.views.generic import TemplateView, View
 from workflow.models import WorkflowLevel2, WorkflowLevel1
-from indicators.models import CollectedData, Indicator
+from indicators.models import IndicatorResult, Indicator
 from .forms import FilterForm
 
 from django.db.models import Q
@@ -266,7 +266,7 @@ class CollectedDataReportData(View, AjaxableResponseMixin):
         filter = make_filter(self.request.GET)
         collecteddata_filter = filter['collecteddata']
 
-        collecteddata = CollectedData.objects.all().filter(
+        collecteddata = IndicatorResult.objects.all().filter(
             **collecteddata_filter).values(
             'indicator__program__name', 'indicator__name', 'indicator__number',
             'targeted', 'achieved')
@@ -282,7 +282,7 @@ class CollectedDataReportData(View, AjaxableResponseMixin):
         }
 
         if request.GET.get('export'):
-            collecteddata_export = CollectedData.objects.all().filter(
+            collecteddata_export = IndicatorResult.objects.all().filter(
                 **collecteddata_filter)
             dataset = CollectedDataResource().export(collecteddata_export)
             response = HttpResponse(

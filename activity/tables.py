@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import django_tables2 as tables
-from indicators.models import CollectedData
+from indicators.models import IndicatorResult
 from django_tables2.utils import A
 from django.template.defaultfilters import floatformat
 
@@ -19,7 +19,7 @@ class IndicatorDataTable(tables.Table):
     actuals = AchievedColumn()
 
     class Meta:
-        model = CollectedData
+        model = IndicatorResult
         attrs = {"class": "paleblue"}
         fields = ('indicator__lop_target', 'actuals',
                   'indicator__program__name', 'indicator__number',
@@ -34,7 +34,7 @@ class CollectedDataTable(tables.Table):
         'projectagreement_update', args=[A('agreement_id')])
 
     class Meta:
-        model = CollectedData
+        model = IndicatorResult
         attrs = {"class": "paleblue"}
         fields = ('targeted', 'achieved', 'description', 'logframe_indicator',
                   'sector', 'community', 'agreement', 'complete')

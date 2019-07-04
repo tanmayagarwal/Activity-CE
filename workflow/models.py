@@ -127,21 +127,21 @@ class Organization(models.Model):
                             blank=True, null=True, upload_to="media/img/")
     organization_url = models.CharField(blank=True, null=True, max_length=255)
     level_1_label = models.CharField(
-        "Project/WorkflowLevel1 Organization Level 1 label", default="WorkflowLevel1",
+        "Project/WorkflowLevel1 Organization IndicatorLevel 1 label", default="WorkflowLevel1",
         max_length=255, blank=True)
     level_2_label = models.CharField(
-        "Project/WorkflowLevel1 Organization Level 2 label", default="Project",
+        "Project/WorkflowLevel1 Organization IndicatorLevel 2 label", default="Project",
         max_length=255, blank=True)
     level_3_label = models.CharField(
-        "Project/WorkflowLevel1 Organization Level 3 label", default="Component",
+        "Project/WorkflowLevel1 Organization IndicatorLevel 3 label", default="Component",
         max_length=255, blank=True)
     level_4_label = models.CharField(
-        "Project/WorkflowLevel1 Organization Level 4 label", default="Activity",
+        "Project/WorkflowLevel1 Organization IndicatorLevel 4 label", default="Activity",
         max_length=255, blank=True)
     site_label = models.CharField('Site Organization label', default='Site',
                                   max_length=255)
-    stakeholder_label = models.CharField('Stakeholder Organization label',
-                                         default='Stakeholder',
+    stakeholder_label = models.CharField('Organization Organization label',
+                                         default='Organization',
                                          max_length=255)
     form_label = models.CharField('Form Organization label', default='Form',
                                   max_length=255)
@@ -349,7 +349,7 @@ class Contact(models.Model):
     email = models.CharField("Email", max_length=255, blank=True, null=True)
     phone = models.CharField("Phone", max_length=255, blank=True, null=True)
     country = models.ForeignKey(
-        Country, blank=True, null=True, on_delete=models.SET_NULL)
+        'activity.Country', blank=True, null=True, on_delete=models.SET_NULL)
     create_date = models.DateTimeField(null=True, blank=True)
     edit_date = models.DateTimeField(null=True, blank=True)
 
@@ -434,15 +434,15 @@ class ApprovalAuthority(models.Model):
 
 
 class Province(models.Model):
-    name = models.CharField("Admin Level 1", max_length=255, blank=True)
-    country = models.ForeignKey(Country, on_delete=models.CASCADE)
+    name = models.CharField("Admin IndicatorLevel 1", max_length=255, blank=True)
+    country = models.ForeignKey('activity.Country', on_delete=models.CASCADE)
     create_date = models.DateTimeField(null=True, blank=True)
     edit_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ('name',)
-        verbose_name = "Admin Level 1"
-        verbose_name_plural = "Admin Level 1"
+        verbose_name = "Admin IndicatorLevel 1"
+        verbose_name_plural = "Admin IndicatorLevel 1"
 
     # on save add create date or update edit date
     def save(self, *args, **kwargs):
@@ -460,20 +460,20 @@ class ProvinceAdmin(admin.ModelAdmin):
     list_display = ('name', 'country', 'create_date')
     search_fields = ('name', 'country__country')
     list_filter = ('create_date', 'country')
-    display = 'Admin Level 1'
+    display = 'Admin IndicatorLevel 1'
 
 
 class District(models.Model):
-    name = models.CharField("Admin Level 2", max_length=255, blank=True)
+    name = models.CharField("Admin IndicatorLevel 2", max_length=255, blank=True)
     province = models.ForeignKey(
-        Province, verbose_name="Admin Level 1", on_delete=models.CASCADE)
+        Province, verbose_name="Admin IndicatorLevel 1", on_delete=models.CASCADE)
     create_date = models.DateTimeField(null=True, blank=True)
     edit_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ('name',)
-        verbose_name = "Admin Level 2"
-        verbose_name_plural = "Admin Level 2"
+        verbose_name = "Admin IndicatorLevel 2"
+        verbose_name_plural = "Admin IndicatorLevel 2"
 
     # on save add create date or update edit date
     def save(self, *args, **kwargs):
@@ -491,21 +491,21 @@ class DistrictAdmin(admin.ModelAdmin):
     list_display = ('name', 'province', 'create_date')
     search_fields = ('create_date', 'province')
     list_filter = ('province__country__country', 'province')
-    display = 'Admin Level 2'
+    display = 'Admin IndicatorLevel 2'
 
 
 class AdminLevelThree(models.Model):
-    name = models.CharField("Admin Level 3", max_length=255, blank=True)
+    name = models.CharField("Admin IndicatorLevel 3", max_length=255, blank=True)
     district = models.ForeignKey(
-        District, verbose_name="Admin Level 2", blank=True, null=True,
+        District, verbose_name="Admin IndicatorLevel 2", blank=True, null=True,
         on_delete=models.SET_NULL)
     create_date = models.DateTimeField(null=True, blank=True)
     edit_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ('name',)
-        verbose_name = "Admin Level 3"
-        verbose_name_plural = "Admin Level 3"
+        verbose_name = "Admin IndicatorLevel 3"
+        verbose_name_plural = "Admin IndicatorLevel 3"
 
     # on save add create date or update edit date
     def save(self, *args, **kwargs):
@@ -523,14 +523,14 @@ class AdminLevelThreeAdmin(admin.ModelAdmin):
     list_display = ('name', 'district', 'create_date')
     search_fields = ('name', 'district__name')
     list_filter = ('district__province__country__country', 'district')
-    display = 'Admin Level 3'
+    display = 'Admin IndicatorLevel 3'
 
 
 class Village(models.Model):
-    name = models.CharField("Admin Level 4", max_length=255, blank=True)
+    name = models.CharField("Admin IndicatorLevel 4", max_length=255, blank=True)
     district = models.ForeignKey(
         District, null=True, blank=True, on_delete=models.SET_NULL)
-    admin_3 = models.ForeignKey(AdminLevelThree, verbose_name="Admin Level 3",
+    admin_3 = models.ForeignKey(AdminLevelThree, verbose_name="Admin IndicatorLevel 3",
                                 null=True, blank=True,
                                 on_delete=models.SET_NULL)
     create_date = models.DateTimeField(null=True, blank=True)
@@ -538,8 +538,8 @@ class Village(models.Model):
 
     class Meta:
         ordering = ('name',)
-        verbose_name = "Admin Level 4"
-        verbose_name_plural = "Admin Level 4"
+        verbose_name = "Admin IndicatorLevel 4"
+        verbose_name_plural = "Admin IndicatorLevel 4"
 
     # on save add create date or update edit date
     def save(self, *args, **kwargs):
@@ -556,14 +556,14 @@ class Village(models.Model):
 class VillageAdmin(admin.ModelAdmin):
     list_display = ('name', 'district', 'create_date', 'edit_date')
     list_filter = ('district__province__country__country', 'district')
-    display = 'Admin Level 4'
+    display = 'Admin IndicatorLevel 4'
 
 
 class Office(models.Model):
     name = models.CharField("Office Name", max_length=255, blank=True)
     code = models.CharField("Office Code", max_length=255, blank=True)
     province = models.ForeignKey(
-        Province, verbose_name="Admin Level 1", on_delete=models.CASCADE)
+        Province, verbose_name="Admin IndicatorLevel 1", on_delete=models.CASCADE)
     create_date = models.DateTimeField(null=True, blank=True)
     edit_date = models.DateTimeField(null=True, blank=True)
 
@@ -690,13 +690,13 @@ class CapacityAdmin(admin.ModelAdmin):
 
 class StakeholderType(models.Model):
     name = models.CharField(
-        "Stakeholder Type", max_length=255, blank=True, null=True)
+        "Organization Type", max_length=255, blank=True, null=True)
     create_date = models.DateTimeField(null=True, blank=True)
     edit_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ('name',)
-        verbose_name_plural = "Stakeholder Types"
+        verbose_name_plural = "Organization Types"
 
     # on save add create date or update edit date
     def save(self, *args, **kwargs):
@@ -712,7 +712,7 @@ class StakeholderType(models.Model):
 
 class StakeholderTypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'create_date', 'edit_date')
-    display = 'Stakeholder Types'
+    display = 'Organization Types'
     list_filter = 'create_date'
     search_fields = 'name'
 
@@ -793,77 +793,6 @@ class TemplateAdmin(admin.ModelAdmin):
     display = 'Template'
 
 
-class StakeholderManager(models.Manager):
-    def get_queryset(self):
-        return super(StakeholderManager, self).get_queryset().prefetch_related(
-            'contact', 'sectors').select_related('country', 'type',
-                                                 'formal_relationship_document',
-                                                 'vetting_document')
-
-
-class Stakeholder(models.Model):
-    name = models.CharField("Stakeholder/Organization Name",
-                            max_length=255, blank=True, null=True)
-    type = models.ForeignKey(StakeholderType, blank=True,
-                             null=True, on_delete=models.SET_NULL)
-    contact = models.ManyToManyField(Contact, max_length=255, blank=True)
-    country = models.ForeignKey(
-        'activity.Country', blank=True, null=True, on_delete=models.SET_NULL)
-    # sector = models.ForeignKey(Sector, blank=True, null=True,
-    # related_name='sects')
-    sectors = models.ManyToManyField(Sector, blank=True)
-    stakeholder_register = models.BooleanField(
-        "Has this partner been added to stakeholder register?")
-    formal_relationship_document = models.ForeignKey(
-        'Documentation',
-        verbose_name="Formal Written Description of Relationship",
-        null=True, blank=True,
-        related_name="relationship_document",
-        on_delete=models.SET_NULL)
-    vetting_document = models.ForeignKey(
-        'Documentation',
-        verbose_name="Vetting/ due diligence statement",
-        null=True, blank=True, related_name="vetting_document",
-        on_delete=models.SET_NULL)
-    approval = models.CharField(
-        "Approval", default="in progress", max_length=255, blank=True,
-        null=True)
-    approved_by = models.ForeignKey(ActivityUser, help_text='', blank=True,
-                                    null=True,
-                                    related_name="stake_approving",
-                                    on_delete=models.SET_NULL)
-    filled_by = models.ForeignKey(ActivityUser, help_text='', blank=True,
-                                  null=True,
-                                  related_name="stake_filled",
-                                  on_delete=models.SET_NULL)
-    notes = models.TextField(max_length=765, blank=True, null=True)
-    create_date = models.DateTimeField(null=True, blank=True)
-    edit_date = models.DateTimeField(null=True, blank=True)
-    # optimize query
-    objects = StakeholderManager()
-
-    class Meta:
-        ordering = ('country', 'name', 'type')
-        verbose_name_plural = "Stakeholders"
-
-    # on save add create date or update edit date
-    def save(self, *args, **kwargs):
-        if self.create_date is None:
-            self.create_date = datetime.now()
-        self.edit_date = datetime.now()
-        super(Stakeholder, self).save()
-
-    # displayed in admin templates
-    def __str__(self):
-        return self.name
-
-
-class StakeholderAdmin(admin.ModelAdmin):
-    list_display = ('name', 'type', 'country', 'create_date')
-    display = 'Stakeholders'
-    list_filter = ('country', 'type', 'sector')
-
-
 class LoggedUser(models.Model):
     username = models.CharField(max_length=30, primary_key=True)
     country = models.CharField(max_length=100, blank=False)
@@ -927,11 +856,11 @@ def get_user_country(request):
 # NEW MODELS
 class WorkflowLevel1Type(models.Model):
     """
-    Workflow Level 1 Type Model
-    These are Workflow Level 1 categories
+    Workflow IndicatorLevel 1 Type Model
+    These are Workflow IndicatorLevel 1 categories
     """
-    type_uuid = models.UUIDField('Workflow Level 1 Type UUID', editable=False, default=uuid.uuid4, unique=True)
-    type = models.CharField('Workflow Level 1 Type', max_length=100, unique=True)
+    type_uuid = models.UUIDField('Workflow IndicatorLevel 1 Type UUID', editable=False, default=uuid.uuid4, unique=True)
+    type = models.CharField('Workflow IndicatorLevel 1 Type', max_length=100, unique=True)
     create_date = models.DateTimeField('Create Date', blank=True, null=True)
     modified_date = models.DateTimeField('Modified Date', blank=True, null=True)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
@@ -960,7 +889,7 @@ class WorkflowLevel1Type(models.Model):
 class FundingStatus(models.Model):
     """
     Funding Status Model
-    Tracking Workflow Level 1 funding status
+    Tracking Workflow IndicatorLevel 1 funding status
     """
     funding_status_uuid = models.UUIDField('Funding Status UUID', editable=False, default=uuid.uuid4(), unique=True)
     status = models.CharField('Funding Status', max_length=165)
@@ -1056,19 +985,19 @@ class WorkflowStatus(models.Model):
 
 class WorkflowLevel1(models.Model):
     """
-    Workflow Level 1 model (top level workflow model)
+    Workflow IndicatorLevel 1 model (top level workflow model)
     """
-    workflow_level1_uuid = models.UUIDField('Workflow Level 1 UUID', editable=False, default=uuid.uuid4, unique=True)
-    name = models.CharField('Workflow Level 1 Name', max_length=255, blank=False)
-    workflow_level1_code = models.CharField('Workflow Level 1 Code', max_length=100, blank=True)
-    description = models.TextField('Workflow Level 1 Description', max_length=765, blank=True)
+    workflow_level1_uuid = models.UUIDField('Workflow IndicatorLevel 1 UUID', editable=False, default=uuid.uuid4, unique=True)
+    name = models.CharField('Workflow IndicatorLevel 1 Name', max_length=255, blank=False)
+    workflow_level1_code = models.CharField('Workflow IndicatorLevel 1 Code', max_length=100, blank=True)
+    description = models.TextField('Workflow IndicatorLevel 1 Description', max_length=765, blank=True)
     start_date = models.DateTimeField('Start Date', null=True, blank=True)
     end_date = models.DateTimeField('End Date', null=True, blank=True)
-    workflow_level1_type = models.ForeignKey(WorkflowLevel1Type, verbose_name='Workflow Level 1 Type', null=True,
+    workflow_level1_type = models.ForeignKey(WorkflowLevel1Type, verbose_name='Workflow IndicatorLevel 1 Type', null=True,
                                              on_delete=models.SET_NULL)
     workflow_status = models.ForeignKey(WorkflowStatus, max_length=100, verbose_name='Workflow Status', null=True,
                                         on_delete=models.SET_NULL)
-    sector = models.ManyToManyField(Sector, blank=True, help_text='Workflow Level 1 sectors')
+    sector = models.ManyToManyField(Sector, blank=True, help_text='Workflow IndicatorLevel 1 sectors')
     workspace = models.ForeignKey('activity.Workspace', on_delete=models.CASCADE)
     organization = models.ForeignKey('activity.Organization', on_delete=models.CASCADE)
     portfolio = models.ForeignKey('activity.Portfolio', on_delete=models.CASCADE)
@@ -1085,7 +1014,7 @@ class WorkflowLevel1(models.Model):
 
     class Meta:
         ordering = ('name',)
-        verbose_name_plural = 'Workflow Level 1s'
+        verbose_name_plural = 'Workflow IndicatorLevel 1s'
 
     def __str__(self):
         return self.name or ''
@@ -1103,11 +1032,11 @@ class WorkflowLevel1(models.Model):
 
 class WorkflowLevel2Type(models.Model):
     """
-    Workflow Level 2 Type Model
-    These are Workflow Level 2 categories
+    Workflow IndicatorLevel 2 Type Model
+    These are Workflow IndicatorLevel 2 categories
     """
-    type_uuid = models.UUIDField('Workflow Level 2 Type UUID', editable=False, default=uuid.uuid4, unique=True)
-    type = models.CharField('Workflow Level 2 Type', max_length=100, unique=True)
+    type_uuid = models.UUIDField('Workflow IndicatorLevel 2 Type UUID', editable=False, default=uuid.uuid4, unique=True)
+    type = models.CharField('Workflow IndicatorLevel 2 Type', max_length=100, unique=True)
     create_date = models.DateTimeField('Create Date', blank=True, null=True)
     modified_date = models.DateTimeField('Modified Date', blank=True, null=True)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,
@@ -1165,16 +1094,16 @@ class WorkflowLevel2(models.Model):
     workflow Level2 or 3 or 4 model
     Workflow Level3s have self relationship with WFL2s
     """
-    workflow_level2_uuid = models.UUIDField('Workflow Level 2/3 UUID', editable=False, default=uuid.uuid4, unique=True)
-    name = models.CharField('Workflow Level 2/3 Name', max_length=255)
-    description = models.TextField('Workflow Level 2/3 Description', max_length=765, blank=True)
+    workflow_level2_uuid = models.UUIDField('Workflow IndicatorLevel 2/3 UUID', editable=False, default=uuid.uuid4, unique=True)
+    name = models.CharField('Workflow IndicatorLevel 2/3 Name', max_length=255)
+    description = models.TextField('Workflow IndicatorLevel 2/3 Description', max_length=765, blank=True)
     workflow_level2_code = models.CharField('Workflow Level2 Code', blank=True, max_length=100)
     start_date = models.DateTimeField('Start Date', null=True, blank=True)
     end_date = models.DateTimeField('End Date', null=True, blank=True)
     workflow_status = models.ForeignKey(WorkflowStatus, max_length=100, verbose_name='Workflow Status', null=True,
                                         on_delete=models.SET_NULL)
     workflow_level1 = models.ForeignKey(WorkflowLevel1, null=False, on_delete=models.CASCADE)
-    workflow_level2_type = models.ForeignKey(WorkflowLevel2Type, verbose_name='Workflow Level 2 Type', null=True,
+    workflow_level2_type = models.ForeignKey(WorkflowLevel2Type, verbose_name='Workflow IndicatorLevel 2 Type', null=True,
                                              on_delete=models.SET_NULL)
     parent = models.ForeignKey('self', null=True, related_name='workflow_level3s', on_delete=models.SET_NULL)
     office_location = models.ForeignKey(Office, null=True, verbose_name='Office Location Tag',
@@ -1195,7 +1124,7 @@ class WorkflowLevel2(models.Model):
 
     class Meta:
         ordering = ('name',)
-        verbose_name_plural = 'Workflow Level 2/3s'
+        verbose_name_plural = 'Workflow IndicatorLevel 2/3s'
 
     def __str__(self):
         return self.name or ''
@@ -1220,9 +1149,9 @@ class WorkflowLevel2Plan(models.Model):
                                                  unique=True)
     name = models.CharField('Workflow Level2 Plan  Name', max_length=150)
     description = models.TextField('Workflow Level2 Plan Description', max_length=765, blank=True)
-    workflow_level1 = models.ForeignKey(WorkflowLevel1, verbose_name='Workflow Level 1',
+    workflow_level1 = models.ForeignKey(WorkflowLevel1, verbose_name='Workflow IndicatorLevel 1',
                                         on_delete=models.CASCADE)
-    workflow_level2 = models.ForeignKey(WorkflowLevel2, verbose_name='Workflow Level 2', null=True,
+    workflow_level2 = models.ForeignKey(WorkflowLevel2, verbose_name='Workflow IndicatorLevel 2', null=True,
                                         on_delete=models.SET_NULL)
     history = HistoricalRecords()
     create_date = models.DateTimeField('Create Date', null=True, blank=True, editable=False)
@@ -1297,7 +1226,7 @@ class Budget(models.Model):
     contributor = models.ForeignKey('activity.Organization', verbose_name='Contributing Organization', null=True,
                                     on_delete=models.SET_NULL)
     description_of_contribution = models.TextField(max_length=765, blank=True)
-    workflow_level2 = models.ForeignKey(WorkflowLevel2, null=True, verbose_name="Workflow Level 2",
+    workflow_level2 = models.ForeignKey(WorkflowLevel2, null=True, verbose_name="Workflow IndicatorLevel 2",
                                         on_delete=models.SET_NULL)
     estimated_budget = models.DecimalField('Estimated Budget', decimal_places=4, max_digits=16,
                                            default=Decimal('0.0000'))

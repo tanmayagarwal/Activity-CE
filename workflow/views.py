@@ -11,12 +11,12 @@ from django.views.generic.detail import DetailView
 from .models import (
     WorkflowLevel1, Country, Province, AdminLevelThree, District, WorkflowLevel2,
     WorkflowLevel2, Location, Documentation, Monitor, Benchmarks, Budget,
-    ApprovalAuthority, Checklist, ChecklistItem, Contact, Stakeholder,
+    ApprovalAuthority, Checklist, ChecklistItem, Contact, Organization,
     FormGuidance,
     ActivityBookmarks, ActivityUser, Sector
 )
 from formlibrary.models import TrainingAttendance, Distribution
-from indicators.models import CollectedData, ExternalService, StrategicObjective
+from indicators.models import IndicatorResult, ExternalService, Objective
 from django.utils import timezone
 
 from .forms import (
@@ -388,9 +388,9 @@ class ProjectAgreementUpdate(UpdateView):
         context.update({'p_agreement_program': get_agreement.program})
 
         try:
-            get_quantitative = CollectedData.objects.all().filter(
+            get_quantitative = IndicatorResult.objects.all().filter(
                 agreement__id=self.kwargs['pk']).order_by('indicator')
-        except CollectedData.DoesNotExist:
+        except IndicatorResult.DoesNotExist:
             get_quantitative = None
         context.update({'get_quantitative': get_quantitative})
 
@@ -565,10 +565,10 @@ class ProjectAgreementDetail(DetailView):
         context.update({'get_documents': get_documents})
 
         try:
-            get_quantitative_outputs = CollectedData.objects.all().filter(
+            get_quantitative_outputs = IndicatorResult.objects.all().filter(
                 agreement__id=self.kwargs['pk'])
 
-        except CollectedData.DoesNotExist:
+        except IndicatorResult.DoesNotExist:
             get_quantitative_outputs = None
         context.update({'get_quantitative_outputs': get_quantitative_outputs})
 
@@ -684,12 +684,12 @@ class ProjectCompleteCreate(CreateView):
             get_sites = None
 
         try:
-            get_stakeholder = Stakeholder.objects.filter(
+            get_stakeholder = Organization.objects.filter(
                 projectagreement__id=get_project_agreement.id).values_list(
                 'id', flat=True)
             stakeholder = {'stakeholder': [o for o in get_stakeholder], }
             initial['stakeholder'] = stakeholder
-        except Stakeholder.DoesNotExist:
+        except Organization.DoesNotExist:
             get_stakeholder = None
 
         return initial
@@ -720,7 +720,7 @@ class ProjectCompleteCreate(CreateView):
 
         # update the quantitative data fields to include the newly
         # created complete
-        CollectedData.objects.filter(
+        IndicatorResult.objects.filter(
             agreement__id=get_complete.project_agreement_id).update(
             complete=get_complete)
 
@@ -795,10 +795,10 @@ class ProjectCompleteUpdate(UpdateView):
 
         # get Quantitative data
         try:
-            get_quantitative = CollectedData.objects.all().filter(
+            get_quantitative = IndicatorResult.objects.all().filter(
                 Q(agreement__id=get_complete.project_agreement_id) |
                 Q(complete__id=get_complete.pk)).order_by('indicator')
-        except CollectedData.DoesNotExist:
+        except IndicatorResult.DoesNotExist:
             get_quantitative = None
         context.update({'get_quantitative': get_quantitative})
 
@@ -1241,7 +1241,7 @@ class IndicatorDataBySite(ListView):
         return context
 
     def get_queryset(self):
-        q = CollectedData.objects.filter(site__id=self.kwargs.get(
+        q = IndicatorResult.objects.filter(site__id=self.kwargs.get(
             'site_id')).order_by('program', 'indicator')
         return q
 
@@ -1751,7 +1751,7 @@ class ContactList(ListView):
         get_stakeholder = None
 
         try:
-            get_stakeholder = Stakeholder.objects.get(id=stakeholder_id)
+            get_stakeholder = Organization.objects.get(id=stakeholder_id)
 
         except Exception as e:
             pass
@@ -1763,7 +1763,7 @@ class ContactList(ListView):
         else:
             # get_contacts = Contact.objects.all().filter(
             # stakeholder__projectagreement=project_agreement_id)
-            get_contacts = Stakeholder.contact.through.objects.filter(
+            get_contacts = Organization.contact.through.objects.filter(
                 stakeholder_id=stakeholder_id)
 
         return render(request, self.template_name,
@@ -1892,7 +1892,7 @@ class StakeholderList(ListView):
     """
     get_stakeholders
     """
-    model = Stakeholder
+    model = Organization
     template_name = 'workflow/stakeholder_list.html'
 
     def get(self, request, *args, **kwargs):
@@ -1916,15 +1916,15 @@ class StakeholderList(ListView):
             funding_status="Funded", country__in=countries)
 
         if program_id != 0:
-            get_stakeholders = Stakeholder.objects.all().filter(
+            get_stakeholders = Organization.objects.all().filter(
                 projectagreement__program__id=program_id).distinct()
 
         elif int(self.kwargs['pk']) != 0:
-            get_stakeholders = Stakeholder.objects.all().filter(
+            get_stakeholders = Organization.objects.all().filter(
                 projectagreement=self.kwargs['pk']).distinct()
 
         else:
-            get_stakeholders = Stakeholder.objects.all().filter(
+            get_stakeholders = Organization.objects.all().filter(
                 country__in=countries)
         return render(request, self.template_name,
                       {'get_stakeholders': get_stakeholders,
@@ -1936,15 +1936,15 @@ class StakeholderList(ListView):
 
 class StakeholderCreate(CreateView):
     """
-    Stakeholder Form
+    Organization Form
     """
-    model = Stakeholder
+    model = Organization
     guidance = None
 
     @method_decorator(group_excluded('ViewOnly', url='workflow/permission'))
     def dispatch(self, request, *args, **kwargs):
         try:
-            self.guidance = FormGuidance.objects.get(form="Stakeholder")
+            self.guidance = FormGuidance.objects.get(form="Organization")
         except FormGuidance.DoesNotExist:
             self.guidance = None
         return super(StakeholderCreate, self).dispatch(request, *args,
@@ -1980,8 +1980,8 @@ class StakeholderCreate(CreateView):
 
     def form_valid(self, form):
         form.save()
-        messages.success(self.request, 'Success, Stakeholder Created!')
-        latest = Stakeholder.objects.latest('id')
+        messages.success(self.request, 'Success, Organization Created!')
+        latest = Organization.objects.latest('id')
         redirect_url = '/workflow/stakeholder_update/' + str(latest.id)
         return HttpResponseRedirect(redirect_url)
 
@@ -1990,15 +1990,15 @@ class StakeholderCreate(CreateView):
 
 class StakeholderUpdate(UpdateView):
     """
-    Stakeholder Form
+    Organization Form
     """
-    model = Stakeholder
+    model = Organization
     guidance = None
 
     @method_decorator(group_excluded('ViewOnly', url='workflow/permission'))
     def dispatch(self, request, *args, **kwargs):
         try:
-            self.guidance = FormGuidance.objects.get(form="Stakeholder")
+            self.guidance = FormGuidance.objects.get(form="Organization")
         except FormGuidance.DoesNotExist:
             self.guidance = None
         return super(StakeholderUpdate, self).dispatch(request, *args,
@@ -2021,7 +2021,7 @@ class StakeholderUpdate(UpdateView):
 
     def form_valid(self, form):
         form.save()
-        messages.success(self.request, 'Success, Stakeholder Updated!')
+        messages.success(self.request, 'Success, Organization Updated!')
 
         return self.render_to_response(self.get_context_data(form=form))
 
@@ -2032,7 +2032,7 @@ class StakeholderDelete(DeleteView):
     """
     Benchmark Form
     """
-    model = Stakeholder
+    model = Organization
     success_url = '/workflow/stakeholder_list/0/0/'
 
     def get_context_data(self, **kwargs):
@@ -2048,7 +2048,7 @@ class StakeholderDelete(DeleteView):
     def form_valid(self, form):
         form.save()
 
-        messages.success(self.request, 'Success, Stakeholder Deleted!')
+        messages.success(self.request, 'Success, Organization Deleted!')
         return self.render_to_response(self.get_context_data(form=form))
 
     form_class = StakeholderForm
@@ -2058,7 +2058,7 @@ class QuantitativeOutputsCreate(AjaxableResponseMixin, CreateView):
     """
     QuantitativeOutput Form
     """
-    model = CollectedData
+    model = IndicatorResult
     template_name = 'workflow/quantitativeoutputs_form.html'
 
     # add the request to the kwargs
@@ -2126,7 +2126,7 @@ class QuantitativeOutputsUpdate(AjaxableResponseMixin, UpdateView):
     """
     QuantitativeOutput Form
     """
-    model = CollectedData
+    model = IndicatorResult
     template_name = 'workflow/quantitativeoutputs_form.html'
 
     # add the request to the kwargs
@@ -2183,7 +2183,7 @@ class QuantitativeOutputsDelete(AjaxableResponseMixin, DeleteView):
     """
     QuantitativeOutput Delete
     """
-    model = CollectedData
+    model = IndicatorResult
 
     # success_url = '/'
 
@@ -2652,10 +2652,10 @@ def objectives_list(request):
         if data.get('parent_objective'):
             parent = int(data.get('parent_objective'))
 
-        parent_objective = StrategicObjective.objects.filter(
+        parent_objective = Objective.objects.filter(
             id=parent).first()
 
-        objective = StrategicObjective(
+        objective = Objective(
             name=data.get('objective_name'),
             description=data.get('description'),
             organization=activity_user.organization,
@@ -2665,7 +2665,7 @@ def objectives_list(request):
 
         return HttpResponseRedirect('/workflow/objectives')
 
-    get_all_objectives = StrategicObjective.objects.all()
+    get_all_objectives = Objective.objects.all()
 
     context = {'get_all_objectives': get_all_objectives,
                'active': ['components']}
@@ -2674,7 +2674,7 @@ def objectives_list(request):
 
 
 def objectives_tree(request):
-    get_all_objectives = StrategicObjective.objects.all()
+    get_all_objectives = Objective.objects.all()
 
     objectives_as_json = [{'id': 0, 'name': 'Strategic Objectives'}]
 
@@ -2707,11 +2707,11 @@ def export_stakeholders_list(request, **kwargs):
     countries = get_country(request.user)
 
     if program_id != 0:
-        get_stakeholders = Stakeholder.objects.prefetch_related(
+        get_stakeholders = Organization.objects.prefetch_related(
             'sector').filter(
             projectagreement__program__id=program_id).distinct()
     else:
-        get_stakeholders = Stakeholder.objects.prefetch_related(
+        get_stakeholders = Organization.objects.prefetch_related(
             'sector').filter(country__in=countries)
 
     dataset = StakeholderResource().export(get_stakeholders)
@@ -2775,19 +2775,19 @@ class StakeholderObjects(View, AjaxableResponseMixin):
         countries = get_country(request.user)
 
         if program_id != 0:
-            get_stakeholders = Stakeholder.objects.all().filter(
+            get_stakeholders = Organization.objects.all().filter(
                 projectagreement__program__id=program_id).distinct(
             ).values('id', 'create_date', 'type__name', 'name',
                      'sectors__sector')
 
         elif int(self.kwargs['pk']) != 0:
-            get_stakeholders = Stakeholder.objects.all().filter(
+            get_stakeholders = Organization.objects.all().filter(
                 projectagreement=self.kwargs['pk']).distinct(
             ).values('id', 'create_date', 'type__name', 'name',
                      'sectors__sector')
 
         else:
-            get_stakeholders = Stakeholder.objects.all().filter(
+            get_stakeholders = Organization.objects.all().filter(
                 country__in=countries).values(
                 'id', 'create_date', 'type__name', 'name', 'sectors__sector')
 

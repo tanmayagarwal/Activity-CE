@@ -319,12 +319,12 @@ class LocationType(models.Model):
 
 class AdministrativeLevel(models.Model):
     """
-    Administrative Level Model
+    Administrative IndicatorLevel Model
     """
-    level_1 = models.CharField('Administrative Level 1', max_length=100, blank=True)
-    level_2 = models.CharField('Administrative Level 2', max_length=100, blank=True)
-    level_3 = models.CharField('Administrative Level 3', max_length=100, blank=True)
-    level_4 = models.CharField('Administrative Level 4', max_length=100, blank=True)
+    level_1 = models.CharField('Administrative IndicatorLevel 1', max_length=100, blank=True)
+    level_2 = models.CharField('Administrative IndicatorLevel 2', max_length=100, blank=True)
+    level_3 = models.CharField('Administrative IndicatorLevel 3', max_length=100, blank=True)
+    level_4 = models.CharField('Administrative IndicatorLevel 4', max_length=100, blank=True)
     create_date = models.DateTimeField('Create Date', null=True, blank=True)
     modified_date = models.DateTimeField('Modified Date', null=True, blank=True)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created by', editable=False, null=True,

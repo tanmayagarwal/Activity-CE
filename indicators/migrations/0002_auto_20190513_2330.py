@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='reportingperiod',
             name='frequency',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='indicators.ReportingFrequency'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='indicators.ReportingPeriod'),
         ),
         migrations.AddField(
             model_name='periodictarget',
@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='indicator',
             name='level',
-            field=models.ManyToManyField(blank=True, help_text=' ', to='indicators.Level'),
+            field=models.ManyToManyField(blank=True, help_text=' ', to='indicators.IndicatorLevel'),
         ),
         migrations.AddField(
             model_name='indicator',
@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='indicator',
             name='reporting_frequency',
-            field=models.ForeignKey(blank=True, help_text=' ', null=True, on_delete=django.db.models.deletion.SET_NULL, to='indicators.ReportingFrequency', verbose_name='Frequency of Reporting'),
+            field=models.ForeignKey(blank=True, help_text=' ', null=True, on_delete=django.db.models.deletion.SET_NULL, to='indicators.ReportingPeriod', verbose_name='Frequency of Reporting'),
         ),
         migrations.AddField(
             model_name='indicator',
@@ -94,7 +94,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='indicator',
             name='strategic_objectives',
-            field=models.ManyToManyField(blank=True, help_text=' ', related_name='strat_indicator', to='indicators.StrategicObjective', verbose_name='Country Strategic Objective'),
+            field=models.ManyToManyField(blank=True, help_text=' ', related_name='strat_indicator', to='indicators.Objective', verbose_name='Country Strategic Objective'),
         ),
         migrations.AddField(
             model_name='historicalindicator',
@@ -124,7 +124,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='historicalindicator',
             name='reporting_frequency',
-            field=models.ForeignKey(blank=True, db_constraint=False, help_text=' ', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='indicators.ReportingFrequency', verbose_name='Frequency of Reporting'),
+            field=models.ForeignKey(blank=True, db_constraint=False, help_text=' ', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='indicators.ReportingPeriod', verbose_name='Frequency of Reporting'),
         ),
         migrations.AddField(
             model_name='historicalindicator',
@@ -169,7 +169,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='historicalcollecteddata',
             name='periodic_target',
-            field=models.ForeignKey(blank=True, db_constraint=False, help_text=' ', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='indicators.PeriodicTarget'),
+            field=models.ForeignKey(blank=True, db_constraint=False, help_text=' ', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='indicators.ReportingPeriod'),
         ),
         migrations.AddField(
             model_name='historicalcollecteddata',
@@ -234,7 +234,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='collecteddata',
             name='periodic_target',
-            field=models.ForeignKey(blank=True, help_text=' ', null=True, on_delete=django.db.models.deletion.SET_NULL, to='indicators.PeriodicTarget'),
+            field=models.ForeignKey(blank=True, help_text=' ', null=True, on_delete=django.db.models.deletion.SET_NULL, to='indicators.ReportingPeriod'),
         ),
         migrations.AddField(
             model_name='collecteddata',

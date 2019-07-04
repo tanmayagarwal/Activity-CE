@@ -4,7 +4,7 @@
 from django.db import models
 from django.contrib import admin
 from workflow.models import WorkflowLevel1, WorkflowLevel2, WorkflowLevel2, Country
-from indicators.models import Indicator, CollectedData
+from indicators.models import Indicator, IndicatorResult
 
 
 class Report(models.Model):
@@ -19,7 +19,7 @@ class Report(models.Model):
     indicator = models.ForeignKey(
         Indicator, null=True, blank=True, on_delete=models.SET_NULL)
     collected = models.ForeignKey(
-        CollectedData, null=True, blank=True, on_delete=models.SET_NULL)
+        IndicatorResult, null=True, blank=True, on_delete=models.SET_NULL)
     description = models.CharField(
         "Status Description", max_length=200, blank=True)
     shared = models.BooleanField(default=False)

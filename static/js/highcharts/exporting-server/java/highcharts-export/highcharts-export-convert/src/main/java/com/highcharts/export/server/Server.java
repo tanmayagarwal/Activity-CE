@@ -16,7 +16,7 @@ import org.apache.commons.io.IOUtils;
 
 import com.highcharts.export.converter.SVGConverterException;
 import com.highcharts.export.util.TempDir;
-import java.util.logging.Level;
+import java.util.logging.IndicatorLevel;
 import java.util.logging.Logger;
 
 public class Server {
@@ -48,14 +48,14 @@ public class Server {
 			commands.add("-port");
 			commands.add("" + port);
 
-			logger.log(Level.FINE, commands.toString());
+			logger.log(IndicatorLevel.FINE, commands.toString());
 
 			process = new ProcessBuilder(commands).start();
 			final BufferedReader bufferedReader = new BufferedReader(
 					new InputStreamReader(process.getInputStream()));
 			String readLine = bufferedReader.readLine();
 			if (readLine == null || !readLine.contains("ready")) {
-                logger.log(Level.WARNING, "Command starting Phantomjs failed");
+                logger.log(IndicatorLevel.WARNING, "Command starting Phantomjs failed");
                 process.destroy();
 				throw new RuntimeException("Error, PhantomJS couldnot start");                
 			}
@@ -66,13 +66,13 @@ public class Server {
 				@Override
 				public void run() {
 					if (process != null) {
-						logger.log(Level.WARNING, "Shutting down PhantomJS instance, kill process directly, {0}", this.toString());
+						logger.log(IndicatorLevel.WARNING, "Shutting down PhantomJS instance, kill process directly, {0}", this.toString());
 						try {
 							process.getErrorStream().close();
 							process.getInputStream().close();
 							process.getOutputStream().close();
 						} catch (IOException e) {
-							logger.log(Level.WARNING, "Error while shutting down process: {0}", e.getMessage());
+							logger.log(IndicatorLevel.WARNING, "Error while shutting down process: {0}", e.getMessage());
 						}
 						process.destroy();
 					}
@@ -84,7 +84,7 @@ public class Server {
 	}
 
 	public void initialize() {
-		logger.log(Level.FINE, "Phantom server started on port {0}", port);
+		logger.log(IndicatorLevel.FINE, "Phantom server started on port {0}", port);
 	}
 
 	public String request(String params) throws SocketTimeoutException, SVGConverterException, TimeoutException {
@@ -96,8 +96,8 @@ public class Server {
 			
 			// TEST with running a local phantom instance
 			// url = new URL("http://" + host + ":7777/");
-			// logger.log(Level.INFO, "requesting url: " + url.toString());
-			// logger.log(Level.INFO, "parameters: " +  params);
+			// logger.log(IndicatorLevel.INFO, "requesting url: " + url.toString());
+			// logger.log(IndicatorLevel.INFO, "parameters: " +  params);
 
 			state = ServerState.BUSY;
 
@@ -137,12 +137,12 @@ public class Server {
 			process.getInputStream().close();
 			process.getOutputStream().close();
 		} catch (IOException e) {
-			logger.log(Level.SEVERE, "Error while shutting down process: {0}", e.getMessage());
+			logger.log(IndicatorLevel.SEVERE, "Error while shutting down process: {0}", e.getMessage());
 		}
 
 		process.destroy();
 		process = null;
-		logger.log(Level.FINE, "Destroyed phantomJS process running on port {0}", port);
+		logger.log(IndicatorLevel.FINE, "Destroyed phantomJS process running on port {0}", port);
 	}
 
 	public int getPort() {

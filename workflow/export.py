@@ -6,7 +6,7 @@ from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 from import_export import fields
 from .models import (
     WorkflowLevel2, WorkflowLevel1, Location, Capacity, Evaluate, Documentation,
-    Stakeholder, Sector, ProjectType, Office, ActivityUser, WorkflowLevel2,
+    Organization, Sector, ProjectType, Office, ActivityUser, WorkflowLevel2,
     Country, Contact, StakeholderType, ProfileType
 )
 
@@ -20,7 +20,7 @@ class ProjectAgreementResource(resources.ModelResource):
                             widget=ManyToManyWidget(Evaluate, 'evaluate'))
     stakeholder = fields.Field(
         column_name='stakeholder', attribute='stakeholder',
-        widget=ManyToManyWidget(Stakeholder, 'name'))
+        widget=ManyToManyWidget(Organization, 'name'))
     program = fields.Field(column_name='program', attribute='program',
                            widget=ForeignKeyWidget(WorkflowLevel1, 'name'))
     sector = fields.Field(column_name='sector', attribute='sector',
@@ -50,7 +50,7 @@ class ProjectCompleteResource(resources.ModelResource):
                             widget=ManyToManyWidget(Evaluate, 'evaluate'))
     stakeholder = fields.Field(
         column_name='stakeholder', attribute='stakeholder',
-        widget=ManyToManyWidget(Stakeholder, 'name'))
+        widget=ManyToManyWidget(Organization, 'name'))
     program = fields.Field(column_name='program', attribute='program',
                            widget=ForeignKeyWidget(WorkflowLevel1, 'name'))
     sector = fields.Field(column_name='sector', attribute='sector',
@@ -103,7 +103,7 @@ class StakeholderResource(resources.ModelResource):
                                                             'name_n_url'))
 
     class Meta:
-        model = Stakeholder
+        model = Organization
 
     def dehydrate_stakeholder_register(self, stakeholder):
         if stakeholder.stakeholder_register == 1:

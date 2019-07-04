@@ -9,7 +9,7 @@ from workflow.models import WorkflowLevel2, WorkflowLevel2, WorkflowLevel1, \
     Location, Country, ActivitySites
 from .models import ProgramNarratives, JupyterNotebooks
 from formlibrary.models import TrainingAttendance, Distribution, Beneficiary
-from indicators.models import CollectedData, Indicator, ActivityTable
+from indicators.models import IndicatorResult, Indicator, ActivityTable
 
 from django.db.models import Sum
 from django.db.models import Q
@@ -101,7 +101,7 @@ def default_custom_dashboard(request, id=0, status=0):
     selected_countries_list = Country.objects.all().filter(
         program__id=program_id)
 
-    get_quantitative_data_sums = CollectedData.objects.filter(
+    get_quantitative_data_sums = IndicatorResult.objects.filter(
         indicator__program__id=program_id, achieved__isnull=False,
         indicator__key_performance_indicator=True) \
         .exclude(achieved=None).order_by(
@@ -216,12 +216,12 @@ def public_dashboard(request, id=0, public=0):
     http://127.0.0.1:8000/customdashboard/program_dashboard/65/0/
     """
     program_id = id
-    get_quantitative_data_sums_2 = CollectedData.objects.all().filter(
+    get_quantitative_data_sums_2 = IndicatorResult.objects.all().filter(
         indicator__program__id=program_id, achieved__isnull=False) \
         .order_by('indicator__source').values('indicator__number',
                                               'indicator__source',
                                               'indicator__id')
-    get_quantitative_data_sums = CollectedData.objects.filter(
+    get_quantitative_data_sums = IndicatorResult.objects.filter(
         indicator__program__id=program_id, achieved__isnull=False).exclude(
         achieved=None) \
         .order_by('indicator__number').values('indicator__number',
@@ -232,7 +232,7 @@ def public_dashboard(request, id=0, public=0):
     get_indicator_count = Indicator.objects.all().filter(
         program__id=program_id).count()
 
-    get_indicator_data = CollectedData.objects.all().filter(
+    get_indicator_data = IndicatorResult.objects.all().filter(
         indicator__program__id=program_id, achieved__isnull=False).order_by(
         'date_collected')
 

@@ -147,7 +147,7 @@ class Command(BaseCommand):
                         continue
 
                     try:
-                        ptarget = PeriodicTarget.objects.create(
+                        ptarget = ReportingPeriod.objects.create(
                             indicator=indicator,
                             period=period,
                             target=target,
@@ -162,7 +162,7 @@ class Command(BaseCommand):
                         continue
 
                     try:
-                        CollectedData.objects.filter(
+                        IndicatorResult.objects.filter(
                             indicator=indicator,
                             date_collected__range=
                             [ptarget.start_date, ptarget.end_date])\

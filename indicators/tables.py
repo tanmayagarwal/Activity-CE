@@ -3,7 +3,7 @@
 
 import django_tables2 as tables
 from django_tables2.utils import A
-from .models import Indicator, CollectedData
+from .models import Indicator, IndicatorResult
 
 
 TEMPLATE = '''
@@ -44,7 +44,7 @@ class IndicatorDataTable(tables.Table):
         'projectagreement_update', args=[A('agreement_id')])
 
     class Meta:
-        model = CollectedData
+        model = IndicatorResult
         attrs = {"class": "paleblue"}
         fields = ('targeted', 'achieved', 'description',
                   'indicator', 'agreement', 'complete')
@@ -58,7 +58,7 @@ class CollectedDataTable(tables.Table):
         'projectagreement_update', args=[A('agreement_id')])
 
     class Meta:
-        model = CollectedData
+        model = IndicatorResult
         attrs = {"class": "paleblue"}
         fields = ('targeted', 'achieved', 'description', 'indicator',
                   'sector', 'community', 'agreement', 'complete')

@@ -11,10 +11,10 @@ from .widgets import GoogleMapsWidget
 from django import forms
 from .models import (
     WorkflowLevel2, WorkflowLevel2, WorkflowLevel1, Location, Documentation,
-    Benchmarks, Monitor, Budget, Office, ChecklistItem, Province, Stakeholder,
+    Benchmarks, Monitor, Budget, Office, ChecklistItem, Province, Organization,
     ActivityUser, Contact, Sector
 )
-from indicators.models import CollectedData, Indicator, PeriodicTarget
+from indicators.models import IndicatorResult, Indicator, ReportingPeriod
 from crispy_forms.layout import LayoutObject, TEMPLATE_PACK
 from activity.util import get_country
 
@@ -555,7 +555,7 @@ class ProjectAgreementForm(forms.ModelForm):
             country__in=countries)
 
         # override the stakeholder queryset to use request.user for country
-        self.fields['stakeholder'].queryset = Stakeholder.objects.filter(
+        self.fields['stakeholder'].queryset = Organization.objects.filter(
             country__in=countries)
 
         if not 'Approver' in self.request.user.groups.values_list('name',
@@ -915,7 +915,7 @@ class ProjectAgreementSimpleForm(forms.ModelForm):
             country__in=countries)
 
         # override the stakeholder queryset to use request.user for country
-        self.fields['stakeholder'].queryset = Stakeholder.objects.filter(
+        self.fields['stakeholder'].queryset = Organization.objects.filter(
             country__in=countries)
 
         if not 'Approver' in self.request.user.groups.values_list('name',
@@ -1011,7 +1011,7 @@ class ProjectCompleteCreateForm(forms.ModelForm):
             funding_status="Funded", country__in=countries)
         self.fields['site'].queryset = Location.objects.filter(
             country__in=countries)
-        self.fields['stakeholder'].queryset = Stakeholder.objects.filter(
+        self.fields['stakeholder'].queryset = Organization.objects.filter(
             country__in=countries)
         self.fields['program2'].initial = kwargs['initial'].get('program')
         self.fields['program'].widget = forms.HiddenInput()
@@ -1339,7 +1339,7 @@ class ProjectCompleteForm(forms.ModelForm):
             country__in=countries)
 
         # override the stakeholder queryset to use request.user for country
-        self.fields['stakeholder'].queryset = Stakeholder.objects.filter(
+        self.fields['stakeholder'].queryset = Organization.objects.filter(
             country__in=countries)
 
         if not 'Approver' in self.request.user.groups.values_list('name',
@@ -1651,7 +1651,7 @@ class ProjectCompleteSimpleForm(forms.ModelForm):
             country__in=countries)
 
         # override the stakeholder queryset to use request.user for country
-        self.fields['stakeholder'].queryset = Stakeholder.objects.filter(
+        self.fields['stakeholder'].queryset = Organization.objects.filter(
             country__in=countries)
 
         if not 'Approver' in self.request.user.groups.values_list('name',
@@ -1854,7 +1854,7 @@ class QuantitativeOutputsForm(forms.ModelForm):
     is_it_project_complete_form = forms.CharField(required=False)
 
     class Meta:
-        model = CollectedData
+        model = IndicatorResult
         exclude = ['create_date', 'edit_date']
 
     def __init__(self, *args, **kwargs):
@@ -1872,7 +1872,7 @@ class QuantitativeOutputsForm(forms.ModelForm):
         instance = kwargs.get('instance', None)
         options = ""
         if instance:
-            pts = PeriodicTarget.objects.filter(indicator=instance.indicator)
+            pts = ReportingPeriod.objects.filter(indicator=instance.indicator)
             for pt in pts:
                 if instance.periodic_target:
                     selected = "selected" \
@@ -1910,7 +1910,7 @@ class QuantitativeOutputsForm(forms.ModelForm):
         self.fields['agreement'].queryset = WorkflowLevel2.objects.filter(
             program__country__in=countries)
         # self.fields['periodic_target'].queryset =
-        # PeriodicTarget.objects.all()
+        # ReportingPeriod.objects.all()
         # forms.NumberInput()
         self.fields['periodic_target'].widget = HiddenInput()
         # self.fields['program'].widget.attrs['disabled'] = "disabled"
@@ -2046,7 +2046,7 @@ class ContactForm(forms.ModelForm):
 
 class StakeholderForm(forms.ModelForm):
     class Meta:
-        model = Stakeholder
+        model = Organization
         # fields = ['contact', 'country', 'approved_by', 'filled_by',
         # 'sectors','formal_relationship_document', 'vetting_document', ]
         exclude = ['create_date', 'edit_date']

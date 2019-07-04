@@ -53,7 +53,7 @@ class Command(BaseCommand):
                     lop = float(ind.lop_target)
 
                     # create a "Life of WorkflowLevel1 (LOP) Only" target
-                    lop_pt = PeriodicTarget.objects.create(
+                    lop_pt = ReportingPeriod.objects.create(
                         indicator=ind,
                         period=ind.TARGET_FREQUENCIES[0][1],
                         target=ind.lop_target,

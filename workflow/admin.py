@@ -7,6 +7,7 @@ from import_export.widgets import ForeignKeyWidget
 from import_export.admin import ImportExportModelAdmin, ExportMixin
 from activity.util import get_country
 from adminreport.mixins import ChartReportAdmin
+from activity.models import (Country)
 
 
 # Resource for CSV export
@@ -35,71 +36,52 @@ class DocumentationAdmin(ImportExportModelAdmin):
     pass
 
 
-# Resource for CSV export
-class ProjectAgreementResource(resources.ModelResource):
-    class Meta:
-        model = WorkflowLevel2
-        widgets = {
-            'create_date': {'format': '%d/%m/%Y'},
-            'edit_date': {'format': '%d/%m/%Y'},
-            'expected_start_date': {'format': '%d/%m/%Y'},
-            'expected_end_date': {'format': '%d/%m/%Y'},
-        }
+# # Resource for CSV export
+# class ProjectAgreementResource(resources.ModelResource):
+#     class Meta:
+#         model = WorkflowLevel2
+#         widgets = {
+#             'create_date': {'format': '%d/%m/%Y'},
+#             'edit_date': {'format': '%d/%m/%Y'},
+#             'expected_start_date': {'format': '%d/%m/%Y'},
+#             'expected_end_date': {'format': '%d/%m/%Y'},
+#         }
 
 
-class ProjectAgreementAdmin(ImportExportModelAdmin):
-    resource_class = ProjectAgreementResource
-    list_display = ('program', 'project_name', 'short', 'create_date')
-    list_filter = ('program__country', 'short')
-    filter_horizontal = ('capacity', 'evaluate', 'site', 'stakeholder')
+# class ProjectAgreementAdmin(ImportExportModelAdmin):
+#     resource_class = ProjectAgreementResource
+#     list_display = ('program', 'project_name', 'short', 'create_date')
+#     list_filter = ('program__country', 'short')
+#     filter_horizontal = ('capacity', 'evaluate', 'site', 'stakeholder')
+#
+#     def queryset(self, request, queryset):
+#         """
+#         Returns the filtered queryset based on the value
+#         provided in the query string and retrievable via
+#         `self.value()`.
+#         """
+#         # Filter by logged in users allowable countries
+#         user_countries = get_country(request.user)
+#         # if not request.user.user.is_superuser:
+#         return queryset.filter(country__in=user_countries)
+#
+#     pass
+#
 
-    def queryset(self, request, queryset):
-        """
-        Returns the filtered queryset based on the value
-        provided in the query string and retrievable via
-        `self.value()`.
-        """
-        # Filter by logged in users allowable countries
-        user_countries = get_country(request.user)
-        # if not request.user.user.is_superuser:
-        return queryset.filter(country__in=user_countries)
-
-    pass
-
-
-# Resource for CSV export
-class ProjectCompleteResource(resources.ModelResource):
-    class Meta:
-        model = WorkflowLevel2
-        widgets = {
-            'create_date': {'format': '%d/%m/%Y'},
-            'edit_date': {'format': '%d/%m/%Y'},
-            'expected_start_date': {'format': '%d/%m/%Y'},
-            'expected_end_date': {'format': '%d/%m/%Y'},
-            'actual_start_date': {'format': '%d/%m/%Y'},
-            'actual_end_date': {'format': '%d/%m/%Y'},
-        }
+# # Resource for CSV export
+# class ProjectCompleteResource(resources.ModelResource):
+#     class Meta:
+#         model = WorkflowLevel2
+#         widgets = {
+#             'create_date': {'format': '%d/%m/%Y'},
+#             'edit_date': {'format': '%d/%m/%Y'},
+#             'expected_start_date': {'format': '%d/%m/%Y'},
+#             'expected_end_date': {'format': '%d/%m/%Y'},
+#             'actual_start_date': {'format': '%d/%m/%Y'},
+#             'actual_end_date': {'format': '%d/%m/%Y'},
+#         }
 
 
-class ProjectCompleteAdmin(ImportExportModelAdmin):
-    resource_class = ProjectCompleteResource
-    list_display = ('program', 'project_name',
-                    'activity_code', 'short', 'create_date')
-    list_filter = ('program__country', 'office', 'short')
-    display = 'project_name'
-
-    def queryset(self, request, queryset):
-        """
-        Returns the filtered queryset based on the value
-        provided in the query string and retrievable via
-        `self.value()`.
-        """
-        # Filter by logged in users allowable countries
-        user_countries = get_country(request.user)
-        # if not request.user.user.is_superuser:
-        return queryset.filter(country__in=user_countries)
-
-    pass
 
 
 # Resource for CSV export
@@ -108,51 +90,37 @@ class CountryResource(resources.ModelResource):
         model = Country
 
 
-class CountryAdmin(ImportExportModelAdmin):
-    resource_class = CountryResource
-    list_display = ('country', 'code', 'organization',
-                    'create_date', 'edit_date')
-    list_filter = ('country', 'organization__name')
-
-
 # Resource for CSV export
-class SiteProfileResource(resources.ModelResource):
-    country = fields.Field(column_name='country', attribute='country',
-                           widget=ForeignKeyWidget(Country, 'country'))
-    type = fields.Field(column_name='type', attribute='type',
-                        widget=ForeignKeyWidget(ProfileType, 'profile'))
-    office = fields.Field(column_name='office', attribute='office',
-                          widget=ForeignKeyWidget(Office, 'code'))
-    district = fields.Field(column_name='admin level 2',
-                            attribute='district',
-                            widget=ForeignKeyWidget(District, 'name'))
-    province = fields.Field(column_name='admin level 1',
-                            attribute='province',
-                            widget=ForeignKeyWidget(Province, 'name'))
-    admin_level_three = fields.Field(
-        column_name='admin level 3', attribute='admin_level_three',
-        widget=ForeignKeyWidget(AdminLevelThree, 'name'))
-
-    class Meta:
-        model = Location
-        skip_unchanged = True
-        report_skipped = False
-
-
-class SiteProfileAdmin(ImportExportModelAdmin):
-    resource_class = SiteProfileResource
-    list_display = ('name', 'office', 'country', 'province',
-                    'district', 'admin_level_three', 'village')
-    list_filter = ('country__country',)
-    search_fields = ('office__code', 'country__country')
-    pass
+# class SiteProfileResource(resources.ModelResource):
+#     country = fields.Field(column_name='country', attribute='country',
+#                            widget=ForeignKeyWidget(Country, 'country'))
+#     type = fields.Field(column_name='type', attribute='type',
+#                         widget=ForeignKeyWidget(ProfileType, 'profile'))
+#     office = fields.Field(column_name='office', attribute='office',
+#                           widget=ForeignKeyWidget(Office, 'code'))
+#     district = fields.Field(column_name='admin level 2',
+#                             attribute='district',
+#                             widget=ForeignKeyWidget(District, 'name'))
+#     province = fields.Field(column_name='admin level 1',
+#                             attribute='province',
+#                             widget=ForeignKeyWidget(Province, 'name'))
+#     admin_level_three = fields.Field(
+#         column_name='admin level 3', attribute='admin_level_three',
+#         widget=ForeignKeyWidget(AdminLevelThree, 'name'))
+#
+#     class Meta:
+#         model = Location
+#         skip_unchanged = True
+#         report_skipped = False
 
 
-class ProgramAdmin(admin.ModelAdmin):
-    list_display = ('id', 'program_uuid', 'name', 'start_date', 'end_date')
-    search_fields = ('name', 'program_uuid')
-    list_filter = ('funding_status', 'country', 'program_uuid', 'start_date')
-    display = 'WorkflowLevel1'
+# class SiteProfileAdmin(ImportExportModelAdmin):
+#     resource_class = SiteProfileResource
+#     list_display = ('name', 'office', 'country', 'province',
+#                     'district', 'admin_level_three', 'village')
+#     list_filter = ('country__country',)
+#     search_fields = ('office__code', 'country__country')
+#     pass
 
 
 class ApprovalAuthorityAdmin(admin.ModelAdmin):
@@ -161,13 +129,6 @@ class ApprovalAuthorityAdmin(admin.ModelAdmin):
     search_fields = ('approval_user__user__first_name',
                      'approval_user__user__last_name', 'country__country')
     list_filter = ('create_date', 'country')
-
-
-class StakeholderAdmin(ImportExportModelAdmin):
-    list_display = ('name', 'type', 'country', 'approval',
-                    'approved_by', 'filled_by', 'create_date')
-    display = 'Stakeholder List'
-    list_filter = ('country', 'type')
 
 
 class ActivityUserProxyResource(resources.ModelResource):
@@ -215,29 +176,18 @@ class CurrencyAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Organization, OrganizationAdmin)
-admin.site.register(Country, CountryAdmin)
 admin.site.register(Province, ProvinceAdmin)
 admin.site.register(Office, OfficeAdmin)
 admin.site.register(District, DistrictAdmin)
 admin.site.register(AdminLevelThree, AdminLevelThreeAdmin)
 admin.site.register(Village)
-admin.site.register(WorkflowLevel1, ProgramAdmin)
 admin.site.register(Sector)
-admin.site.register(WorkflowLevel2, ProjectAgreementAdmin)
-admin.site.register(WorkflowLevel2, ProjectCompleteAdmin)
 admin.site.register(Documentation, DocumentationAdmin)
 admin.site.register(Template)
-admin.site.register(Location, SiteProfileAdmin)
 admin.site.register(Capacity)
-admin.site.register(Monitor)
-admin.site.register(Benchmarks)
 admin.site.register(Evaluate)
-admin.site.register(ProjectType, ProjectTypeAdmin)
 admin.site.register(ProfileType)
 admin.site.register(ApprovalAuthority, ApprovalAuthorityAdmin)
-admin.site.register(ChecklistItem, ChecklistItemAdmin)
-admin.site.register(Checklist, ChecklistAdmin)
-admin.site.register(Stakeholder, StakeholderAdmin)
 admin.site.register(Contact, ContactAdmin)
 admin.site.register(StakeholderType)
 admin.site.register(ActivityUser, ActivityUserAdmin)

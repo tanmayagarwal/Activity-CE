@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Sum, Q, Count
 from django.db import IntegrityError
 
-from indicators.models import CollectedData, Indicator
+from indicators.models import IndicatorResult, Indicator
 
 from workflow.models import (
     WorkflowLevel2, WorkflowLevel2, WorkflowLevel1,
@@ -229,7 +229,7 @@ def index(request, selected_countries=None, id=0, sector=0):
         complete_awaiting_count = WorkflowLevel2.objects.all().filter(
             program__id=program_id, approval='awaiting approval').count()
 
-    get_quantitative_data_sums = CollectedData.objects.all() \
+    get_quantitative_data_sums = IndicatorResult.objects.all() \
         .filter(**filter_for_quantitative_data_sums) \
         .exclude(achieved=None, periodic_target=None,
                  program__funding_status="Archived") \
@@ -241,13 +241,13 @@ def index(request, selected_countries=None, id=0, sector=0):
 
     # Evidence and Objectives are for the global leader dashboard
     # items and are the same every time
-    count_evidence = CollectedData.objects.all().filter(
+    count_evidence = IndicatorResult.objects.all().filter(
         indicator__isnull=False) \
         .values("indicator__program__country__country").annotate(
         evidence_count=Count('evidence', distinct=True) + Count(
             'activity_table', distinct=True),
         indicator_count=Count('pk', distinct=True)).order_by('-evidence_count')
-    get_objectives = CollectedData.objects.filter(
+    get_objectives = IndicatorResult.objects.filter(
         indicator__strategic_objectives__isnull=False,
         indicator__program__country__in=selected_countries) \
         .exclude(
@@ -274,7 +274,7 @@ def index(request, selected_countries=None, id=0, sector=0):
     count_indicator = Indicator.objects.all().filter(
         program__country__in=selected_countries,
         program__funding_status='Funded').values('program').distinct().count()
-    count_evidence_adoption = CollectedData.objects.all().filter(
+    count_evidence_adoption = IndicatorResult.objects.all().filter(
         indicator__isnull=False,
         indicator__program__country__in=selected_countries) \
         .values("indicator__program__country__country") \

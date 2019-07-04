@@ -14,8 +14,8 @@ from functools import partial
 from datetime import datetime
 
 from indicators.models import (
-    Indicator, PeriodicTarget, CollectedData, Objective,
-    StrategicObjective, ActivityTable, DisaggregationType
+    Indicator, ReportingPeriod, IndicatorResult, Objective,
+    Objective, ActivityTable, DisaggregationType
 )
 from workflow.models import WorkflowLevel1, Location, Documentation, \
     WorkflowLevel2, ActivityUser
@@ -314,7 +314,7 @@ class IndicatorForm(forms.ModelForm):
         self.fields['objectives'].queryset = Objective.objects.all().filter(
             program__id__in=self.program)
         self.fields[
-            'strategic_objectives'].queryset = StrategicObjective.objects.\
+            'strategic_objectives'].queryset = Objective.objects.\
             filter(country__in=countries)
         self.fields['approved_by'].queryset = ActivityUser.objects.filter(
             country__in=countries).distinct()
@@ -346,7 +346,7 @@ class IndicatorForm(forms.ModelForm):
 class CollectedDataForm(forms.ModelForm):
 
     class Meta:
-        model = CollectedData
+        model = IndicatorResult
         exclude = ['create_date', 'edit_date']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
@@ -417,7 +417,7 @@ class CollectedDataForm(forms.ModelForm):
               <!-- Table -->
               <table class="table">
                 <tr>
-                <th>Disaggregation Level</th>
+                <th>Disaggregation IndicatorLevel</th>
                 <th>Actuals</th>
                 </tr>
                 {% for item in get_disaggregation_label_standard %}
@@ -443,7 +443,7 @@ class CollectedDataForm(forms.ModelForm):
               <!-- Table -->
               <table class="table">
                 <tr>
-                <th>Disaggregation Level</th>
+                <th>Disaggregation IndicatorLevel</th>
                 <th>Actuals</th>
                 </tr>
                 {% for item in get_disaggregation_label %}
@@ -470,7 +470,7 @@ class CollectedDataForm(forms.ModelForm):
               <!-- Table -->
               <table class="table">
                 <tr>
-                <th>Disaggregation Level</th>
+                <th>Disaggregation IndicatorLevel</th>
                 <th>Actuals</th>
                 </tr>
                 {% for item in get_disaggregation_value %}
@@ -494,7 +494,7 @@ class CollectedDataForm(forms.ModelForm):
               <!-- Table -->
               <table class="table">
                 <tr>
-                <th>Disaggregation Level</th>
+                <th>Disaggregation IndicatorLevel</th>
                 <th>Actuals</th>
                 </tr>
                 {% for item in get_disaggregation_value_standard %}
@@ -538,7 +538,7 @@ class CollectedDataForm(forms.ModelForm):
         except TypeError:
             pass
 
-        self.fields['periodic_target'].queryset = PeriodicTarget.objects\
+        self.fields['periodic_target'].queryset = ReportingPeriod.objects\
             .filter(indicator=self.indicator)\
             .order_by('customsort', 'create_date', 'period')
 

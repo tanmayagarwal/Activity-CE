@@ -8,7 +8,7 @@ and get all country records
 Install module django-extensions
 Runs twice via function calls at bottom once
 """
-from indicators.models import Indicator, Level
+from indicators.models import Indicator, IndicatorLevel
 from workflow.models import WorkflowLevel1
 from django.db import connection
 
@@ -26,8 +26,8 @@ for program in WorkflowLevel1.objects.all():
             kpi_count = kpi_count + 1
     # if the program has no kpis update goal level indicators to be kpi
     if kpi_count == 0:
-        # get_level = Level.objects.get(name="Goal")
-        get_level = Level.objects.get(name="Impact")
+        # get_level = IndicatorLevel.objects.get(name="Goal")
+        get_level = IndicatorLevel.objects.get(name="Impact")
         Indicator.objects.all().filter(program__id=program.id,
                                        level=get_level).update(
             key_performance_indicator=True)

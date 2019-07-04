@@ -12,8 +12,8 @@ from .export import IndicatorResource, CollectedDataResource
 from .tables import IndicatorDataTable
 from .forms import IndicatorForm, CollectedDataForm
 from .models import (
-    Indicator, PeriodicTarget, DisaggregationLabel, DisaggregationValue,
-    CollectedData, IndicatorType, Level, ExternalServiceRecord,
+    Indicator, ReportingPeriod, DisaggregationLabel, DisaggregationValue,
+    IndicatorResult, IndicatorType, IndicatorLevel, ExternalServiceRecord,
     ExternalService, ActivityTable
 )
 
@@ -234,7 +234,7 @@ def indicator_create(request, id=0):
         type = IndicatorType.objects.get(indicator_type="custom")
         program = WorkflowLevel1.objects.get(id=request.POST['program'])
         service = request.POST['services']
-        level = Level.objects.all()[0]
+        level = IndicatorLevel.objects.all()[0]
         node_id = request.POST['service_indicator']
         sector = None
         # add a temp name for custom indicators
@@ -254,7 +254,7 @@ def indicator_create(request, id=0):
                     get_sector, created = Sector.objects.get_or_create(
                         sector=item['sector'])
                     sector = get_sector
-                    get_level, created = Level.objects.get_or_create(
+                    get_level, created = IndicatorLevel.objects.get_or_create(
                         name=item['level'].title())
                     level = get_level
                     name = item['title']
@@ -355,7 +355,7 @@ class PeriodicTargetView(View):
     This view is responsible for generating periodic targets or deleting them
     (via POST)
     """
-    model = PeriodicTarget
+    model = ReportingPeriod
 
     def get(self, request, *args, **kwargs):
         indicator = Indicator.objects.get(
@@ -369,7 +369,7 @@ class PeriodicTargetView(View):
         try:
             num_targets = int(request.GET.get('num_targets', None))
         except Exception as e:
-            num_targets = PeriodicTarget.objects.filter(
+            num_targets = ReportingPeriod.objects.filter(
                 indicator=indicator).count() + 1
 
         pt_generated = generate_periodic_target_single(
@@ -383,7 +383,7 @@ class PeriodicTargetView(View):
             pk=self.kwargs.get('indicator', None))
         deleteall = self.kwargs.get('deleteall', None)
         if deleteall == 'true':
-            periodic_targets = PeriodicTarget.objects.filter(
+            periodic_targets = ReportingPeriod.objects.filter(
                 indicator=indicator)
             for pt in periodic_targets:
                 pt.collecteddata_set.all().update(periodic_target=None)
@@ -404,26 +404,26 @@ def handle_data_collected_records(indicatr, lop, existing_target_frequency,
     # then delete the LOP periodic_target if existing_target_
     # frequency == Indicator.LOP and new_target_frequency != Indicator.LOP:
     if existing_target_frequency != new_target_frequency:
-        CollectedData.objects.filter(
+        IndicatorResult.objects.filter(
             indicator=indicatr).update(periodic_target=None)
-        PeriodicTarget.objects.filter(indicator=indicatr).delete()
+        ReportingPeriod.objects.filter(indicator=indicatr).delete()
 
     # If the user sets target_frequency to LOP then create a LOP periodic_
     # target and associate all collected data for this indicator with this
     # single LOP periodic_target
     if existing_target_frequency != Indicator.LOP and \
             new_target_frequency == Indicator.LOP:
-        lop_pt = PeriodicTarget.objects.create(
+        lop_pt = ReportingPeriod.objects.create(
             indicator=indicatr, period=Indicator.TARGET_FREQUENCIES[0][1],
             target=lop, create_date=timezone.now())
-        CollectedData.objects.filter(
+        IndicatorResult.objects.filter(
             indicator=indicatr).update(periodic_target=lop_pt)
 
     if generated_pt_ids:
-        pts = PeriodicTarget.objects.filter(
+        pts = ReportingPeriod.objects.filter(
             indicator=indicatr, pk__in=generated_pt_ids)
         for pt in pts:
-            CollectedData.objects.filter(
+            IndicatorResult.objects.filter(
                 indicator=indicatr,
                 date_collected__range=[pt.start_date, pt.end_date])\
                 .update(periodic_target=pt)
@@ -470,11 +470,11 @@ class IndicatorUpdate(UpdateView):
 
         context.update({'i_name': get_indicator.name})
         context['program_id'] = get_indicator.program.all()[0].id
-        context['periodic_targets'] = PeriodicTarget.objects\
+        context['periodic_targets'] = ReportingPeriod.objects\
             .filter(indicator=get_indicator)\
             .annotate(num_data=Count('collecteddata'))\
             .order_by('customsort', 'create_date', 'period')
-        context['targets_sum'] = PeriodicTarget.objects.filter(
+        context['targets_sum'] = ReportingPeriod.objects.filter(
             indicator=get_indicator).aggregate(Sum('target'))['target__sum']
 
         # get external service data if any
@@ -569,7 +569,7 @@ class IndicatorUpdate(UpdateView):
 
                 # print("i = %s............%s..........." %
                 # (i, periodic_targets) )
-                periodic_target, created = PeriodicTarget.objects\
+                periodic_target, created = ReportingPeriod.objects\
                     .update_or_create(indicator=indicatr, id=pk,
                                       defaults=
                                       {'period': pt.get('period', ''),
@@ -600,9 +600,9 @@ class IndicatorUpdate(UpdateView):
             update_indicator_row = '1'
 
         self.object = form.save()
-        # periodic_targets = PeriodicTarget.objects.filter(indicator=indicatr)\
+        # periodic_targets = ReportingPeriod.objects.filter(indicator=indicatr)\
         #     .order_by('customsort','create_date', 'period')
-        periodic_targets = PeriodicTarget.objects.filter(indicator=indicatr)\
+        periodic_targets = ReportingPeriod.objects.filter(indicator=indicatr)\
             .annotate(num_data=Count('collecteddata'))\
             .order_by('customsort', 'create_date', 'period')
 
@@ -656,7 +656,7 @@ class IndicatorDelete(DeleteView):
 
 
 class PeriodicTargetDeleteView(DeleteView):
-    model = PeriodicTarget
+    model = ReportingPeriod
 
     def delete(self, request, *args, **kwargs):
         collecteddata_count = self.get_object().collecteddata_set.count()
@@ -673,7 +673,7 @@ class PeriodicTargetDeleteView(DeleteView):
             indicator.target_frequency_start = None
             indicator.target_frequency_custom = None
             indicator.save()
-        targets_sum = PeriodicTarget.objects.filter(
+        targets_sum = ReportingPeriod.objects.filter(
             indicator=indicator).aggregate(Sum('target'))['target__sum']
         return JsonResponse({"status": "success",
                              "msg": "Periodic Target deleted successfully.",
@@ -682,9 +682,9 @@ class PeriodicTargetDeleteView(DeleteView):
 
 class CollectedDataCreate(CreateView):
     """
-    CollectedData Form
+    IndicatorResult Form
     """
-    model = CollectedData
+    model = IndicatorResult
     guidance = None
 
     def get_template_names(self):
@@ -697,7 +697,7 @@ class CollectedDataCreate(CreateView):
     @method_decorator(group_excluded('ViewOnly', url='workflow/permission'))
     def dispatch(self, request, *args, **kwargs):
         try:
-            self.guidance = FormGuidance.objects.get(form="CollectedData")
+            self.guidance = FormGuidance.objects.get(form="IndicatorResult")
         except FormGuidance.DoesNotExist:
             self.guidance = None
         return super(CollectedDataCreate, self)\
@@ -815,9 +815,9 @@ class CollectedDataCreate(CreateView):
 
 class CollectedDataUpdate(UpdateView):
     """
-    CollectedData Form
+    IndicatorResult Form
     """
-    model = CollectedData
+    model = IndicatorResult
     guidance = None
 
     def get_template_names(self):
@@ -828,7 +828,7 @@ class CollectedDataUpdate(UpdateView):
     @method_decorator(group_excluded('ViewOnly', url='workflow/permission'))
     def dispatch(self, request, *args, **kwargs):
         try:
-            self.guidance = FormGuidance.objects.get(form="CollectedData")
+            self.guidance = FormGuidance.objects.get(form="IndicatorResult")
         except FormGuidance.DoesNotExist:
             self.guidance = None
         return super(CollectedDataUpdate, self)\
@@ -837,7 +837,7 @@ class CollectedDataUpdate(UpdateView):
     def get_context_data(self, **kwargs):
         context = super(CollectedDataUpdate, self).get_context_data(**kwargs)
         # get the indicator_id for the collected data
-        get_indicator = CollectedData.objects.get(id=self.kwargs['pk'])
+        get_indicator = IndicatorResult.objects.get(id=self.kwargs['pk'])
 
         try:
             get_disaggregation_label = DisaggregationLabel.objects.all()\
@@ -884,7 +884,7 @@ class CollectedDataUpdate(UpdateView):
 
     # add the request to the kwargs
     def get_form_kwargs(self):
-        get_data = CollectedData.objects.get(id=self.kwargs['pk'])
+        get_data = IndicatorResult.objects.get(id=self.kwargs['pk'])
         kwargs = super(CollectedDataUpdate, self).get_form_kwargs()
         kwargs['request'] = self.request
         kwargs['program'] = get_data.program
@@ -897,14 +897,14 @@ class CollectedDataUpdate(UpdateView):
 
     def form_valid(self, form):
 
-        get_collected_data = CollectedData.objects.get(id=self.kwargs['pk'])
+        get_collected_data = IndicatorResult.objects.get(id=self.kwargs['pk'])
         get_disaggregation_label = DisaggregationLabel.objects.all()\
             .filter(
             Q(disaggregation_type__indicator__id=
               self.request.POST['indicator']) |
             Q(disaggregation_type__standard=True)).distinct()
 
-        get_indicator = CollectedData.objects.get(id=self.kwargs['pk'])
+        get_indicator = IndicatorResult.objects.get(id=self.kwargs['pk'])
 
         # update the count with the value of Table unique count
         if form.instance.update_count_activity_table and \
@@ -952,9 +952,9 @@ class CollectedDataUpdate(UpdateView):
 
 class CollectedDataDelete(DeleteView):
     """
-    CollectedData Delete
+    IndicatorResult Delete
     """
-    model = CollectedData
+    model = IndicatorResult
     success_url = '/indicators/home/0/0/0/'
 
     @method_decorator(group_excluded('ViewOnly', url='workflow/permission'))
@@ -1083,17 +1083,17 @@ def collected_data_json(AjaxableResponseMixin, indicator, program):
     ind = Indicator.objects.get(pk=indicator)
     template_name = 'indicators/collected_data_table.html'
 
-    # collecteddata = CollectedData.objects\
+    # collecteddata = IndicatorResult.objects\
     #     .filter(indicator=indicator)\
     #     .select_related('indicator')\
     #     .prefetch_related('evidence', 'periodic_target',
     #       'disaggregation_value')\
     #     .order_by('periodic_target__customsort', 'date_collected')
 
-    periodictargets = PeriodicTarget.objects.filter(
+    periodictargets = ReportingPeriod.objects.filter(
         indicator=indicator).prefetch_related('collecteddata_set')\
         .order_by('customsort')
-    collecteddata_without_periodictargets = CollectedData.objects.filter(
+    collecteddata_without_periodictargets = IndicatorResult.objects.filter(
         indicator=indicator, periodic_target__isnull=True)
 
     detail_url = ''
@@ -1105,7 +1105,7 @@ def collected_data_json(AjaxableResponseMixin, indicator, program):
     # except Exception as e:
     #     pass
 
-    collected_sum = CollectedData.objects\
+    collected_sum = IndicatorResult.objects\
         .select_related('periodic_target')\
         .filter(indicator=indicator)\
         .aggregate(Sum('periodic_target__target'), Sum('achieved'))
@@ -1331,14 +1331,14 @@ def indicator_data_report(request, id=0, program=0, type=0):
         q = {'indicator__indicator_type__id': type}
 
     if request.method == "GET" and "search" in request.GET:
-        queryset = CollectedData.objects.filter(**q)\
+        queryset = IndicatorResult.objects.filter(**q)\
             .filter(
             Q(agreement__project_name__contains=request.GET["search"]) |
             Q(description__icontains=request.GET["search"]) |
             Q(indicator__name__contains=request.GET["search"]))\
             .select_related()
     else:
-        queryset = CollectedData.objects.all().filter(**q).select_related()
+        queryset = IndicatorResult.objects.all().filter(**q).select_related()
 
     # pass query to table and configure
     table = IndicatorDataTable(queryset)
@@ -1481,7 +1481,7 @@ class CollectedDataReportData(View, AjaxableResponseMixin):
             }
             q.update(s)
 
-        get_collected_data = CollectedData.objects.all()\
+        get_collected_data = IndicatorResult.objects.all()\
             .select_related('periodic_target').prefetch_related(
             'evidence', 'indicator', 'program',
             'indicator__objectives',
@@ -1499,7 +1499,7 @@ class CollectedDataReportData(View, AjaxableResponseMixin):
             'indicator__external_service_record__external_service__name',
             'evidence','activity_table', 'periodic_target', 'achieved')
 
-        collected_sum = CollectedData.objects\
+        collected_sum = IndicatorResult.objects\
             .select_related('periodic_target')\
             .filter(program__organization=organization).filter(**q)\
             .aggregate(Sum('periodic_target__target'), Sum('achieved'))
@@ -1717,7 +1717,7 @@ class TVAReport(TemplateView):
 
 class CollectedDataList(ListView):
     """
-    This is the Indicator CollectedData report for each indicator and program.
+    This is the Indicator IndicatorResult report for each indicator and program.
     Displays a list collected data entries
     and sums it at the bottom.  Lives in the "Reports" navigation.
     URL: indicators/data/[id]/[program]/[type]
@@ -1727,7 +1727,7 @@ class CollectedDataList(ListView):
     :param type: Type ID
     :return:
     """
-    model = CollectedData
+    model = IndicatorResult
     template_name = 'indicators/collecteddata_list.html'
 
     def get(self, request, *args, **kwargs):
@@ -1775,7 +1775,7 @@ class CollectedDataList(ListView):
             q.update(s)
             indicator_name = Indicator.objects.get(id=indicator)
 
-        indicators = CollectedData.objects.all()\
+        indicators = IndicatorResult.objects.all()\
             .select_related('periodic_target')\
             .prefetch_related('evidence', 'indicator', 'program',
                               'indicator__objectives',
@@ -1861,7 +1861,7 @@ class IndicatorDataExport(View):
 
         organization = request.user.activity_user.organization
 
-        queryset = CollectedData.objects.filter(
+        queryset = IndicatorResult.objects.filter(
             **kwargs).filter(indicator__program__organization=organization)
         dataset = CollectedDataResource().export(queryset)
         response = HttpResponse(

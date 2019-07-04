@@ -3,7 +3,7 @@
 
 from django.test import TestCase
 from indicators.models import Indicator, IndicatorType, DisaggregationType, \
-    ReportingFrequency, CollectedData
+    ReportingPeriod, IndicatorResult
 from workflow.models import WorkflowLevel1, Country, Organization
 from django.contrib.auth.models import User
 
@@ -33,9 +33,9 @@ class IndicatorTestCase(TestCase):
         new_disaggregation.save()
         get_disaggregation = DisaggregationType.objects.get(
             disaggregation_type="disagg")
-        new_frequency = ReportingFrequency.objects.create(frequency="newfreq")
+        new_frequency = ReportingPeriod.objects.create(frequency="newfreq")
         new_frequency.save()
-        get_frequency = ReportingFrequency.objects.get(frequency="newfreq")
+        get_frequency = ReportingPeriod.objects.get(frequency="newfreq")
         user = User.objects.create_user(
             'john', 'lennon@thebeatles.com', 'johnpassword')
         user.save()
@@ -53,7 +53,7 @@ class IndicatorTestCase(TestCase):
         new_indicator.program.add(get_program)
 
         get_indicator = Indicator.objects.get(name="testindicator")
-        new_collected = CollectedData.objects.create(
+        new_collected = IndicatorResult.objects.create(
             achieved="20", description="somevaluecollected",
             indicator=get_indicator)
         new_collected.save()
@@ -65,8 +65,8 @@ class IndicatorTestCase(TestCase):
             id=get_indicator.id).count(), 1)
 
     def test_collected_exists(self):
-        """Check for CollectedData object"""
-        get_collected = CollectedData.objects.get(
+        """Check for IndicatorResult object"""
+        get_collected = IndicatorResult.objects.get(
             description="somevaluecollected")
-        self.assertEqual(CollectedData.objects.filter(
+        self.assertEqual(IndicatorResult.objects.filter(
             id=get_collected.id).count(), 1)

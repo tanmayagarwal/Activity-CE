@@ -8,15 +8,15 @@ from django.core.serializers.python import Serializer as PythonSerializer
 from rest_framework import serializers
 
 from indicators.models import (
-    Indicator, ReportingFrequency, ActivityUser, IndicatorType, Objective,
-    DisaggregationType, Level, ExternalService, ExternalServiceRecord,
-    StrategicObjective, CollectedData, ActivityTable, DisaggregationValue,
-    PeriodicTarget
+    Indicator, ReportingPeriod, ActivityUser, IndicatorType, Objective,
+    DisaggregationType, IndicatorLevel, ExternalService, ExternalServiceRecord,
+    Objective, IndicatorResult, ActivityTable, DisaggregationValue,
+    ReportingPeriod
 )
 from workflow.models import (
     WorkflowLevel1, Sector, ProjectType, Office, Location, Country,
     WorkflowLevel2,
-    WorkflowLevel2, Stakeholder, Capacity, Evaluate, ProfileType,
+    WorkflowLevel2, Organization, Capacity, Evaluate, ProfileType,
     Province, District, AdminLevelThree, Village, StakeholderType,
     Contact, Documentation, LoggedUser, Checklist, Organization
 )
@@ -65,7 +65,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 class PeriodicTargetSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PeriodicTarget
+        model = ReportingPeriod
         fields = '__all__'
 
 
@@ -181,7 +181,7 @@ class IndicatorTypeLightSerializer(serializers.ModelSerializer):
 
 class IndicatorLevelLightSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Level
+        model = IndicatorLevel
         fields = ('id', 'name')
 
 
@@ -220,7 +220,7 @@ class ProgramIndicatorSerializer(serializers.ModelSerializer):
 
 class ReportingFrequencySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = ReportingFrequency
+        model = ReportingPeriod
         fields = '__all__'
 
 
@@ -250,13 +250,13 @@ class DisaggregationTypeSerializer(serializers.HyperlinkedModelSerializer):
 
 class LevelSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Level
+        model = IndicatorLevel
         fields = '__all__'
 
 
 class StakeholderSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Stakeholder
+        model = Organization
         fields = '__all__'
 
 
@@ -274,7 +274,7 @@ class ExternalServiceRecordSerializer(serializers.HyperlinkedModelSerializer):
 
 class StrategicObjectiveSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = StrategicObjective
+        model = Objective
         fields = '__all__'
 
 
@@ -340,7 +340,7 @@ class DocumentationSerializer(serializers.HyperlinkedModelSerializer):
 
 class CollectedDataSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = CollectedData
+        model = IndicatorResult
         fields = '__all__'
 
 

@@ -15,12 +15,12 @@ from workflow.mixins import APIDefaultsMixin
 
 from workflow.models import (
     WorkflowLevel1, Sector, ProjectType, Office, Location, Country, WorkflowLevel2, Checklist,
-    WorkflowLevel2, Stakeholder, Capacity, Evaluate, ProfileType, Contact, Documentation,
+    WorkflowLevel2, Organization, Capacity, Evaluate, ProfileType, Contact, Documentation,
     Province, District, AdminLevelThree, Village, StakeholderType
 )
 from indicators.models import (
-    Indicator, Objective, ReportingFrequency, ActivityUser, IndicatorType, DisaggregationType,
-    Level, ExternalService, ExternalServiceRecord, StrategicObjective, CollectedData,
+    Indicator, Objective, ReportingPeriod, ActivityUser, IndicatorType, DisaggregationType,
+    IndicatorLevel, ExternalService, ExternalServiceRecord, Objective, IndicatorResult,
     ActivityTable, DisaggregationValue, DisaggregationLabel
 )
 
@@ -47,7 +47,7 @@ class PeriodicTargetReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PeriodicTargetSerializer
 
     def get_queryset(self):
-        queryset = PeriodicTarget.objects.all()
+        queryset = ReportingPeriod.objects.all()
         indicator_id = self.request.query_params.get('indicator', None)
         if indicator_id:
             queryset = queryset.filter(indicator=indicator_id)
@@ -233,7 +233,7 @@ class ReportingFrequencyViewSet(viewsets.ModelViewSet):
     This viewset automatically provides `list`, `create`, `retrieve`,
     `update` and `destroy` actions.
     """
-    queryset = ReportingFrequency.objects.all()
+    queryset = ReportingPeriod.objects.all()
     serializer_class = ReportingFrequencySerializer
 
 
@@ -292,7 +292,7 @@ class LevelViewSet(viewsets.ModelViewSet):
     This viewset automatically provides `list`, `create`, `retrieve`,
     `update` and `destroy` actions.
     """
-    queryset = Level.objects.all()
+    queryset = IndicatorLevel.objects.all()
     serializer_class = LevelSerializer
 
 
@@ -306,13 +306,13 @@ class StakeholderViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         user_countries = get_country(request.user)
-        queryset = Stakeholder.objects.all().filter(country__in=user_countries)
+        queryset = Organization.objects.all().filter(country__in=user_countries)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     filter_fields = ('country__country',)
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    queryset = Stakeholder.objects.all()
+    queryset = Organization.objects.all()
     serializer_class = StakeholderSerializer
 
 
@@ -339,7 +339,7 @@ class StrategicObjectiveViewSet(viewsets.ModelViewSet):
     This viewset automatically provides `list`, `create`, `retrieve`,
     `update` and `destroy` actions.
     """
-    queryset = StrategicObjective.objects.all()
+    queryset = Objective.objects.all()
     serializer_class = StrategicObjectiveSerializer
 
 
@@ -441,7 +441,7 @@ class CollectedDataViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         user_countries = get_country(request.user)
-        queryset = CollectedData.objects.all().filter(
+        queryset = IndicatorResult.objects.all().filter(
             program__country__in=user_countries)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
@@ -449,7 +449,7 @@ class CollectedDataViewSet(viewsets.ModelViewSet):
     filter_fields = ('indicator__program__country__country',
                      'indicator__program__name')
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    queryset = CollectedData.objects.all()
+    queryset = IndicatorResult.objects.all()
     serializer_class = CollectedDataSerializer
     pagination_class = SmallResultsSetPagination
 

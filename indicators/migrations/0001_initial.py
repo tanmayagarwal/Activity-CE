@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='CollectedData',
+            name='IndicatorResult',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('achieved', models.DecimalField(decimal_places=2, help_text=' ', max_digits=20, verbose_name='Achieved')),
@@ -220,7 +220,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='Level',
+            name='IndicatorLevel',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(blank=True, max_length=135)),
@@ -243,7 +243,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='PeriodicTarget',
+            name='ReportingPeriod',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('period', models.CharField(blank=True, max_length=255, null=True)),
@@ -259,7 +259,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='ReportingFrequency',
+            name='ReportingPeriod',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('frequency', models.CharField(blank=True, max_length=135)),
@@ -277,7 +277,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='StrategicObjective',
+            name='Objective',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(blank=True, max_length=135)),

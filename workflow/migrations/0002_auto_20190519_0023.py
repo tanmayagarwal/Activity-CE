@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='organization',
             name='stakeholder_label',
-            field=models.CharField(default='Stakeholder', max_length=255, verbose_name='Stakeholder Organization label'),
+            field=models.CharField(default='Organization', max_length=255, verbose_name='Organization Organization label'),
         ),
         migrations.AddField(
             model_name='organization',
