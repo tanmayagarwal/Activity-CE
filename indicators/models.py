@@ -85,7 +85,7 @@ class DisaggregationType(models.Model):
     disaggregation_type = models.CharField(max_length=135, blank=True)
     description = models.CharField(max_length=765, blank=True)
     country = models.ForeignKey(
-        '.activity.Country', null=True, blank=True, on_delete=models.SET_NULL)
+        'activity.Country', null=True, blank=True, on_delete=models.SET_NULL)
     standard = models.BooleanField(
         default=False, verbose_name="Standard (Activity Admins Only)")
     create_date = models.DateTimeField(null=True, blank=True)

@@ -3,8 +3,9 @@
 
 from django.db import models
 from django.contrib import admin
-from workflow.models import WorkflowLevel1, WorkflowLevel2, WorkflowLevel2, Country
-from indicators.models import Indicator, IndicatorResult
+from workflow.models import (WorkflowLevel1, WorkflowLevel2,)
+from indicators.models import (Indicator, IndicatorResult)
+from activity.models import (Country,)
 
 
 class Report(models.Model):

@@ -14,12 +14,13 @@ from indicators.models import (
     ReportingPeriod
 )
 from workflow.models import (
-    WorkflowLevel1, Sector, ProjectType, Office, Location, Country,
+    WorkflowLevel1, Sector, ProjectType, Office,
     WorkflowLevel2,
     WorkflowLevel2, Organization, Capacity, Evaluate, ProfileType,
     Province, District, AdminLevelThree, Village, StakeholderType,
     Contact, Documentation, LoggedUser, Checklist, Organization
 )
+from activity.models import (Location, Country)
 
 
 class FlatJsonSerializer(PythonSerializer):

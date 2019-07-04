@@ -69,7 +69,6 @@ class ActivityTableAdmin(ImportExportModelAdmin):
 
 admin.site.register(DisaggregationType, DisaggregationTypeAdmin)
 admin.site.register(DisaggregationLabel, DisaggregationLabelAdmin)
-admin.site.register(IndicatorLevel)
 admin.site.register(ExternalService, ExternalServiceAdmin)
 admin.site.register(ExternalServiceRecord, ExternalServiceRecordAdmin)
 admin.site.register(ActivityTable, ActivityTableAdmin)
@@ -104,7 +103,7 @@ class IndicatorTagAdmin(admin.ModelAdmin):
     display = 'Indicator Tags'
 
 
-@admin.register(Indicator1)
+@admin.register(Indicator)
 class Indicator1Admin(admin.ModelAdmin):
     list_display = ('name', 'type', 'key_performance_indicator')
     list_filter = ('name', 'level', 'workflow_level1')

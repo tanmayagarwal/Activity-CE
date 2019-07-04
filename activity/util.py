@@ -2,7 +2,8 @@ import unicodedata
 import json
 import requests
 
-from workflow.models import Country, ActivityUser, ActivitySites
+from activity.models import (Country,)
+from workflow.models import (ActivityUser, ActivitySites)
 from django.contrib.auth.models import User
 from django.core.mail import mail_admins, EmailMessage
 from django.core.exceptions import PermissionDenied

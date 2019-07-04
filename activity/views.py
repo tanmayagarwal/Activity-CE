@@ -15,16 +15,14 @@ from django.db import IntegrityError
 
 from indicators.models import IndicatorResult, Indicator
 
-from workflow.models import (
-    WorkflowLevel2, WorkflowLevel2, WorkflowLevel1,
-    Location, Sector, Country, ActivityUser,
-    ActivitySites, ActivityBookmarks, FormGuidance, Organization
+from workflow.models import (WorkflowLevel2, WorkflowLevel1, Sector, ActivityUser,
+                             ActivitySites, ActivityBookmarks, FormGuidance, Organization
 )
+from activity.models import (Location, Country)
 from activity.tables import IndicatorDataTable
 from activity.util import get_country, get_nav_links
 from activity.forms import (
     RegistrationForm, BookmarkForm, OrganizationEditForm)
-from activity.settings import PROJECT_ROOT
 from django.core import serializers
 from .tokens import account_activation_token
 from django.core.mail import EmailMessage

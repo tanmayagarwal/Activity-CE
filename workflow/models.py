@@ -1287,3 +1287,64 @@ class Budget(models.Model):
     def remaining_expenditure(self):
         return Decimal(self.actual_budget_donor_currency) - Decimal(self.actual_expenditure_donor_currency)
 
+
+# Andrew and Ninette to decide whether we are keeping these
+class Checklist(models.Model):
+    name = models.CharField(max_length=255, null=True,
+                            blank=True, default="Checklist")
+    agreement = models.ForeignKey(WorkflowLevel2, null=True, blank=True,
+                                  verbose_name="Project Initiation", on_delete=models.SET_NULL)
+    country = models.ForeignKey(
+        'activity.Country', null=True, blank=True, on_delete=models.SET_NULL)
+    create_date = models.DateTimeField(null=True, blank=True)
+    edit_date = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ('agreement',)
+
+    # on save add create date or update edit date
+    def save(self, *args, **kwargs):
+        if self.create_date is None:
+            self.create_date = datetime.now()
+        self.edit_date = datetime.now()
+        super(Checklist, self).save()
+
+    # displayed in admin templates
+    def __str__(self):
+        return self.agreement
+
+
+class ChecklistAdmin(admin.ModelAdmin):
+    list_display = ('name', 'country')
+    list_filter = ('country', 'agreement')
+
+
+class ChecklistItem(models.Model):
+    item = models.CharField(max_length=255)
+    checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE)
+    in_file = models.BooleanField(default=False)
+    not_applicable = models.BooleanField(default=False)
+    global_item = models.BooleanField(default=False)
+    owner = models.ForeignKey(
+        ActivityUser, null=True, blank=True, on_delete=models.SET_NULL)
+    create_date = models.DateTimeField(null=True, blank=True)
+    edit_date = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ('item',)
+
+    # on save add create date or update edit date
+    def save(self, *args, **kwargs):
+        if self.create_date is None:
+            self.create_date = datetime.now()
+        self.edit_date = datetime.now()
+        super(ChecklistItem, self).save()
+
+    # displayed in admin templates
+    def __str__(self):
+        return self.item
+
+
+class ChecklistItemAdmin(admin.ModelAdmin):
+    list_display = ('item', 'checklist', 'in_file')
+    list_filter = ('checklist', 'global_item')
