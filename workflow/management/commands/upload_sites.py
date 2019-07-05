@@ -80,9 +80,9 @@ class Command(BaseCommand):
                     office = None
 
                 try:
-                    profile_type = ProfileType.objects.get(
+                    profile_type = LocationType.objects.get(
                         profile=type_of_site)
-                except ProfileType.DoesNotExist:
+                except LocationType.DoesNotExist:
                     profile_type = None
 
                 try:

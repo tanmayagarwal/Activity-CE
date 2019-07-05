@@ -82,7 +82,7 @@ class Organization1Admin(admin.ModelAdmin):
     display = 'Organizations'
 
 
-@admin.register(Sector1)
+@admin.register(Sector)
 class Sector1Admin(admin.ModelAdmin):
     list_display = ('sector', 'created_by', 'create_date')
     list_filter = ('parent_sector', 'created_by')

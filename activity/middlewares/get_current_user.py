@@ -15,11 +15,10 @@ class RequestMiddleware:
         request_local.request = request
         return self.get_response(request)
 
-    @staticmethod
     def process_exception(self, request, exception):
         request_local.request = None
+        return None
 
-    @staticmethod
     def process_template_response(self, request, response):
         request_local.request = None
         return response

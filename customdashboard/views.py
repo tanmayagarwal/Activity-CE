@@ -5,16 +5,17 @@ from django.views.generic.list import ListView
 from django.http import HttpResponse
 
 from django.shortcuts import render
-from workflow.models import WorkflowLevel2, WorkflowLevel2, WorkflowLevel1, \
-    Location, Country, ActivitySites
+
+from activity.models import (Location, Country)
+from workflow.models import (WorkflowLevel2, WorkflowLevel1, ActivitySites)
 from .models import ProgramNarratives, JupyterNotebooks
-from formlibrary.models import TrainingAttendance, Distribution, Beneficiary
-from indicators.models import IndicatorResult, Indicator, ActivityTable
+from formlibrary.models import (TrainingAttendance, Distribution, Beneficiary)
+from indicators.models import (IndicatorResult, Indicator, ActivityTable)
 
 from django.db.models import Sum
 from django.db.models import Q
 
-from activity.util import get_country, get_table
+from activity.util import get_organizations, get_table
 
 from django.contrib.auth.decorators import login_required
 import requests
@@ -34,7 +35,7 @@ class ProgramList(ListView):
 
         # retrieve the coutries the user has data access for
         country = None
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         country_list = Country.objects.all().filter(id__in=countries)
         organization = request.user.activity_user.organization
         if int(self.kwargs['pk']) == 0:
@@ -95,7 +96,7 @@ def default_custom_dashboard(request, id=0, status=0):
     http://127.0.0.1:8000/customdashboard/65/
     """
     program_id = id
-    countries = get_country(request.user)
+    countries = get_organizations(request.user)
 
     # transform to list if a submitted country
     selected_countries_list = Country.objects.all().filter(
@@ -584,7 +585,7 @@ def rrima_public_dashboard(request, id=0):
     get_program = WorkflowLevel1.objects.all().filter(id=program_id)
 
     # retrieve the coutries the user has data access for
-    countries = get_country(request.user)
+    countries = get_organizations(request.user)
 
     # retrieve projects for a program
     # .filter(program__id=1, program__country__in=1)
@@ -680,7 +681,7 @@ def rrima_jupyter_view1(request, id=0):
     # get_program = WorkflowLevel1.objects.all().filter(id=program_id)
 
     # retrieve the coutries the user has data access for
-    countries = get_country(request.user)
+    countries = get_organizations(request.user)
     with open('static/rrima.html') as myfile:
         data = "\n".join(line for line in myfile)
 

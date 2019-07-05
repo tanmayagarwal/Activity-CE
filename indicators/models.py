@@ -11,7 +11,8 @@ from simple_history.models import HistoricalRecords
 from decimal import Decimal
 from datetime import datetime, timedelta
 
-from workflow.models import (Documentation, ActivityUser, Organization, Sector,
+from activity.models import (Sector, Organization)
+from workflow.models import (Documentation, ActivityUser,
                              WorkflowLevel1, WorkflowLevel2, Approval)
 
 from activity.middlewares.get_current_user import get_request
@@ -59,27 +60,6 @@ class Objective(models.Model):
         if self.create_date is None:
             self.create_date = datetime.now()
         super(Objective, self).save()
-
-
-class IndicatorLevel(models.Model):
-    name = models.CharField(max_length=135, blank=True)
-    description = models.TextField(max_length=765, blank=True)
-    create_date = models.DateTimeField(null=True, blank=True)
-    edit_date = models.DateTimeField(null=True, blank=True)
-
-    def __str__(self):
-        return self.name
-
-    def save(self):
-        if self.create_date is None:
-            self.create_date = datetime.now()
-        super(IndicatorLevel, self).save()
-
-
-class LevelAdmin(admin.ModelAdmin):
-    list_display = 'name'
-    display = 'Levels'
-
 
 class DisaggregationType(models.Model):
     disaggregation_type = models.CharField(max_length=135, blank=True)
@@ -365,7 +345,8 @@ class Indicator(models.Model):
                                          max_digits=25)
     rationale_for_target = models.TextField('Rationale for Target', max_length=500, blank=True)
     number_of_target_periods = models.IntegerField('Number of Periodic Target', default=0)
-    periodic_targets = models.ManyToManyField(ReportingPeriod, verbose_name='Periodic Target')
+    periodic_targets = models.ManyToManyField(ReportingPeriod, verbose_name='Periodic Target',
+                                              related_name='indicator_periodic_target')
     target_frequency = models.ForeignKey(ReportingPeriod, verbose_name='Target Frequencies', null=True, max_length=100,
                                          on_delete=models.SET_NULL)
     source = models.CharField('Source', max_length=255, blank=True)
@@ -434,8 +415,8 @@ class IndicatorLibrary(models.Model):
                                          max_digits=25)
     rationale_for_target = models.TextField('Rationale for Target', max_length=500, blank=True)
     number_of_target_periods = models.IntegerField('Number of Periodic Target', default=0)
-    periodic_targets = models.ManyToManyField(ReportingPeriod, verbose_name='Periodic Target')
-    periodic_targets = models.ManyToManyField(ReportingPeriod, verbose_name='Periodic Target')
+    periodic_targets = models.ManyToManyField(ReportingPeriod, verbose_name='Periodic Target',
+                                              related_name='indicator_targets')
     source = models.CharField('Source', max_length=255, blank=True)
     means_of_verification = models.TextField('Means of Verification', blank=True)
     method_of_data_collection = models.TextField('Method of Data Collection', max_length=765, blank=True)

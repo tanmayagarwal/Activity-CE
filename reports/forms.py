@@ -7,7 +7,8 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import *
 from crispy_forms.bootstrap import *
 
-from workflow.models import Country, WorkflowLevel1, Sector
+from activity.models import (Country, Sector)
+from workflow.models import (WorkflowLevel1)
 from functools import partial
 
 

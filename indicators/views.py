@@ -33,12 +33,13 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponse
 from django_tables2 import RequestConfig
 
-from workflow.models import WorkflowLevel1, Location, Country, Sector, ActivitySites, ActivityUser, FormGuidance
+from activity.models import (Location, Country, Sector)
+from workflow.models import WorkflowLevel1, ActivitySites, ActivityUser, FormGuidance
 from workflow.mixins import AjaxableResponseMixin
-from workflow.admin import CountryResource
+# from workflow.admin import CountryResource
 from workflow.forms import FilterForm
 from feed.serializers import FlatJsonSerializer
-from activity.util import get_country, get_table
+from activity.util import get_organizations, get_table
 
 import json
 import requests
@@ -220,7 +221,7 @@ def indicator_create(request, id=0):
     """
     get_indicator_types = IndicatorType.objects.all()
     get_countries = Country.objects.all()
-    countries = get_country(request.user)
+    countries = get_organizations(request.user)
     country_id = Country.objects.get(country=countries[0]).id
     organization = request.user.activity_user.organization
     get_programs = WorkflowLevel1.objects.all().filter(
@@ -1874,10 +1875,11 @@ class IndicatorDataExport(View):
 class CountryExport(View):
 
     def get(self, *args, **kwargs):
-        country = CountryResource().export()
-        response = HttpResponse(country.csv, content_type="csv")
-        response['Content-Disposition'] = 'attachment; filename=country.csv'
-        return response
+        # country = CountryResource().export()
+        # response = HttpResponse(country.csv, content_type="csv")
+        # response['Content-Disposition'] = 'attachment; filename=country.csv'
+        # return response
+        pass
 
 
 def const_table_det_url(url):

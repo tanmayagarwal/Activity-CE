@@ -11,11 +11,9 @@ from activity.models import (Country,)
 class Report(models.Model):
     country = models.ForeignKey(
         Country, null=True, blank=True, on_delete=models.SET_NULL)
-    program = models.ForeignKey(
+    workflow_level1 = models.ForeignKey(
         WorkflowLevel1, null=True, blank=True, on_delete=models.SET_NULL)
-    agreement = models.ForeignKey(
-        WorkflowLevel2, null=True, blank=True, on_delete=models.SET_NULL)
-    complete = models.ForeignKey(
+    workflow_level2 = models.ForeignKey(
         WorkflowLevel2, null=True, blank=True, on_delete=models.SET_NULL)
     indicator = models.ForeignKey(
         Indicator, null=True, blank=True, on_delete=models.SET_NULL)
@@ -33,6 +31,6 @@ class Report(models.Model):
 
 
 class ReportAdmin(admin.ModelAdmin):
-    list_display = ('country', 'program', 'description',
+    list_display = ('country', 'workflow_level1', 'description',
                     'create_date', 'edit_date')
     display = 'Project Status'

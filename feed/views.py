@@ -9,17 +9,18 @@ from rest_framework.pagination import PageNumberPagination
 import django_filters
 
 from .serializers import *
-from activity.util import get_country
+from activity.util import get_organizations
 
 from workflow.mixins import APIDefaultsMixin
 
+from activity.models import (Location, Country, Sector, LocationType, Office, Organization)
 from workflow.models import (
-    WorkflowLevel1, Sector, ProjectType, Office, Location, Country, WorkflowLevel2, Checklist,
-    WorkflowLevel2, Organization, Capacity, Evaluate, ProfileType, Contact, Documentation,
+    WorkflowLevel1, ProjectType, Checklist,
+    WorkflowLevel2, Capacity, Evaluate, Contact, Documentation,
     Province, District, AdminLevelThree, Village, StakeholderType
 )
 from indicators.models import (
-    Indicator, Objective, ReportingPeriod, ActivityUser, IndicatorType, DisaggregationType,
+    Indicator, ReportingPeriod, ActivityUser, IndicatorType, DisaggregationType,
     IndicatorLevel, ExternalService, ExternalServiceRecord, Objective, IndicatorResult,
     ActivityTable, DisaggregationValue, DisaggregationLabel
 )
@@ -86,7 +87,7 @@ class ProgramViewSet(viewsets.ModelViewSet):
     """
 
     def list(self, request):
-        user_countries = get_country(request.user)
+        user_countries = get_organizations(request.user)
         queryset = WorkflowLevel1.objects.all().filter(country__in=user_countries)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
@@ -133,7 +134,7 @@ class SiteProfileViewSet(viewsets.ModelViewSet):
     """
 
     def list(self, request):
-        user_countries = get_country(request.user)
+        user_countries = get_organizations(request.user)
         queryset = Location.objects.all().filter(country__in=user_countries)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
@@ -162,7 +163,7 @@ class AgreementViewSet(viewsets.ModelViewSet):
     """
 
     def list(self, request):
-        user_countries = get_country(request.user)
+        user_countries = get_organizations(request.user)
         queryset = WorkflowLevel2.objects.all().filter(
             program__country__in=user_countries)
         serializer = self.get_serializer(queryset, many=True)
@@ -194,7 +195,7 @@ class CompleteViewSet(viewsets.ModelViewSet):
     """
 
     def list(self, request):
-        user_countries = get_country(request.user)
+        user_countries = get_organizations(request.user)
         queryset = WorkflowLevel2.objects.all().filter(
             program__country__in=user_countries)
         serializer = self.get_serializer(queryset, many=True)
@@ -216,7 +217,7 @@ class IndicatorViewSet(viewsets.ModelViewSet):
     """
 
     def list(self, request):
-        user_countries = get_country(request.user)
+        user_countries = get_organizations(request.user)
         queryset = Indicator.objects.all().filter(
             program__country__in=user_countries)
         serializer = self.get_serializer(queryset, many=True)
@@ -305,7 +306,7 @@ class StakeholderViewSet(viewsets.ModelViewSet):
     """
 
     def list(self, request):
-        user_countries = get_country(request.user)
+        user_countries = get_organizations(request.user)
         queryset = Organization.objects.all().filter(country__in=user_countries)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
@@ -375,7 +376,7 @@ class ProfileTypeViewSet(viewsets.ModelViewSet):
     This viewset automatically provides `list`, `create`, `retrieve`,
     `update` and `destroy` actions.
     """
-    queryset = ProfileType.objects.all()
+    queryset = LocationType.objects.all()
     serializer_class = ProfileTypeSerializer
 
 
@@ -440,7 +441,7 @@ class CollectedDataViewSet(viewsets.ModelViewSet):
     """
 
     def list(self, request):
-        user_countries = get_country(request.user)
+        user_countries = get_organizations(request.user)
         queryset = IndicatorResult.objects.all().filter(
             program__country__in=user_countries)
         serializer = self.get_serializer(queryset, many=True)
@@ -466,7 +467,7 @@ class ActivitytableViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def get_queryset(self):
-        user_countries = get_country(self.request.user)
+        user_countries = get_organizations(self.request.user)
         queryset = ActivityTable.objects.filter(country__in=user_countries)
         table_id = self.request.query_params.get('table_id', None)
         if table_id is not None:
@@ -487,7 +488,7 @@ class DisaggregationValueViewSet(viewsets.ModelViewSet):
     """
 
     def list(self, request):
-        user_countries = get_country(request.user)
+        user_countries = get_organizations(request.user)
         queryset = DisaggregationValue.objects.all().filter(
             country__in=user_countries)
         serializer = self.get_serializer(queryset, many=True)

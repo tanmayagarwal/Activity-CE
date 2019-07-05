@@ -8,7 +8,9 @@ from decimal import Decimal
 from workflow.models import (Documentation, ActivityUser)
 
 from activity.middlewares.get_current_user import get_request
-
+from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
+from django.core.files.images import get_image_dimensions
 
 class Workspace(models.Model):
     """
@@ -68,7 +70,7 @@ class OrganizationType(models.Model):
 
     class Meta:
         ordering = ('create_date',)
-        verbose_name_plural = 'Workflow Level1 Types'
+        verbose_name_plural = 'Organization Types'
 
     # displayed in admin templates
     def __str__(self):
@@ -102,7 +104,7 @@ class OrganizationSubType(models.Model):
 
     class Meta:
         ordering = ('create_date',)
-        verbose_name_plural = 'Workflow Level1 Sub Types'
+        verbose_name_plural = 'Organization Sub Types'
 
     # displayed in admin templates
     def __str__(self):
@@ -119,6 +121,26 @@ class OrganizationSubType(models.Model):
         return super(OrganizationSubType, self).save(*args, **kwargs)
 
 
+IMAGE_SPEC = {
+    "width": 2000,
+    "height": 500,
+    "limit_kb": 100
+}
+
+
+def validate_image(image, width=IMAGE_SPEC['width'],
+                   height=IMAGE_SPEC['height'],
+                   limit_kb=IMAGE_SPEC['limit_kb']):
+    file_size = image.file.size
+    if file_size > limit_kb * 1024:
+        raise ValidationError("Max size of file is %s KB" % limit_kb)
+    w, h = get_image_dimensions(image)
+    if w < width:
+        raise ValidationError("Min width is %s" % width)
+    if h < height:
+        raise ValidationError("Min height is %s" % height)
+
+
 class Organization(models.Model):
     """
     Organization Model
@@ -133,9 +155,9 @@ class Organization(models.Model):
     short_name = models.CharField('Organization Short Name', max_length=100)
     url = models.CharField('Organization Website url', max_length=165, blank=True)
     description = models.TextField('Description/Notes', max_length=765, null=True, blank=True)
-    organization_type = models.ForeignKey(OrganizationType, null=True,  on_delete=models.SET_NULL)
-    parent_organization = models.ForeignKey('self', null=True, related_name='children', on_delete=models.SET_NULL)
-    documentation = models.ForeignKey(Documentation, null=True, on_delete=models.SET_NULL)
+    organization_type = models.ForeignKey(OrganizationType, null=True, blank=True, on_delete=models.SET_NULL)
+    parent_organization = models.ForeignKey('self', null=True, blank=True, related_name='children', on_delete=models.SET_NULL)
+    documentation = models.ForeignKey(Documentation, null=True, blank=True, on_delete=models.SET_NULL)
     link_to_description_relationship = models.CharField('Link to Description of Relationship', blank=True,
                                                         max_length=165)
     link_to_due_diligence = models.CharField('Link to Due Diligence', blank=True, max_length=165)
@@ -151,6 +173,12 @@ class Organization(models.Model):
     modified_by = models.ForeignKey(ActivityUser, verbose_name='Modified By', related_name='org_modified_by',
                                     editable=False, null=True, on_delete=models.SET_NULL)
 
+    theme_color = models.CharField("Organization Costum Color", default="25ced1",
+        validators=[RegexValidator(regex='^.{6}$', message='Length has to be 6', code='nomatch')], max_length=6)
+    logo = models.ImageField("Your Organization logo", upload_to='images/', blank=True, validators=[validate_image],
+        help_text="Image of minimum {} width and {} height, "
+                  "maximum of {} ko".format(*tuple(IMAGE_SPEC.values())))
+
     class Meta:
         ordering = ('full_name',)
         verbose_name_plural = "Organizations"
@@ -158,7 +186,7 @@ class Organization(models.Model):
 
     # displayed in admin templates
     def __str__(self):
-        return self.name or ''
+        return self.full_name or ''
 
     # on save add create date or update edit date
     def save(self, *args, **kwargs):
@@ -203,7 +231,7 @@ class Office(models.Model):
         return new_name
 
 
-class Sector1(models.Model):
+class Sector(models.Model):
     """
     Sector Model
     """
@@ -220,7 +248,6 @@ class Sector1(models.Model):
     class Meta:
         ordering = ('sector',)
         verbose_name_plural = 'Location'
-        app_label = 'workflow'
 
     # displayed in admin templates
     def __str__(self):
@@ -234,7 +261,7 @@ class Sector1(models.Model):
             self.created_by = logged_user
         self.modified_date = timezone.now()
         self.modified_by = logged_user
-        return super(Sector1, self).save(*args, **kwargs)
+        return super(Sector, self).save(*args, **kwargs)
 
 
 class Contact(models.Model):
@@ -291,6 +318,8 @@ class LocationType(models.Model):
     """
     location_type_uuid = models.UUIDField('Organization Sub-Type UUID', editable=False, default=uuid.uuid4, unique=True)
     type = models.CharField('Location Type', max_length=100, unique=True)
+    work_space = models.ForeignKey(Workspace, verbose_name='Location Workspace', null=True, blank=True,
+                                   on_delete=models.SET_NULL)
     create_date = models.DateTimeField('Create Date', blank=True, null=True, editable=False)
     modified_date = models.DateTimeField('Edit Date', blank=True, null=True, editable=False)
     created_by = models.ForeignKey(ActivityUser, verbose_name='Created By', editable=False, null=True,

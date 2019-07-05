@@ -2,7 +2,7 @@ import unicodedata
 import json
 import requests
 
-from activity.models import (Country,)
+from activity.models import (Country, Organization)
 from workflow.models import (ActivityUser, ActivitySites)
 from django.contrib.auth.models import User
 from django.core.mail import mail_admins, EmailMessage
@@ -28,16 +28,16 @@ def silo_to_dict(silo):
     return parsed_data
 
 
-def get_country(user):
+def get_organizations(user):
     """
     Returns the object the view is displaying.
     """
-    user_countries = ActivityUser.objects.all().filter(
-        user__id=user.id).values('countries')
+    user_organizations = ActivityUser.objects.all().filter(
+        user__id=user.id).values('organizations')
 
-    get_countries = Country.objects.all().filter(id__in=user_countries)
+    get_organization_list = Organization.objects.all().filter(id__in=user_organizations)
 
-    return get_countries
+    return get_organization_list
 
 
 def email_group(country, group, link, subject, message, submiter=None):

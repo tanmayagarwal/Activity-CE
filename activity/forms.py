@@ -7,7 +7,8 @@ from crispy_forms.layout import Layout, Submit, Reset
 from django import forms
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.contrib.auth.models import User
-from workflow.models import ActivityUser, ActivityBookmarks, Organization
+from activity.models import (Organization)
+from workflow.models import ActivityUser, ActivityBookmarks
 
 
 class RegistrationForm(UserChangeForm):

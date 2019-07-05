@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from .mixins import AjaxableResponseMixin
-from activity.util import get_country, group_excluded
+from activity.util import get_organizations, group_excluded
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
@@ -44,7 +44,7 @@ class CustomDashboardList(ListView):
         get_program = WorkflowLevel1.objects.all().filter(id=program_id)
 
         # retrieve the coutries the user has data access for
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
 
         # retrieve projects for a program
         # get_projects = WorkflowLevel2.objects.all()
@@ -591,7 +591,7 @@ class DashboardComponentList(ListView):
         # retrieve program
         model = WorkflowLevel1
         # retrieve the countries the user has data access for
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         dashboard_id = int(self.kwargs['pk'])
 
         get_dashboard_list_components = DashboardComponent.objects.all()\

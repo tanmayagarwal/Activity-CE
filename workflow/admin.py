@@ -5,7 +5,7 @@ from .models import *
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 from import_export.admin import ImportExportModelAdmin, ExportMixin
-from activity.util import get_country
+from activity.util import get_organizations
 from adminreport.mixins import ChartReportAdmin
 from activity.models import (Country)
 
@@ -32,7 +32,7 @@ class DocumentationResource(resources.ModelResource):
 class DocumentationAdmin(ImportExportModelAdmin):
     resource_class = DocumentationResource
     list_display = ('program', 'project')
-    list_filter = ('program__country',)
+    list_filter = ('program__organization',)
     pass
 
 
@@ -95,7 +95,7 @@ class CountryResource(resources.ModelResource):
 #     country = fields.Field(column_name='country', attribute='country',
 #                            widget=ForeignKeyWidget(Country, 'country'))
 #     type = fields.Field(column_name='type', attribute='type',
-#                         widget=ForeignKeyWidget(ProfileType, 'profile'))
+#                         widget=ForeignKeyWidget(LocationType, 'profile'))
 #     office = fields.Field(column_name='office', attribute='office',
 #                           widget=ForeignKeyWidget(Office, 'code'))
 #     district = fields.Field(column_name='admin level 2',
@@ -175,18 +175,13 @@ class CurrencyAdmin(admin.ModelAdmin):
     list_filter = ('name', 'code')
 
 
-admin.site.register(Organization, OrganizationAdmin)
 admin.site.register(Province, ProvinceAdmin)
-admin.site.register(Office, OfficeAdmin)
 admin.site.register(District, DistrictAdmin)
-admin.site.register(AdminLevelThree, AdminLevelThreeAdmin)
 admin.site.register(Village)
-admin.site.register(Sector)
 admin.site.register(Documentation, DocumentationAdmin)
 admin.site.register(Template)
 admin.site.register(Capacity)
 admin.site.register(Evaluate)
-admin.site.register(ProfileType)
 admin.site.register(ApprovalAuthority, ApprovalAuthorityAdmin)
 admin.site.register(Contact, ContactAdmin)
 admin.site.register(StakeholderType)

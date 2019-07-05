@@ -9,7 +9,7 @@ from django.urls import reverse_lazy
 from .forms import TrainingAttendanceForm, BeneficiaryForm, DistributionForm
 from workflow.models import FormGuidance, WorkflowLevel1, WorkflowLevel2
 from django.utils.decorators import method_decorator
-from activity.util import get_country, group_excluded
+from activity.util import get_organizations, group_excluded
 
 from django.shortcuts import render
 from django.contrib import messages
@@ -32,7 +32,7 @@ class TrainingList(ListView):
     def get(self, request, *args, **kwargs):
 
         project_agreement_id = self.kwargs['pk']
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries).distinct()
         if int(self.kwargs['pk']) == 0:
@@ -296,7 +296,7 @@ class DistributionList(ListView):
     def get(self, request, *args, **kwargs):
 
         program_id = self.kwargs['pk']
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries).distinct()
 
@@ -423,7 +423,7 @@ class TrainingListObjects(View, AjaxableResponseMixin):
         program_id = int(self.kwargs['program'])
         project_id = int(self.kwargs['project'])
         print(project_id)
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         if int(self.kwargs['program']) == 0:
             get_training = TrainingAttendance.objects.all().filter(
                 program__country__in=countries).values(
@@ -485,7 +485,7 @@ class DistributionListObjects(View, AjaxableResponseMixin):
 
         program_id = int(self.kwargs['program'])
         project_id = int(self.kwargs['project'])
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         if program_id == 0:
             get_distribution = Distribution.objects.all().filter(
                 program__country__in=countries).values(
@@ -514,7 +514,7 @@ class GetAgreements(View, AjaxableResponseMixin):
     def get(self, request, *args, **kwargs):
 
         program_id = self.kwargs['program']
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         if program_id != 0:
             get_agreements = WorkflowLevel2.objects.all().filter(
                 program=program_id).values('id', 'project_name')

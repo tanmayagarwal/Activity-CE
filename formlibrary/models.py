@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib import admin
 from datetime import datetime
-from workflow.models import (WorkflowLevel1, WorkflowLevel2, Office, Province)
-from activity.models import (Location)
+from workflow.models import (WorkflowLevel1, WorkflowLevel2, Province)
+from activity.models import (Location, Office)
 
 try:
     from django.utils import timezone
@@ -65,7 +65,7 @@ class TrainingAttendanceAdmin(admin.ModelAdmin):
     list_display = ('training_name', 'program',
                     'project_agreement', 'create_date', 'edit_date')
     display = 'Training Attendance'
-    list_filter = ('program__country', 'program')
+    list_filter = ('program__organization', 'program')
 
 
 class Distribution(models.Model):

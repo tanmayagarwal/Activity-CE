@@ -98,104 +98,6 @@ class Currency(models.Model):
         return self.name
 
 
-IMAGE_SPEC = {
-    "width": 2000,
-    "height": 500,
-    "limit_kb": 100
-}
-
-
-def validate_image(image, width=IMAGE_SPEC['width'],
-                   height=IMAGE_SPEC['height'],
-                   limit_kb=IMAGE_SPEC['limit_kb']):
-    file_size = image.file.size
-    if file_size > limit_kb * 1024:
-        raise ValidationError("Max size of file is %s KB" % limit_kb)
-    w, h = get_image_dimensions(image)
-    if w < width:
-        raise ValidationError("Min width is %s" % width)
-    if h < height:
-        raise ValidationError("Min height is %s" % height)
-
-
-class Organization(models.Model):
-    name = models.CharField("Organization Name",
-                            max_length=255, blank=True, default="Hikaya")
-    description = models.TextField(
-        "Description/Notes", max_length=765, null=True, blank=True)
-    logo = models.FileField("Your Organization Logo",
-                            blank=True, null=True, upload_to="media/img/")
-    organization_url = models.CharField(blank=True, null=True, max_length=255)
-    level_1_label = models.CharField(
-        "Project/WorkflowLevel1 Organization IndicatorLevel 1 label", default="WorkflowLevel1",
-        max_length=255, blank=True)
-    level_2_label = models.CharField(
-        "Project/WorkflowLevel1 Organization IndicatorLevel 2 label", default="Project",
-        max_length=255, blank=True)
-    level_3_label = models.CharField(
-        "Project/WorkflowLevel1 Organization IndicatorLevel 3 label", default="Component",
-        max_length=255, blank=True)
-    level_4_label = models.CharField(
-        "Project/WorkflowLevel1 Organization IndicatorLevel 4 label", default="Activity",
-        max_length=255, blank=True)
-    site_label = models.CharField('Site Organization label', default='Site',
-                                  max_length=255)
-    stakeholder_label = models.CharField('Organization Organization label',
-                                         default='Organization',
-                                         max_length=255)
-    form_label = models.CharField('Form Organization label', default='Form',
-                                  max_length=255)
-    indicator_label = models.CharField('Indicator Organization label',
-                                       default='Indicator',
-                                       max_length=255)
-    site_label = models.CharField('Site Organization label', default='Site',
-                                  max_length=255)
-    theme_color = models.CharField('Organization theme color',
-                                   default='#25ced1', max_length=50)
-    default_currency = models.ForeignKey(Currency,
-                                         help_text='Organization currency',
-                                         blank=True, null=True,
-                                         on_delete=models.SET_NULL)
-    default_language = models.CharField('Organization language',
-                                        default='English-US', max_length=50)
-    date_format = models.CharField('Organization Date Format',
-                                   default='DD.MM.YYYY', max_length=100)
-    create_date = models.DateTimeField(null=True, blank=True)
-    edit_date = models.DateTimeField(null=True, blank=True)
-    theme_color = models.CharField(
-        "Organization Costum Color", default="25ced1", validators=[
-            RegexValidator(regex='^.{6}$', message='Length has to be 6',
-                           code='nomatch')],
-        max_length=6)
-    logo = models.ImageField(
-        "Your Organization logo",
-        upload_to='images/', blank=True,
-        validators=[validate_image],
-        help_text="Image of minimum {} width and {} height, "
-                  "maximum of {} ko".format(*tuple(IMAGE_SPEC.values())))
-
-    class Meta:
-        ordering = ('name',)
-        verbose_name_plural = "Organizations"
-        app_label = 'workflow'
-
-    # on save add create date or update edit date
-    def save(self, *args, **kwargs):
-        if self.create_date is None:
-            self.create_date = datetime.now()
-        self.edit_date = datetime.now()
-        super(Organization, self).save()
-
-    # displayed in admin templates
-    def __str__(self):
-        return self.name or ''
-
-
-class OrganizationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'create_date', 'edit_date')
-    display = 'Organization'
-
-
 TITLE_CHOICES = (
     ('mr', 'Mr.'),
     ('mrs', 'Mrs.'),
@@ -214,11 +116,11 @@ class ActivityUser(models.Model):
         User, unique=True, related_name='activity_user',
         on_delete=models.CASCADE)
     organization = models.ForeignKey(
-        Organization, default=1, blank=True, null=True,
+        'activity.Organization', default=1, blank=True, null=True,
         on_delete=models.SET_NULL)
     country = models.ForeignKey(
         'activity.Country', blank=True, null=True, on_delete=models.SET_NULL)
-    organizations = models.ManyToManyField(Organization, verbose_name='Accessible Organizations',
+    organizations = models.ManyToManyField('activity.Organization', verbose_name='Accessible Organizations',
                                            related_name='organization', blank=True)
     tables_api_token = models.CharField(blank=True, null=True, max_length=255)
     activity_api_token = models.CharField(
@@ -315,31 +217,6 @@ class FormGuidanceAdmin(admin.ModelAdmin):
     display = 'Form Guidance'
 
 
-class Sector(models.Model):
-    sector = models.CharField("Sector Name", max_length=255, blank=True)
-    create_date = models.DateTimeField(null=True, blank=True)
-    edit_date = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        ordering = ('sector',)
-
-    # on save add create date or update edit date
-    def save(self, *args, **kwargs):
-        if self.create_date is None:
-            self.create_date = datetime.now()
-        self.edit_date = datetime.now()
-        super(Sector, self).save()
-
-    # displayed in admin templates
-    def __str__(self):
-        return self.sector or ''
-
-
-class SectorAdmin(admin.ModelAdmin):
-    list_display = ('sector', 'create_date', 'edit_date')
-    display = 'Sector'
-
-
 class Contact(models.Model):
     name = models.CharField("Name", max_length=255, blank=True, null=True)
     title = models.CharField("Title", max_length=255, blank=True, null=True)
@@ -412,7 +289,7 @@ class ApprovalAuthority(models.Model):
     budget_limit = models.IntegerField(null=True, blank=True)
     fund = models.CharField("Fund", max_length=255, null=True, blank=True)
     country = models.ForeignKey(
-        "Country", null=True, blank=True, on_delete=models.SET_NULL)
+        "activity.Country", null=True, blank=True, on_delete=models.SET_NULL)
     create_date = models.DateTimeField(null=True, blank=True)
     edit_date = models.DateTimeField(null=True, blank=True)
 
@@ -559,62 +436,6 @@ class VillageAdmin(admin.ModelAdmin):
     display = 'Admin IndicatorLevel 4'
 
 
-class Office(models.Model):
-    name = models.CharField("Office Name", max_length=255, blank=True)
-    code = models.CharField("Office Code", max_length=255, blank=True)
-    province = models.ForeignKey(
-        Province, verbose_name="Admin IndicatorLevel 1", on_delete=models.CASCADE)
-    create_date = models.DateTimeField(null=True, blank=True)
-    edit_date = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        ordering = ('name',)
-
-    # on save add create date or update edit date
-    def save(self, *args, **kwargs):
-        if self.create_date is None:
-            self.create_date = datetime.now()
-        self.edit_date = datetime.now()
-        super(Office, self).save()
-
-    # displayed in admin templates
-    def __str__(self):
-        new_name = self.name + " - " + self.code
-        return new_name
-
-
-class OfficeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'code', 'province', 'create_date', 'edit_date')
-    search_fields = ('name', 'province__name', 'code')
-    list_filter = ('create_date', 'province__country__country')
-    display = 'Office'
-
-
-class ProfileType(models.Model):
-    profile = models.CharField("Profile Type", max_length=255, blank=True)
-    create_date = models.DateTimeField(null=True, blank=True)
-    edit_date = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        ordering = ('profile',)
-
-    # on save add create date or update edit date
-    def save(self, *args, **kwargs):
-        if self.create_date is None:
-            self.create_date = datetime.now()
-        self.edit_date = datetime.now()
-        super(ProfileType, self).save()
-
-    # displayed in admin templates
-    def __str__(self):
-        return self.profile
-
-
-class ProfileTypeAdmin(admin.ModelAdmin):
-    list_display = ('profile', 'create_date', 'edit_date')
-    display = 'ProfileType'
-
-
 # Add land classification - 'Rural', 'Urban', 'Peri-Urban', activity-help
 # issue #162
 class LandType(models.Model):
@@ -696,7 +517,7 @@ class StakeholderType(models.Model):
 
     class Meta:
         ordering = ('name',)
-        verbose_name_plural = "Organization Types"
+        verbose_name_plural = "Capacity Admins"
 
     # on save add create date or update edit date
     def save(self, *args, **kwargs):
@@ -708,13 +529,6 @@ class StakeholderType(models.Model):
     # displayed in admin templates
     def __str__(self):
         return self.name
-
-
-class StakeholderTypeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'create_date', 'edit_date')
-    display = 'Organization Types'
-    list_filter = 'create_date'
-    search_fields = 'name'
 
 
 class Evaluate(models.Model):
@@ -997,7 +811,7 @@ class WorkflowLevel1(models.Model):
                                              on_delete=models.SET_NULL)
     workflow_status = models.ForeignKey(WorkflowStatus, max_length=100, verbose_name='Workflow Status', null=True,
                                         on_delete=models.SET_NULL)
-    sector = models.ManyToManyField(Sector, blank=True, help_text='Workflow IndicatorLevel 1 sectors')
+    sector = models.ManyToManyField('activity.Sector', blank=True, help_text='Workflow IndicatorLevel 1 sectors')
     workspace = models.ForeignKey('activity.Workspace', on_delete=models.CASCADE)
     organization = models.ForeignKey('activity.Organization', on_delete=models.CASCADE)
     portfolio = models.ForeignKey('activity.Portfolio', on_delete=models.CASCADE)
@@ -1094,7 +908,8 @@ class WorkflowLevel2(models.Model):
     workflow Level2 or 3 or 4 model
     Workflow Level3s have self relationship with WFL2s
     """
-    workflow_level2_uuid = models.UUIDField('Workflow IndicatorLevel 2/3 UUID', editable=False, default=uuid.uuid4, unique=True)
+    workflow_level2_uuid = models.UUIDField('Workflow IndicatorLevel 2/3 UUID', editable=False, default=uuid.uuid4,
+                                            unique=True)
     name = models.CharField('Workflow IndicatorLevel 2/3 Name', max_length=255)
     description = models.TextField('Workflow IndicatorLevel 2/3 Description', max_length=765, blank=True)
     workflow_level2_code = models.CharField('Workflow Level2 Code', blank=True, max_length=100)
@@ -1106,14 +921,14 @@ class WorkflowLevel2(models.Model):
     workflow_level2_type = models.ForeignKey(WorkflowLevel2Type, verbose_name='Workflow IndicatorLevel 2 Type', null=True,
                                              on_delete=models.SET_NULL)
     parent = models.ForeignKey('self', null=True, related_name='workflow_level3s', on_delete=models.SET_NULL)
-    office_location = models.ForeignKey(Office, null=True, verbose_name='Office Location Tag',
+    office_location = models.ForeignKey('activity.Office', null=True, verbose_name='Office Location Tag',
                                         on_delete=models.SET_NULL)
     implementation_location = models.ForeignKey('activity.Location', verbose_name='Implementation Location Tag',
                                                 null=True, on_delete=models.SET_NULL)
     staff_responsible = models.ForeignKey('activity.Contact', verbose_name='Staff Responsible', null=True,
                                           on_delete=models.SET_NULL)
-    workflow_sector = models.ManyToManyField(Sector, verbose_name='Workflow Sector Tag',
-                                             related_name='workflow_sectors')
+    workflow_sector = models.ManyToManyField('activity.Sector', verbose_name='Workflow Sector Tag',
+                                             related_name='workflow_sectors', blank=True)
     history = HistoricalRecords()
     create_date = models.DateTimeField('Create Date', null=True, blank=True, editable=False)
     modified_date = models.DateTimeField('Modified Date', null=True, blank=True)
@@ -1348,3 +1163,78 @@ class ChecklistItem(models.Model):
 class ChecklistItemAdmin(admin.ModelAdmin):
     list_display = ('item', 'checklist', 'in_file')
     list_filter = ('checklist', 'global_item')
+
+
+class Benchmarks(models.Model):
+    percent_complete = models.IntegerField("% complete", blank=True, null=True)
+    percent_cumulative = models.IntegerField(
+        "% cumulative completion", blank=True, null=True)
+    est_start_date = models.DateTimeField(null=True, blank=True)
+    est_end_date = models.DateTimeField(null=True, blank=True)
+    actual_start_date = models.DateTimeField(null=True, blank=True)
+    actual_end_date = models.DateTimeField(null=True, blank=True)
+    location = models.ForeignKey('activity.Location', null=True,
+                             blank=True, on_delete=models.SET_NULL)
+    budget = models.IntegerField("Estimated Budget", blank=True, null=True)
+    cost = models.IntegerField("Actual Cost", blank=True, null=True)
+    description = models.CharField("Description", max_length=255, blank=True)
+    workflow_level2 = models.ForeignKey(WorkflowLevel2, blank=True, null=True,
+                                  verbose_name="Project Initiation", on_delete=models.SET_NULL)
+    create_date = models.DateTimeField(null=True, blank=True)
+    edit_date = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ('description',)
+        verbose_name_plural = "Project Components"
+
+    # on save add create date or update edit date
+    def save(self, *args, **kwargs):
+        if self.create_date is None:
+            self.create_date = datetime.now()
+        self.edit_date = datetime.now()
+        super(Benchmarks, self).save()
+
+    # displayed in admin templates
+    def __str__(self):
+        return self.description
+
+
+class BenchmarksAdmin(admin.ModelAdmin):
+    list_display = ('description', 'agreement__name',
+                    'create_date', 'edit_date')
+    display = 'Project Components'
+
+
+# TODO Delete not in use
+class Monitor(models.Model):
+    responsible_person = models.CharField(
+        "Person Responsible", max_length=25, blank=True, null=True)
+    frequency = models.CharField(
+        "Frequency", max_length=25, blank=True, null=True)
+    type = models.TextField("Type", null=True, blank=True)
+    workflow_level2 = models.ForeignKey(WorkflowLevel2, blank=True, null=True, verbose_name="Project Initiation",
+                                        on_delete=models.SET_NULL)
+    create_date = models.DateTimeField(null=True, blank=True)
+    edit_date = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ('type',)
+        verbose_name_plural = "Monitors"
+
+    # on save add create date or update edit date
+    def save(self, *args, **kwargs):
+        if self.create_date is None:
+            self.create_date = datetime.now()
+        self.edit_date = datetime.now()
+        super(Monitor, self).save()
+
+    # displayed in admin templates
+    def __str__(self):
+        return self.responsible_person
+
+
+class MonitorAdmin(admin.ModelAdmin):
+    list_display = ('responsible_person', 'frequency',
+                    'type', 'create_date', 'edit_date')
+    display = 'Monitor'
+

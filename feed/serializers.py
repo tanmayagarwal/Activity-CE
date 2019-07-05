@@ -14,13 +14,11 @@ from indicators.models import (
     ReportingPeriod
 )
 from workflow.models import (
-    WorkflowLevel1, Sector, ProjectType, Office,
-    WorkflowLevel2,
-    WorkflowLevel2, Organization, Capacity, Evaluate, ProfileType,
+    WorkflowLevel1, ProjectType, WorkflowLevel2, Capacity, Evaluate,
     Province, District, AdminLevelThree, Village, StakeholderType,
-    Contact, Documentation, LoggedUser, Checklist, Organization
+    Contact, Documentation, LoggedUser, Checklist
 )
-from activity.models import (Location, Country)
+from activity.models import (Location, Country, Sector, Office, LocationType, Organization)
 
 
 class FlatJsonSerializer(PythonSerializer):
@@ -299,7 +297,7 @@ class EvaluateSerializer(serializers.HyperlinkedModelSerializer):
 
 class ProfileTypeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = ProfileType
+        model = LocationType
         fields = '__all__'
 
 

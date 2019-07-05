@@ -4,10 +4,12 @@
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
-from .models import TrainingAttendance, Distribution, Beneficiary
-from workflow.models import WorkflowLevel1, WorkflowLevel2, Office, Province, Location
+
+from activity.models import (Location, Office)
+from .models import (TrainingAttendance, Distribution, Beneficiary)
+from workflow.models import (WorkflowLevel1, WorkflowLevel2, Province,)
 from functools import partial
-from activity.util import get_country
+from activity.util import get_organizations
 
 
 class DatePicker(forms.DateInput):
@@ -40,7 +42,7 @@ class TrainingAttendanceForm(forms.ModelForm):
 
         super(TrainingAttendanceForm, self).__init__(*args, **kwargs)
 
-        countries = get_country(self.request.user)
+        countries = get_organizations(self.request.user)
         self.fields['project_agreement'].queryset = \
             WorkflowLevel2.objects.filter(program__country__in=countries)
         self.fields['program'].queryset = WorkflowLevel1.objects.filter(
@@ -71,7 +73,7 @@ class DistributionForm(forms.ModelForm):
 
         super(DistributionForm, self).__init__(*args, **kwargs)
 
-        countries = get_country(self.request.user)
+        countries = get_organizations(self.request.user)
         self.fields['initiation'].queryset = WorkflowLevel2.objects.filter(
             program__country__in=countries)
         self.fields['program'].queryset = WorkflowLevel1.objects.filter(
@@ -104,7 +106,7 @@ class BeneficiaryForm(forms.ModelForm):
         super(BeneficiaryForm, self).__init__(*args, **kwargs)
 
         organization = self.request.user.activity_user.organization
-        countries = get_country(self.request.user)
+        countries = get_organizations(self.request.user)
         self.fields['training'].queryset = TrainingAttendance.objects.filter(
             program__organization=organization)
         self.fields['program'].queryset = WorkflowLevel1.objects.filter(

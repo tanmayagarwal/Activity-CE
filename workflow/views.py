@@ -9,20 +9,20 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from .models import (
-    WorkflowLevel1, Country, Province, AdminLevelThree, District, WorkflowLevel2,
-    WorkflowLevel2, Location, Documentation, Monitor, Benchmarks, Budget,
-    ApprovalAuthority, Checklist, ChecklistItem, Contact, Organization,
-    FormGuidance,
-    ActivityBookmarks, ActivityUser, Sector
+    WorkflowLevel1, Province, AdminLevelThree, District, WorkflowLevel2,
+    WorkflowLevel2, Documentation, Monitor, Benchmarks, Budget,
+    ApprovalAuthority, Checklist, ChecklistItem, Contact,
+    FormGuidance, ActivityBookmarks, ActivityUser
 )
+from activity.models import (Country, Location, Sector, Organization)
 from formlibrary.models import TrainingAttendance, Distribution
 from indicators.models import IndicatorResult, ExternalService, Objective
 from django.utils import timezone
 
 from .forms import (
-    ProjectAgreementForm, ProjectAgreementSimpleForm,
-    ProjectAgreementCreateForm,
-    ProjectCompleteForm, ProjectCompleteSimpleForm, ProjectCompleteCreateForm,
+    # ProjectAgreementForm, ProjectAgreementSimpleForm,
+    # ProjectAgreementCreateForm,
+    # ProjectCompleteForm, ProjectCompleteSimpleForm, ProjectCompleteCreateForm,
     DocumentationForm, SiteProfileForm, MonitorForm, BenchmarkForm, BudgetForm,
     FilterForm,
     QuantitativeOutputsForm, ChecklistItemForm, StakeholderForm, ContactForm
@@ -48,7 +48,7 @@ from django.views.generic.detail import View
 
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.decorators import method_decorator
-from activity.util import get_country, email_group, group_excluded, \
+from activity.util import get_organizations, email_group, group_excluded, \
     group_required
 from .mixins import AjaxableResponseMixin
 from .export import ProjectAgreementResource, StakeholderResource, \
@@ -88,7 +88,7 @@ class ProjectDash(ListView):
 
     def get(self, request, *args, **kwargs):
 
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded",
             organization=request.user.activity_user.organization)
@@ -155,7 +155,7 @@ class ProgramDash(ListView):
 
     def get(self, request, *args, **kwargs):
 
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         get_programs = WorkflowLevel1.objects.all().filter(
             organization=request.user.activity_user.organization).distinct()
         filtered_program = None
@@ -212,7 +212,7 @@ class ProjectAgreementList(ListView):
     template_name = 'workflow/projectagreement_list.html'
 
     def get(self, request, *args, **kwargs):
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries).distinct()
 
@@ -254,7 +254,7 @@ class ProjectAgreementImport(ListView):
     template_name = 'workflow/projectagreement_import.html'
 
     def get(self, request, *args, **kwargs):
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries)
         get_services = ExternalService.objects.all()
@@ -345,7 +345,7 @@ class ProjectAgreementCreate(CreateView):
         redirect_url = '/workflow/dashboard/project/' + str(latest.id)
         return HttpResponseRedirect(redirect_url)
 
-    form_class = ProjectAgreementCreateForm
+    # form_class = ProjectAgreementCreateForm
 
 
 class ProjectAgreementUpdate(UpdateView):
@@ -355,7 +355,7 @@ class ProjectAgreementUpdate(UpdateView):
     :param id: project_agreement_id
     """
     model = WorkflowLevel2
-    form_class = ProjectAgreementForm
+    # form_class = ProjectAgreementForm
     guidance = None
 
     @method_decorator(group_excluded('ViewOnly', url='workflow/permission'))
@@ -371,9 +371,11 @@ class ProjectAgreementUpdate(UpdateView):
         check_form_type = WorkflowLevel2.objects.get(id=self.kwargs['pk'])
 
         if check_form_type.short:
-            form_class = ProjectAgreementSimpleForm
+            # form_class = ProjectAgreementSimpleForm
+            pass
         else:
-            form_class = ProjectAgreementForm
+            # form_class = ProjectAgreementForm
+            pass
 
         return form_class(**self.get_form_kwargs())
 
@@ -597,7 +599,7 @@ class ProjectAgreementDelete(DeleteView):
 
         return HttpResponseRedirect('/workflow/success')
 
-    form_class = ProjectAgreementForm
+    # form_class = ProjectAgreementForm
 
 
 class ProjectCompleteList(ListView):
@@ -610,7 +612,7 @@ class ProjectCompleteList(ListView):
     template_name = 'workflow/projectcomplete_list.html'
 
     def get(self, request, *args, **kwargs):
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries)
 
@@ -663,14 +665,12 @@ class ProjectCompleteCreate(CreateView):
             'program': get_project_agreement.program,
             'office': get_project_agreement.office,
             'sector': get_project_agreement.sector,
-            'project_agreement': get_project_agreement.id,
-            'project_name': get_project_agreement.project_name,
-            'activity_code': get_project_agreement.activity_code,
-            'expected_start_date': get_project_agreement.expected_start_date,
-            'expected_end_date': get_project_agreement.expected_end_date,
-            'expected_duration': get_project_agreement.expected_duration,
-            'estimated_budget': get_project_agreement.total_estimated_budget,
-            'short': get_project_agreement.short,
+            'name': get_project_agreement.project_name,
+            'start_date': get_project_agreement.expected_start_date,
+            'end_date': get_project_agreement.expected_end_date,
+            # 'expected_duration': get_project_agreement.expected_duration,
+            # 'estimated_budget': get_project_agreement.total_estimated_budget,
+            # 'short': get_project_agreement.short,
         }
 
         try:
@@ -743,7 +743,7 @@ class ProjectCompleteCreate(CreateView):
         redirect_url = '/workflow/projectcomplete_update/' + str(latest.id)
         return HttpResponseRedirect(redirect_url)
 
-    form_class = ProjectCompleteCreateForm
+    # form_class = ProjectCompleteCreateForm
 
 
 class ProjectCompleteUpdate(UpdateView):
@@ -766,9 +766,11 @@ class ProjectCompleteUpdate(UpdateView):
         check_form_type = WorkflowLevel2.objects.get(id=self.kwargs['pk'])
 
         if check_form_type.project_agreement.short:
-            form_class = ProjectCompleteSimpleForm
+            # form_class = ProjectCompleteSimpleForm
+            pass
         else:
-            form_class = ProjectCompleteForm
+            # form_class = ProjectCompleteForm
+            pass
 
         return form_class(**self.get_form_kwargs())
 
@@ -866,7 +868,7 @@ class ProjectCompleteUpdate(UpdateView):
 
         return self.render_to_response(self.get_context_data(form=form))
 
-    form_class = ProjectCompleteForm
+    # form_class = ProjectCompleteForm
 
 
 class ProjectCompleteDetail(DetailView):
@@ -928,7 +930,7 @@ class ProjectCompleteDelete(DeleteView):
 
         return HttpResponseRedirect('/workflow/success')
 
-    form_class = ProjectCompleteForm
+    # form_class = ProjectCompleteForm
 
 
 class ProjectCompleteImport(ListView):
@@ -951,7 +953,7 @@ class DocumentationList(ListView):
     def get(self, request, *args, **kwargs):
 
         project_agreement_id = self.kwargs['project']
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries)
 
@@ -964,7 +966,7 @@ class DocumentationList(ListView):
                 'program', 'project').filter(
                 project__id=self.kwargs['project'])
         else:
-            countries = get_country(request.user)
+            countries = get_organizations(request.user)
             get_documentation = Documentation.objects.all().prefetch_related(
                 'program', 'project', 'project__office').filter(
                 program__country__in=countries)
@@ -983,7 +985,7 @@ class DocumentationAgreementList(AjaxableResponseMixin, CreateView):
     template_name = 'workflow/documentation_popup_list.html'
 
     def get(self, request, *args, **kwargs):
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries)
 
@@ -1282,7 +1284,7 @@ class SiteProfileList(ListView):
         activity_id = int(self.kwargs['activity_id'])
         program_id = int(self.kwargs['program_id'])
 
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries)
 
@@ -1360,7 +1362,7 @@ class SiteProfileReport(ListView):
     template_name = 'workflow/site_profile_report.html'
 
     def get(self, request, *args, **kwargs):
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         project_agreement_id = self.kwargs['pk']
 
         if int(self.kwargs['pk']) == 0:
@@ -1410,7 +1412,7 @@ class SiteProfileCreate(CreateView):
         return kwargs
 
     def get_initial(self):
-        countries = get_country(self.request.user)
+        countries = get_organizations(self.request.user)
         default_country = None
         if countries:
             default_country = countries[0]
@@ -1757,7 +1759,7 @@ class ContactList(ListView):
             pass
 
         if int(self.kwargs['pk']) == 0:
-            countries = get_country(request.user)
+            countries = get_organizations(request.user)
             get_contacts = Contact.objects.all().filter(country__in=countries)
 
         else:
@@ -1794,7 +1796,7 @@ class ContactCreate(CreateView):
         return context
 
     def get_initial(self):
-        country = get_country(self.request.user)[0]
+        country = get_organizations(self.request.user)[0]
         initial = {
             'agreement': self.kwargs['id'],
             'country': country,
@@ -1905,7 +1907,7 @@ class StakeholderList(ListView):
             program_id = 0
 
         try:
-            countries = get_country(request.user)
+            countries = get_organizations(request.user)
             if countries.first() is None:
                 raise CountryDoesNotExist
         except CountryDoesNotExist:
@@ -1963,7 +1965,7 @@ class StakeholderCreate(CreateView):
 
     def get_initial(self):
 
-        country = get_country(self.request.user).first()
+        country = get_organizations(self.request.user).first()
 
         initial = {
             'agreement': self.kwargs['id'],
@@ -2517,7 +2519,7 @@ class Report(View, AjaxableResponseMixin):
 
     def get(self, request, *args, **kwargs):
 
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         organization = request.user.activity_user.organization
 
         if int(self.kwargs['pk']) != 0:
@@ -2704,7 +2706,7 @@ def service_json(request, service):
 
 def export_stakeholders_list(request, **kwargs):
     program_id = int(kwargs['program_id'])
-    countries = get_country(request.user)
+    countries = get_organizations(request.user)
 
     if program_id != 0:
         get_stakeholders = Organization.objects.prefetch_related(
@@ -2723,7 +2725,7 @@ def export_stakeholders_list(request, **kwargs):
 
 def export_sites_list(request, **kwargs):
     # program_id = int(kwargs['program_id'])
-    countries = get_country(request.user)
+    countries = get_organizations(request.user)
 
     # if program_id != 0:
     #    get_sites = Sites.objects.prefetch_related('sector').filter(
@@ -2770,9 +2772,9 @@ class StakeholderObjects(View, AjaxableResponseMixin):
         else:
             program_id = 0
 
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
 
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
 
         if program_id != 0:
             get_stakeholders = Organization.objects.all().filter(
@@ -2815,9 +2817,9 @@ class SiteProfileObjects(View, AjaxableResponseMixin):
         else:
             program_id = 0
 
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
 
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
 
         if program_id != 0:
             get_sites = Location.objects.all().filter(
@@ -2844,7 +2846,7 @@ class DocumentationListObjects(View, AjaxableResponseMixin):
     def get(self, request, *args, **kwargs):
 
         project_agreement_id = self.kwargs['project']
-        countries = get_country(request.user)
+        countries = get_organizations(request.user)
         get_programs = WorkflowLevel1.objects.all().filter(
             funding_status="Funded", country__in=countries)
 
@@ -2863,7 +2865,7 @@ class DocumentationListObjects(View, AjaxableResponseMixin):
                 'project__project_name',
                 'create_date')
         else:
-            countries = get_country(request.user)
+            countries = get_organizations(request.user)
             get_documentation = Documentation.objects.all().prefetch_related(
                 'program', 'project', 'project__office') \
                 .filter(program__country__in=countries).values(

@@ -17,9 +17,10 @@ from indicators.models import (
     Indicator, ReportingPeriod, IndicatorResult, Objective,
     Objective, ActivityTable, DisaggregationType
 )
-from workflow.models import WorkflowLevel1, Location, Documentation, \
+from activity.models import (Location)
+from workflow.models import WorkflowLevel1, Documentation, \
     WorkflowLevel2, ActivityUser
-from activity.util import get_country
+from activity.util import get_organizations
 
 
 class DatePicker(forms.DateInput):
@@ -306,7 +307,7 @@ class IndicatorForm(forms.ModelForm):
         super(IndicatorForm, self).__init__(*args, **kwargs)
 
         # override the program queryset to use request.user for country
-        countries = get_country(self.request.user)
+        countries = get_organizations(self.request.user)
         self.fields['program'].queryset = WorkflowLevel1.objects.filter(
             funding_status="Funded", country__in=countries)
         self.fields['disaggregation'].queryset = DisaggregationType.objects. \
@@ -529,7 +530,7 @@ class CollectedDataForm(forms.ModelForm):
         self.fields['complete'].label = "Project"
 
         # override the program queryset to use request.user for country
-        countries = get_country(self.request.user)
+        countries = get_organizations(self.request.user)
         # self.fields['program'].queryset = WorkflowLevel1.objects\
         #   .filter(funding_status="Funded", country__in=countries).distinct()
         try:

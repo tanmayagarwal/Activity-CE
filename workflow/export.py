@@ -4,10 +4,12 @@
 from import_export import resources
 from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 from import_export import fields
+
+from activity.models import (Location, Country, Sector, LocationType, Office, Organization)
 from .models import (
-    WorkflowLevel2, WorkflowLevel1, Location, Capacity, Evaluate, Documentation,
-    Organization, Sector, ProjectType, Office, ActivityUser, WorkflowLevel2,
-    Country, Contact, StakeholderType, ProfileType
+    WorkflowLevel1, Capacity, Evaluate, Documentation,
+    ProjectType, ActivityUser, WorkflowLevel2,
+    Contact, StakeholderType,
 )
 
 
@@ -115,7 +117,7 @@ class StakeholderResource(resources.ModelResource):
 
 class SiteProfileResource(resources.ModelResource):
     type = fields.Field(column_name='type', attribute='type',
-                        widget=ForeignKeyWidget(ProfileType, 'name'))
+                        widget=ForeignKeyWidget(LocationType, 'name'))
     contact = fields.Field(column_name='contact', attribute='contact',
                            widget=ManyToManyWidget(Contact, field='name'))
     country = fields.Field(column_name='country', attribute='country',
