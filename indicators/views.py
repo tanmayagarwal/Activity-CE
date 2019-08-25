@@ -468,6 +468,8 @@ class IndicatorUpdate(UpdateView):
         get_indicator = Indicator.objects.get(id=self.kwargs['pk'])
 
         context.update({'i_name': get_indicator.name})
+        get_programs = Program.objects.all()
+        context.update({'program': get_programs})
         context['program_id'] = get_indicator.program.all()[0].id
         context['periodic_targets'] = PeriodicTarget.objects\
             .filter(indicator=get_indicator)\
