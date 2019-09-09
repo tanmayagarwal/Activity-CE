@@ -20,7 +20,7 @@ urlpatterns = [
     path('training_delete/<slug:pk>/', delete_training,
          name='training_delete'),
 
-    path('beneficiary_list/<slug:program>/<slug:training>/<slug:distribution>/',
+    path('beneficiary_list/<slug:program>/<slug:training>/',
          BeneficiaryList.as_view(), name='beneficiary_list'),
     path('beneficiary_objects/<slug:program>/<slug:project>/',
          BeneficiaryListObjects.as_view(), name='beneficiary_objects'),

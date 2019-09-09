@@ -24,12 +24,9 @@ $('form#configForm').submit(function(e) {
 		data,
 		success: function(data, status) {
 			toastr.success(
-				'Your update has been saved.',
+				'Admin configurations have been successfuly updated',
 				'Succesfully Updated'
 			);
-			setTimeout(() => {
-				document.location.reload();
-			}, 2000);
 		},
 		error: function(xhr, desc, error) {
 			toastr.error('An error occured during the operation', 'An Error occurred');
