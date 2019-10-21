@@ -76,7 +76,7 @@
         <td>
           <span class="expandable collapsed" data-toggle="collapse" href="#row-{{indicator.id}}" aria-expanded="false"
             aria-controls="row-{{indicator.id}}">
-            <button class="btn btn-link"><i class="fa fa-angle-right"></i></button>
+            <button class="btn btn-sm btn-link"><i class="fa fa-angle-right"></i></button>
           </span>
           <a href="{% url 'indicator_update' indicator.id %}" data-toggle="tooltip" title="{{ indicator.name }}">
             {{ indicator.name | truncatechars:50}}
